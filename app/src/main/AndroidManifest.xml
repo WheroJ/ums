@@ -27,6 +27,7 @@
         <activity android:name=".MainActivity" android:configChanges="orientation|screenSize" />
         <activity android:name=".BaoyangActivity" android:configChanges="orientation|screenSize" />
         <activity android:name=".DianjianActivity" android:configChanges="orientation|screenSize" />
+        <service android:name=".service.UmsService" />
     </application>
 
 </manifest>

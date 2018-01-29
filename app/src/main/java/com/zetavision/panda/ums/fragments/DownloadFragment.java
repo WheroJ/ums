@@ -1,13 +1,13 @@
 package com.zetavision.panda.ums.fragments;
 
-import android.database.DataSetObserver;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 import com.zetavision.panda.ums.R;
@@ -21,6 +21,7 @@ import com.zetavision.panda.ums.model.ActionInfo;
 import com.zetavision.panda.ums.model.FormInfo;
 import com.zetavision.panda.ums.model.Result;
 import com.zetavision.panda.ums.model.SystemInfo;
+import com.zetavision.panda.ums.service.UmsService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,8 @@ import io.reactivex.Flowable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
+
+import static android.content.Context.BIND_AUTO_CREATE;
 
 public class DownloadFragment extends BaseFragment{
 
@@ -53,9 +56,12 @@ public class DownloadFragment extends BaseFragment{
         actionSpinnerAdapter = new ActionSpinnerAdapter(getContext());
         systemSpinner.setAdapter(systemSpinnerAdapter);
         actionSpinner.setAdapter(actionSpinnerAdapter);
-
         adapter = new DownloadAdapter(getContext());
         listView.setAdapter(adapter);
+
+        // 绑定service
+        Intent intent = new Intent(getActivity(), UmsService.class);
+        getActivity().bindService(intent, connection, BIND_AUTO_CREATE);
 
         getData();
     }
@@ -121,5 +127,28 @@ public class DownloadFragment extends BaseFragment{
                 dialog.dismiss();
             }
         });
+    }
+
+    public UmsService umsService;
+    // service连接
+    public ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            UmsService.MyBinder binder = (UmsService.MyBinder)service;
+            umsService = binder.getService();
+            System.out.println("onServiceConnected");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            //当Service服务被意外销毁时，
+            System.out.println("onServiceDisconnected");
+        }
+    };
+
+    @Override
+    public void onDestroyView() {
+        getActivity().unbindService(connection);
+        super.onDestroyView();
     }
 }

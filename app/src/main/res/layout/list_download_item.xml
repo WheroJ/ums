@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/form_number"
+        style="@style/list_header_text"
+        android:layout_weight="0.2" />
+    <TextView
+        android:id="@+id/category"
+        style="@style/list_header_text"
+        android:layout_weight="0.15" />
+    <TextView
+        android:id="@+id/line_or_eqp"
+        style="@style/list_header_text"
+        android:layout_weight="0.15" />
+    <TextView
+        android:id="@+id/desc"
+        style="@style/list_header_text"
+        android:layout_weight="0.2" />
+    <TextView
+        android:id="@+id/status"
+        style="@style/list_header_text"
+        android:layout_weight="0.15" />
+    <LinearLayout
+        style="@style/list_header_text"
+        android:layout_weight="0.15">
+
+    </LinearLayout>
+</LinearLayout>

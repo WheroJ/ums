@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">UMS</string>
+    <string name="input_username">Input a username</string>
+    <string name="input_password">Input a password</string>
+    <string name="login">Login</string>
+    <string name="form_download">DOWNLOAD</string>
+    <string name="form_upload">UPLOAD</string>
+    <string name="maintain_scan">MAINTAIN</string>
+    <string name="check_scan">CHECK</string>
+    <string name="system_name">System Name</string>
+    <string name="action_name">Action Name</string>
+    <string name="search">Search</string>
+    <string name="form_number">Form Number</string>
+    <string name="category">Category</string>
+    <string name="line_or_eqp">Line/EQP</string>
+    <string name="description">Description</string>
+    <string name="form_status">Form Status</string>
+    <string name="operation">Operation</string>
+    <string name="total_download_progress">Total progress</string>
+    <string name="input_device_name">Input device name</string>
+    <string name="ok">OK</string>
+    <string name="switch_to_scan">Switch to scan</string>
+    <string name="check_line">Check line</string>
+    <string name="device_name">Device name</string>
+    <string name="maintain_cycle">Maintain cycle</string>
+    <string name="maintain_cycle_desc">Description</string>
+    <string name="maintain_plan_date">Maintain plan date</string>
+</resources>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    tools:context="com.zetavision.panda.ums.LoginActivity">
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/leftLayout"
+        android:layout_width="180dp"
+        android:layout_height="match_parent"
+        android:background="#1d395e">
+        <ImageView
+            android:padding="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#1b68b6"
+            android:src="@mipmap/logo" />
+        <!--下载-->
+        <LinearLayout
+            android:id="@+id/download"
+            android:background="#62a7ea"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+            <ImageView
+                android:src="@mipmap/download"
+                android:padding="16dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
+            <TextView
+                android:text="@string/form_download"
+                android:lines="1"
+                android:gravity="center_vertical"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_width="match_parent"
+                android:layout_height="60dp" />
+        </LinearLayout>
+        <!--上传-->
+        <LinearLayout
+            android:id="@+id/upload"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+            <ImageView
+                android:src="@mipmap/upload"
+                android:padding="16dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
+            <TextView
+                android:text="@string/form_upload"
+                android:lines="1"
+                android:gravity="center_vertical"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp" />
+            <TextView
+                android:text="10"
+                android:textColor="#FFFFFF"
+                android:gravity="center"
+                android:layout_marginStart="8dp"
+                android:textSize="12sp"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/badge"
+                android:layout_width="wrap_content"
+                android:minWidth="20dp"
+                android:layout_height="20dp" />
+        </LinearLayout>
+        <!--保养-->
+        <LinearLayout
+            android:id="@+id/baoyang"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+            <ImageView
+                android:src="@mipmap/baoyang"
+                android:padding="16dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
+            <TextView
+                android:text="@string/maintain_scan"
+                android:lines="1"
+                android:gravity="center_vertical"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp" />
+        </LinearLayout>
+        <!--点检-->
+        <LinearLayout
+            android:id="@+id/dianjian"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+            <ImageView
+                android:src="@mipmap/repair"
+                android:padding="16dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
+            <TextView
+                android:text="@string/check_scan"
+                android:lines="1"
+                android:gravity="center_vertical"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:background="#ffffff"
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+            <LinearLayout
+                android:id="@+id/menu"
+                android:layout_centerVertical="true"
+                android:orientation="vertical"
+                android:layout_marginStart="16dp"
+                android:layout_width="26dp"
+                android:layout_height="wrap_content">
+                <View
+                    android:background="#7e9ec5"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp" />
+                <View
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp"
+                    android:background="#7e9ec5"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp" />
+                <View
+                    android:background="#7e9ec5"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp" />
+            </LinearLayout>
+            <TextView
+                android:id="@+id/title"
+                android:text="@string/form_download"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:layout_width="match_parent"
+                android:layout_height="50dp" />
+            <ImageView
+                android:id="@+id/logout"
+                android:scaleType="fitCenter"
+                android:padding="8dp"
+                android:layout_alignParentRight="true"
+                android:src="@mipmap/logout"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+            <TextView
+                android:id="@+id/username"
+                android:text="admin"
+                android:layout_toStartOf="@id/logout"
+                android:gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp" />
+            <ImageView
+                android:src="@mipmap/panda"
+                android:layout_toStartOf="@id/username"
+                android:layout_marginEnd="6dp"
+                android:scaleType="fitCenter"
+                android:padding="10dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+        </RelativeLayout>
+        <FrameLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <SurfaceView android:id="@+id/preview_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <com.zetavision.panda.ums.zxing.ViewfinderView
+        android:id="@+id/finderView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <LinearLayout
+        android:id="@+id/inputLayout"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:layout_width="260dp"
+        android:layout_height="wrap_content">
+        <EditText
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:id="@+id/device_name"
+            android:background="@drawable/bg_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="40dp" />
+        <LinearLayout
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/switchScan"
+                android:layout_gravity="bottom|center_horizontal"
+                android:background="@drawable/bg_btn_black"
+                android:orientation="horizontal"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp">
+                <ImageView
+                    android:src="@mipmap/scan"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp" />
+                <TextView
+                    android:layout_marginStart="8dp"
+                    android:text="@string/switch_to_scan"
+                    android:textColor="@color/white"
+                    android:layout_width="wrap_content"
+                    android:gravity="center"
+                    android:layout_height="24dp" />
+            </LinearLayout>
+            <Button
+                android:id="@+id/ok"
+                android:layout_gravity="end"
+                android:text="@string/ok"
+                android:textColor="@color/white"
+                android:layout_marginStart="16dp"
+                android:background="@drawable/bg_btn_black"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/switchInput"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:background="@drawable/bg_btn_black"
+        android:orientation="horizontal"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp">
+        <ImageView
+            android:src="@mipmap/edit"
+            android:layout_width="24dp"
+            android:layout_height="24dp" />
+        <TextView
+            android:layout_marginStart="8dp"
+            android:text="@string/input_device_name"
+            android:textColor="@color/white"
+            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:layout_height="24dp" />
+    </LinearLayout>
+</FrameLayout>

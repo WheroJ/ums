@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">UMS</string>
+    <string name="input_username">请输入用户名</string>
+    <string name="input_password">请输入密码</string>
+    <string name="login">登陆</string>
+    <string name="form_download">表单下载</string>
+    <string name="form_upload">数据上传</string>
+    <string name="maintain_scan">保养扫描</string>
+    <string name="check_scan">点检扫描</string>
+    <string name="system_name">系统名称</string>
+    <string name="action_name">动作分类</string>
+    <string name="search">查询</string>
+    <string name="form_number">表单编号</string>
+    <string name="category">分类</string>
+    <string name="line_or_eqp">点检线路/设备</string>
+    <string name="description">描述</string>
+    <string name="form_status">表单状态</string>
+    <string name="operation">操作</string>
+    <string name="total_download_progress">总下载进度</string>
+    <string name="input_device_name">输入设备名称</string>
+    <string name="ok">确定</string>
+    <string name="switch_to_scan">切换成扫码</string>
+    <string name="device_name">设备名称</string>
+    <string name="maintain_cycle">保养周期</string>
+    <string name="maintain_cycle_desc">保养周期描述</string>
+    <string name="maintain_plan_date">计划保养日</string>
+</resources>

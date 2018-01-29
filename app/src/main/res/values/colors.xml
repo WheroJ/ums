@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#ffffff</color>
+    <color name="light">#f3f8fb</color>
+    <color name="text_light_blue">#7ba1df</color>
+    <color name="text_blue">#1a68b3</color>
+    <color name="primary_light">#62a7ea</color>
+    <color name="primary">#0098fe</color>
+    <color name="red">#e94141</color>
+
+
+    <color name="possible_result_points">#c0ffbd21</color> <!-- Android standard ICS color -->
+    <color name="result_view">#b0000000</color>
+    <color name="viewfinder_laser">#ffcc0000</color> <!-- Android standard ICS color -->
+    <color name="viewfinder_mask">#60000000</color>
+    <color name="result_points">#c099cc00</color> <!-- Android standard ICS color -->
+
+</resources>

@@ -9,6 +9,7 @@ import com.zetavision.panda.ums.Utils.Api;
 import com.zetavision.panda.ums.model.FormInfo;
 import com.zetavision.panda.ums.model.Result;
 
+
 import java.util.List;
 
 import io.reactivex.Flowable;
@@ -60,9 +61,19 @@ public class UmsService extends Service {
     // 下载全部表单
     public void startDownloadAll() {
         if (downloadList == null) return;
-//        for (int i = 0; i < downloadList.size(); i++) {
-//            startDownload(downloadList.get(i));
-//        }
+        Flowable.fromIterable(downloadList)
+//                .filter(new Predicate<FormInfo>() {           //过滤下载完成、正在下载项
+//                    @Override
+//                    public boolean test(FormInfo info) throws Exception {
+//                        return false;
+//                    }
+//                })
+                .subscribe(new Consumer<FormInfo>() {
+                    @Override
+                    public void accept(FormInfo info) throws Exception {
+                        startDownload(info);
+                    }
+                });
     }
 
     // 停止下载单个表单

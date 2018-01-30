@@ -51,8 +51,7 @@ public class Api {
                         UserPreferences userPreferences = new UserPreferences(context);
                         return gson.fromJson(userPreferences.getCookie(url.host()), new TypeToken<List<Cookie>>() {}.getType());
                     }
-                })
-                .build();
+                }).build();
     }
 
     public Flowable<Result> post(final String action, final RequestBody body) {
@@ -74,7 +73,6 @@ public class Api {
                 http.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-                        System.out.println(e);
                         emitter.onError(new Throwable(e.getMessage()));
                     }
                     @Override

@@ -50,13 +50,19 @@ public class DownloadFragment extends BaseFragment{
         return inflater.inflate(R.layout.fragment_download, null);
     }
 
+    @OnClick(R.id.downloadAll) void downloadAll() {
+        if (umsService != null) {
+            umsService.startDownloadAll();
+        }
+    }
+
     @Override
     protected void init() {
         systemSpinnerAdapter = new SystemSpinnerAdapter(getContext());
         actionSpinnerAdapter = new ActionSpinnerAdapter(getContext());
         systemSpinner.setAdapter(systemSpinnerAdapter);
         actionSpinner.setAdapter(actionSpinnerAdapter);
-        adapter = new DownloadAdapter(getContext());
+        adapter = new DownloadAdapter(getContext(), this);
         listView.setAdapter(adapter);
 
         // 绑定service
@@ -75,7 +81,10 @@ public class DownloadFragment extends BaseFragment{
         api.get("queryPlannedForm.mobile?utilitySystemId="+systemInfo.getUtilitySystemId() + "&actionType=" + actionInfo.getActionType()).subscribe(new Consumer<Result>() {
             @Override
             public void accept(Result result) throws Exception {
-                adapter.notifyDataSetChanged(result.getList(FormInfo.class));
+                if (umsService != null) {
+                    // 设置下载列表
+                    umsService.setDownloadList(result.getList(FormInfo.class));
+                }
             }
         }, new Consumer<Throwable>() {
             @Override
@@ -136,13 +145,16 @@ public class DownloadFragment extends BaseFragment{
         public void onServiceConnected(ComponentName name, IBinder service) {
             UmsService.MyBinder binder = (UmsService.MyBinder)service;
             umsService = binder.getService();
-            System.out.println("onServiceConnected");
+            umsService.setDownloadListener(new UmsService.OnDownloadListener() {
+                @Override
+                public void onUpdate(List<FormInfo> list) {
+                    adapter.notifyDataSetChanged(list);
+                }
+            });
         }
-
         @Override
         public void onServiceDisconnected(ComponentName name) {
             //当Service服务被意外销毁时，
-            System.out.println("onServiceDisconnected");
         }
     };
 

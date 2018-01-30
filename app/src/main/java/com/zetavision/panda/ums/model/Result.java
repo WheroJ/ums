@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 public class Result {
+
     private int returnCode;
     private String returnMessage;
     private String returnData;

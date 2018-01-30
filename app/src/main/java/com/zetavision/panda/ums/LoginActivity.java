@@ -1,15 +1,14 @@
 package com.zetavision.panda.ums;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.zetavision.panda.ums.Utils.Api;
-import com.zetavision.panda.ums.Utils.BaseActivity;
 import com.zetavision.panda.ums.Utils.LoadingDialog;
 import com.zetavision.panda.ums.Utils.UserPreferences;
+import com.zetavision.panda.ums.base.BaseActivity;
 import com.zetavision.panda.ums.model.Result;
 import com.zetavision.panda.ums.model.User;
 
@@ -31,7 +30,7 @@ public class LoginActivity extends BaseActivity {
 
     @OnClick(R.id.login) void login() {
 
-        final UserPreferences preferences = new UserPreferences(LoginActivity.this);
+        final UserPreferences preferences = new UserPreferences();
         preferences.clearCookie();
 
         Api api = new Api(this);

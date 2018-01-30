@@ -1,4 +1,4 @@
-package com.zetavision.panda.ums.Utils;
+package com.zetavision.panda.ums.base;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,7 +8,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 
-import org.greenrobot.eventbus.EventBus;
+import com.zetavision.panda.ums.Utils.ActivityCollector;
+import com.zetavision.panda.ums.Utils.Constant;
+import com.zetavision.panda.ums.Utils.UserPreferences;
+
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -18,13 +21,22 @@ import butterknife.ButterKnife;
 
 abstract public class BaseActivity extends Activity {
 
+    private BaseActivity mContext;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ActivityCollector.addActivity(this);
         changeAppLanguage();
         onCreateView();
         ButterKnife.bind(this);
         init();
+        mContext = this;
+    }
+
+    protected BaseActivity getThis() {
+        return mContext;
     }
 
     protected void init() {}
@@ -32,7 +44,7 @@ abstract public class BaseActivity extends Activity {
     abstract public void onCreateView();
 
     public void changeAppLanguage() {
-        UserPreferences preferences = new UserPreferences(this);
+        UserPreferences preferences = new UserPreferences();
         String sta = preferences.getLanguage();
         Locale myLocale = new Locale(sta);
         Resources res = getResources();
@@ -59,12 +71,25 @@ abstract public class BaseActivity extends Activity {
     @Override
     public void onStart() {
         super.onStart();
-        EventBus.getDefault().register(this);
+        //建议需要的时候在对应界面开启，基类调用这样会占用资源
+//        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        EventBus.getDefault().unregister(this);
+//        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mContext = null;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivityCollector.removeActivity(this);
     }
 }

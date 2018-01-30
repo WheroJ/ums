@@ -1,7 +1,6 @@
 package com.zetavision.panda.ums.Utils;
 
 import android.content.Context;
-import android.webkit.RenderProcessGoneDetail;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -11,7 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -42,13 +40,13 @@ public class Api {
                     @Override
                     public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
                         Gson gson = new Gson();
-                        UserPreferences userPreferences = new UserPreferences(context);
+                        UserPreferences userPreferences = new UserPreferences();
                         userPreferences.setCookie(url.host(), gson.toJson(cookies));
                     }
                     @Override
                     public List<Cookie> loadForRequest(HttpUrl url) {
                         Gson gson = new Gson();
-                        UserPreferences userPreferences = new UserPreferences(context);
+                        UserPreferences userPreferences = new UserPreferences();
                         return gson.fromJson(userPreferences.getCookie(url.host()), new TypeToken<List<Cookie>>() {}.getType());
                     }
                 }).build();

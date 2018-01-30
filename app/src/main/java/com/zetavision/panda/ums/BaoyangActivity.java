@@ -4,7 +4,7 @@ package com.zetavision.panda.ums;
 import android.content.Intent;
 import android.widget.ListView;
 
-import com.zetavision.panda.ums.Utils.BaseActivity;
+import com.zetavision.panda.ums.base.BaseActivity;
 
 import butterknife.BindView;
 import butterknife.OnClick;

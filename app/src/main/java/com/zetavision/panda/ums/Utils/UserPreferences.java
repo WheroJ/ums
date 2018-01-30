@@ -10,10 +10,14 @@ import java.util.Locale;
 
 
 public class UserPreferences {
-    private Context mContext;
+    private static Context mContext;
 
-    public UserPreferences(Context context) {
-        this.mContext = context;
+    public static void init(Context context) {
+        mContext = context;
+    }
+
+    static {
+        mContext = UIUtils.getContext();
     }
 
     public void setLanguage(String name) {

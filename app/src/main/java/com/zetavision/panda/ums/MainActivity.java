@@ -2,14 +2,11 @@ package com.zetavision.panda.ums;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
@@ -18,15 +15,15 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.zetavision.panda.ums.Utils.BaseActivity;
 import com.zetavision.panda.ums.Utils.Common;
 import com.zetavision.panda.ums.Utils.Constant;
 import com.zetavision.panda.ums.Utils.UserPreferences;
+import com.zetavision.panda.ums.base.BaseActivity;
 import com.zetavision.panda.ums.fragments.BaoyangFragment;
 import com.zetavision.panda.ums.fragments.DianjianFragment;
 import com.zetavision.panda.ums.fragments.DownloadFragment;
-import com.zetavision.panda.ums.model.User;
 import com.zetavision.panda.ums.fragments.UploadFragment;
+import com.zetavision.panda.ums.model.User;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -50,7 +47,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void init() {
-        UserPreferences preferences = new UserPreferences(this);
+        UserPreferences preferences = new UserPreferences();
         User user = preferences.getUser();
         if (user != null) {
             username.setText(user.getUSERNAME());
@@ -137,7 +134,7 @@ public class MainActivity extends BaseActivity {
 
     @OnClick(R.id.username) void onChangeLanguage() {
         // 中英文切换
-        UserPreferences preferences = new UserPreferences(this);
+        UserPreferences preferences = new UserPreferences();
         if (preferences.getLanguage().equals(Locale.CHINESE.getLanguage())) {//中文
             preferences.setLanguage(Locale.ENGLISH.getLanguage());
         } else {//英文

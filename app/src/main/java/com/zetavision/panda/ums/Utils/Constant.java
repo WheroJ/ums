@@ -2,9 +2,29 @@ package com.zetavision.panda.ums.Utils;
 
 
 public class Constant {
+    /**
+     * 记录当前是否为debug状态
+     */
+    public static final boolean isDebug = false;
+
+    /**
+     * 1: 内网   2：外网
+     */
+    private static final int net_type = 1;
+
     public static final String EVENT_REFRESH_LANGUAGE = "LANGUAGE";
     public static final String EVENT_REFRESH_USER = "USER";
-    public static final String API_BASE_URL = "http://7.177.122.179:8088/ums/control/";
+    public static String API_BASE_URL;
+    static {
+        switch (net_type) {
+            case 1:
+                API_BASE_URL = "http://7.177.122.179:8088/ums/control/";
+                break;
+            case 2:
+                API_BASE_URL = "http://192.168.0.200:8088/ums/control/";
+                break;
+        }
+    }
 
     // capture
     public static final boolean IS_DISABLE_AUTO_ORIENTATION = false;     //是否禁止自动旋转

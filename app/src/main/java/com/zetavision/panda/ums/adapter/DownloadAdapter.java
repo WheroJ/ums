@@ -4,24 +4,31 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.zetavision.panda.ums.R;
+import com.zetavision.panda.ums.fragments.DownloadFragment;
 import com.zetavision.panda.ums.model.FormInfo;
+import com.zetavision.panda.ums.service.UmsService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class DownloadAdapter extends BaseAdapter {
 
     private Context mContext;
     private List<FormInfo> list = new ArrayList<>();
+    private DownloadFragment fragment;
 
-    public DownloadAdapter(Context mContext) {
+    public DownloadAdapter(Context mContext, DownloadFragment fragment) {
         this.mContext = mContext;
+        this.fragment = fragment;
     }
 
     public void notifyDataSetChanged(List<FormInfo> list) {
@@ -66,12 +73,63 @@ public class DownloadAdapter extends BaseAdapter {
         @BindView(R.id.desc) TextView desc;
         @BindView(R.id.status) TextView status;
 
+        @BindView(R.id.downloadBtn) ImageView downloadBtn;
+        @BindView(R.id.progressBar) ProgressBar progressBar;
+        @BindView(R.id.pauseBtn) ImageView pauseBtn;
+        @BindView(R.id.doneImg) ImageView doneImg;
+        @BindView(R.id.textInfo) TextView textInfo;
+
+        private FormInfo data;
+
         public void setData(FormInfo data) {
+            this.data = data;
+
             form_number.setText(data.getFormCode());
             category.setText(data.getActionType());
             line_or_eqp.setText(data.getLineOrEqp());
             desc.setText(data.getDesc());
             status.setText(data.getStatus());
+
+            switch (data.getDownload_status()) {
+                case DONE:
+                    downloadBtn.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.GONE);
+                    pauseBtn.setVisibility(View.GONE);
+                    doneImg.setVisibility(View.VISIBLE);
+                    textInfo.setText("完成");
+                    break;
+                case FAIL:
+                    downloadBtn.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.GONE);
+                    pauseBtn.setVisibility(View.GONE);
+                    doneImg.setVisibility(View.GONE);
+                    textInfo.setText("失败");
+                    break;
+                case PROGRESS:
+                    downloadBtn.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.VISIBLE);
+                    pauseBtn.setVisibility(View.VISIBLE);
+                    doneImg.setVisibility(View.GONE);
+                    textInfo.setText("暂停");
+                    break;
+                default:
+                    downloadBtn.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.GONE);
+                    pauseBtn.setVisibility(View.GONE);
+                    doneImg.setVisibility(View.GONE);
+                    textInfo.setText("下载");
+            }
+
+        }
+
+        @OnClick(R.id.downloadBtn) void download() {
+            if (fragment.umsService!=null) {
+                fragment.umsService.startDownload(data);
+            }
+        }
+
+        @OnClick(R.id.pauseBtn) void pause() {
+            System.out.println("pause");
         }
     }
 }

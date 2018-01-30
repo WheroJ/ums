@@ -3,6 +3,15 @@ package com.zetavision.panda.ums.model;
 public class FormInfo {
 
 
+    // 下载状态
+    public enum DOWNLOAD_STATUS {
+        WAIT,              // 等待开始下载
+        PROGRESS,          // 下载中
+        DONE,              // 下载完成
+        FAIL               // 下载失败
+    }
+    private DOWNLOAD_STATUS download_status = DOWNLOAD_STATUS.WAIT; //默认等待下载
+
     public static final String ACTION_TYPE_M = "M";
     public static final String ACTION_TYPE_P = "P";
 
@@ -49,6 +58,14 @@ public class FormInfo {
         } else {
             return inspectRouteDescription;
         }
+    }
+
+    public DOWNLOAD_STATUS getDownload_status() {
+        return download_status;
+    }
+
+    public void setDownload_status(DOWNLOAD_STATUS download_status) {
+        this.download_status = download_status;
     }
 
     public int getUtilitySystemId() {

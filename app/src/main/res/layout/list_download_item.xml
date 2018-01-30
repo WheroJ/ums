@@ -3,30 +3,61 @@
     android:orientation="horizontal" android:layout_width="match_parent"
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
     <TextView
         android:id="@+id/form_number"
-        style="@style/list_header_text"
+        style="@style/list_item_text"
         android:layout_weight="0.2" />
     <TextView
         android:id="@+id/category"
-        style="@style/list_header_text"
+        style="@style/list_item_text"
         android:layout_weight="0.15" />
     <TextView
         android:id="@+id/line_or_eqp"
-        style="@style/list_header_text"
+        style="@style/list_item_text"
         android:layout_weight="0.15" />
     <TextView
         android:id="@+id/desc"
-        style="@style/list_header_text"
+        style="@style/list_item_text"
         android:layout_weight="0.2" />
     <TextView
         android:id="@+id/status"
-        style="@style/list_header_text"
+        style="@style/list_item_text"
         android:layout_weight="0.15" />
     <LinearLayout
-        style="@style/list_header_text"
+        style="@style/list_item_text"
         android:layout_weight="0.15">
-
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/downloadBtn"
+                android:src="@mipmap/down_circle"
+                android:layout_width="30dp"
+                android:layout_gravity="center"
+                android:layout_height="30dp" />
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="38dp"
+                android:layout_height="38dp" />
+            <ImageView
+                android:id="@+id/pauseBtn"
+                android:layout_gravity="center"
+                android:src="@mipmap/pause_circle"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+            <ImageView
+                android:id="@+id/doneImg"
+                android:layout_gravity="center"
+                android:src="@mipmap/done_circle"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+        </FrameLayout>
+        <TextView
+            android:id="@+id/textInfo"
+            android:layout_marginStart="16dp"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </LinearLayout>

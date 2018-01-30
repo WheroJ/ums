@@ -6,27 +6,30 @@
     android:layout_height="match_parent">
     <TextView
         android:id="@+id/form_number"
-        style="@style/list_header_text"
+        style="@style/list_item_text"
         android:layout_weight="0.2" />
     <TextView
         android:id="@+id/category"
-        style="@style/list_header_text"
+        style="@style/list_item_text"
         android:layout_weight="0.15" />
     <TextView
         android:id="@+id/line_or_eqp"
-        style="@style/list_header_text"
+        style="@style/list_item_text"
         android:layout_weight="0.15" />
     <TextView
         android:id="@+id/desc"
-        style="@style/list_header_text"
+        style="@style/list_item_text"
         android:layout_weight="0.2" />
     <TextView
         android:id="@+id/status"
-        style="@style/list_header_text"
+        style="@style/list_item_text"
         android:layout_weight="0.15" />
     <LinearLayout
-        style="@style/list_header_text"
+        style="@style/list_item_text"
         android:layout_weight="0.15">
-
+        <ImageView
+            android:src="@mipmap/down_circle"
+            android:layout_width="33dp"
+            android:layout_height="33dp" />
     </LinearLayout>
 </LinearLayout>

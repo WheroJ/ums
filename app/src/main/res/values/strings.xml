@@ -24,4 +24,8 @@
     <string name="maintain_cycle">保养周期</string>
     <string name="maintain_cycle_desc">保养周期描述</string>
     <string name="maintain_plan_date">计划保养日</string>
+    <string name="temperature">天气</string>
+    <string name="classes">班次</string>
+    <string name="save_success">保存成功</string>
+    <string name="save_fail">保存失败</string>
 </resources>

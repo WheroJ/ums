@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/itemUpKeep_content"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+    <TextView
+        android:id="@+id/itemUpKeep_tvDeviceName"
+        style="@style/list_item_text"
+        android:layout_weight="0.15"
+        tools:text="设备名称"/>
+    <TextView
+        android:id="@+id/itemUpKeep_tvFormCode"
+        style="@style/list_item_text"
+        android:layout_weight="0.2"
+        tools:text="表单编号"/>
+    <TextView
+        android:id="@+id/itemUpKeep_tvMaintPeriod"
+        style="@style/list_item_text"
+        android:layout_weight="0.15"
+        tools:text="保养周期"/>
+    <TextView
+        android:id="@+id/itemUpKeep_tvMaintPeriodDesc"
+        style="@style/list_item_text"
+        android:layout_weight="0.2"
+        tools:text="保养周期描述"/>
+    <TextView
+        android:id="@+id/itemUpKeep_tvPlanDate"
+        style="@style/list_item_text"
+        android:layout_weight="0.15"
+        tools:text="计划保养日期"/>
+
+    <TextView
+        android:id="@+id/itemUpKeep_tvStatus"
+        style="@style/list_item_text"
+        android:layout_weight="0.15"
+        android:textColor="@color/main_color"
+        tools:text="表单状态"/>
+</LinearLayout>

@@ -14,5 +14,12 @@
     <color name="viewfinder_laser">#ffcc0000</color> <!-- Android standard ICS color -->
     <color name="viewfinder_mask">#60000000</color>
     <color name="result_points">#c099cc00</color> <!-- Android standard ICS color -->
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+    <!--#62a7ea-->
+    <color name="main_color">#7ba1df</color>
+    <color name="gray3">#333333</color>
+    <color name="blue_back">#f4f9fa</color>
+    <color name="blue_00">@color/primary</color>
 
 </resources>

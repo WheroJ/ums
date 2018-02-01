@@ -1,7 +1,7 @@
 package com.zetavision.panda.ums
 
 import android.content.Context
-import com.zetavision.panda.ums.Utils.UIUtils
+import com.zetavision.panda.ums.utils.UIUtils
 import org.litepal.LitePalApplication
 
 /**

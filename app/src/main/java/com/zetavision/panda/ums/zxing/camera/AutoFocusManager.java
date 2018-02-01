@@ -23,13 +23,11 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.zetavision.panda.ums.Utils.Constant;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.RejectedExecutionException;
 
-import static com.zetavision.panda.ums.Utils.Constant.IS_AUTO_FOCUS;
+import static com.zetavision.panda.ums.utils.Constant.IS_AUTO_FOCUS;
 
 
 @SuppressWarnings("deprecation") // camera APIs

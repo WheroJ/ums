@@ -15,12 +15,12 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import static com.zetavision.panda.ums.Utils.Constant.IS_DECODE_1D_INDUSTRIAL;
-import static com.zetavision.panda.ums.Utils.Constant.IS_DECODE_1D_PRODUCT;
-import static com.zetavision.panda.ums.Utils.Constant.IS_DECODE_AZTEC;
-import static com.zetavision.panda.ums.Utils.Constant.IS_DECODE_DATA_MATRIX;
-import static com.zetavision.panda.ums.Utils.Constant.IS_DECODE_PDF417;
-import static com.zetavision.panda.ums.Utils.Constant.IS_DECODE_QR;
+import static com.zetavision.panda.ums.utils.Constant.IS_DECODE_1D_INDUSTRIAL;
+import static com.zetavision.panda.ums.utils.Constant.IS_DECODE_1D_PRODUCT;
+import static com.zetavision.panda.ums.utils.Constant.IS_DECODE_AZTEC;
+import static com.zetavision.panda.ums.utils.Constant.IS_DECODE_DATA_MATRIX;
+import static com.zetavision.panda.ums.utils.Constant.IS_DECODE_PDF417;
+import static com.zetavision.panda.ums.utils.Constant.IS_DECODE_QR;
 
 public class DecodeThread extends Thread {
     public static final String BARCODE_BITMAP = "barcode_bitmap";

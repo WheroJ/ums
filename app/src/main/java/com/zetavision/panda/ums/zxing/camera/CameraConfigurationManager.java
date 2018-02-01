@@ -27,17 +27,16 @@ import android.view.Surface;
 import android.view.WindowManager;
 
 import com.google.zxing.client.android.camera.CameraConfigurationUtils;
-import com.zetavision.panda.ums.Utils.Constant;
 import com.zetavision.panda.ums.zxing.camera.open.CameraFacing;
 import com.zetavision.panda.ums.zxing.camera.open.OpenCamera;
 
-import static com.zetavision.panda.ums.Utils.Constant.IS_AUTO_FOCUS;
-import static com.zetavision.panda.ums.Utils.Constant.IS_DISABLE_BARCODE_SCENE_MODE;
-import static com.zetavision.panda.ums.Utils.Constant.IS_DISABLE_CONTINUOUS_FOCUS;
-import static com.zetavision.panda.ums.Utils.Constant.IS_DISABLE_EXPOSURE;
-import static com.zetavision.panda.ums.Utils.Constant.IS_DISABLE_METERING;
-import static com.zetavision.panda.ums.Utils.Constant.IS_FRONT_LIGHT_MODE_ON;
-import static com.zetavision.panda.ums.Utils.Constant.IS_INVERT_SCAN;
+import static com.zetavision.panda.ums.utils.Constant.IS_AUTO_FOCUS;
+import static com.zetavision.panda.ums.utils.Constant.IS_DISABLE_BARCODE_SCENE_MODE;
+import static com.zetavision.panda.ums.utils.Constant.IS_DISABLE_CONTINUOUS_FOCUS;
+import static com.zetavision.panda.ums.utils.Constant.IS_DISABLE_EXPOSURE;
+import static com.zetavision.panda.ums.utils.Constant.IS_DISABLE_METERING;
+import static com.zetavision.panda.ums.utils.Constant.IS_FRONT_LIGHT_MODE_ON;
+import static com.zetavision.panda.ums.utils.Constant.IS_INVERT_SCAN;
 
 /**
  * A class which deals with reading, parsing, and setting the camera parameters which are used to

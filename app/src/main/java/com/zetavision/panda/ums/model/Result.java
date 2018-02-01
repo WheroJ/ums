@@ -1,7 +1,7 @@
 package com.zetavision.panda.ums.model;
 
 import com.google.gson.Gson;
-import com.zetavision.panda.ums.Utils.MyParameterizedType;
+import com.zetavision.panda.ums.utils.MyParameterizedType;
 
 import java.lang.reflect.Type;
 import java.util.List;

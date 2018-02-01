@@ -29,8 +29,8 @@ import com.google.zxing.ResultPoint;
 import com.zetavision.panda.ums.R;
 import com.zetavision.panda.ums.zxing.Intents;
 import com.zetavision.panda.ums.zxing.ViewfinderView;
-import com.zetavision.panda.ums.zxing.camera.CameraManager;
 import com.zetavision.panda.ums.zxing.camera.BeepManager;
+import com.zetavision.panda.ums.zxing.camera.CameraManager;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -38,7 +38,7 @@ import java.util.Map;
 
 import butterknife.BindView;
 
-import static com.zetavision.panda.ums.Utils.Constant.IS_DISABLE_AUTO_ORIENTATION;
+import static com.zetavision.panda.ums.utils.Constant.IS_DISABLE_AUTO_ORIENTATION;
 
 public abstract class CaptureFragment extends BaseFragment implements SurfaceHolder.Callback, ViewTreeObserver.OnGlobalLayoutListener {
 
@@ -62,7 +62,6 @@ public abstract class CaptureFragment extends BaseFragment implements SurfaceHol
         hasSurface = false;
         beepManager = new BeepManager(getActivity());
     }
-
 
     @Override
     public void onResume() {

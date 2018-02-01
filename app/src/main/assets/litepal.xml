@@ -33,6 +33,9 @@
     -->
     <list>
         <mapping class="com.zetavision.panda.ums.model.User"/>
+        <mapping class="com.zetavision.panda.ums.model.FormInfo"/>
+        <mapping class="com.zetavision.panda.ums.model.FormItem"/>
+        <mapping class="com.zetavision.panda.ums.model.FormInfoDetail"/>
     </list>
 
     <!--

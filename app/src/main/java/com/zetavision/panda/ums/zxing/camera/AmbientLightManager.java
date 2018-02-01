@@ -24,7 +24,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.preference.PreferenceManager;
 
-import static com.zetavision.panda.ums.Utils.Constant.IS_FRONT_LIGHT_AUTO_MODE;
+import static com.zetavision.panda.ums.utils.Constant.IS_FRONT_LIGHT_AUTO_MODE;
 
 /**
  * Detects ambient light and switches on the front light when very dark, and off again when sufficiently light.

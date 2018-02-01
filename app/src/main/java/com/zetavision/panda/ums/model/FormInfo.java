@@ -1,16 +1,19 @@
 package com.zetavision.panda.ums.model;
 
-public class FormInfo {
+import org.litepal.annotation.Column;
+import org.litepal.crud.DataSupport;
+
+public class FormInfo extends DataSupport{
 
 
-    // 下载状态
-    public enum DOWNLOAD_STATUS {
-        WAIT,              // 等待开始下载
-        PROGRESS,          // 下载中
-        DONE,              // 下载完成
-        FAIL               // 下载失败
-    }
-    private DOWNLOAD_STATUS download_status = DOWNLOAD_STATUS.WAIT; //默认等待下载
+    /**
+     * 下载状态
+     */
+    public static final int WAIT = 1;
+    public static final int PROGRESS = 2;
+    public static final int DONE = 3;
+    public static final int FAIL = 4;
+    private int download_status = WAIT; //默认等待下载
 
     public static final String ACTION_TYPE_M = "M";
     public static final String ACTION_TYPE_P = "P";
@@ -20,7 +23,44 @@ public class FormInfo {
 
     private int utilitySystemId;
     private String utilitySystemCode;
-    private int formId;
+
+    /**
+     * 天气
+     */
+    public String weather;
+
+    /**
+     * 轮班
+     */
+    public String shift;
+
+    /**
+     * 保养开始时间
+     */
+    public long startTime;
+
+    /**
+     * 保养结束时间
+     */
+    public long completeTime;
+
+    /**
+     * 备注
+     */
+    public String fillinRemarks;
+
+    /**
+     * 开始的用户
+     */
+    public String startUser;
+
+    /**
+     * 完成的用户
+     */
+    public String completeUser;
+
+    @Column(unique = true, defaultValue = "undefine")
+    private String formId;
     private String formCode;
     private String status;
     private String planDate;
@@ -38,13 +78,21 @@ public class FormInfo {
     private String inspectRouteCode;
     private String inspectRouteDescription;
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof FormInfo) {
+            return ((FormInfo) obj).formId.equals(formId);
+        }
+        return super.equals(obj);
+    }
+
     // 根据表单类型获取line或者eqp
     public String getLineOrEqp(){
         if (actionType.equals(ACTION_TYPE_M)) {
             return equipmentCode;
-        } else {
+        } else if (actionType.equals(ACTION_TYPE_P)){
             return inspectRouteCode;
-        }
+        } else return null;
     }
 
     // 根据类型获取说明
@@ -55,16 +103,16 @@ public class FormInfo {
             } else {
                 return maintParamTypeDescription;
             }
-        } else {
+        } else if (actionType.equals(ACTION_TYPE_P)) {
             return inspectRouteDescription;
-        }
+        } else return null;
     }
 
-    public DOWNLOAD_STATUS getDownload_status() {
+    public int getDownload_status() {
         return download_status;
     }
 
-    public void setDownload_status(DOWNLOAD_STATUS download_status) {
+    public void setDownload_status(int download_status) {
         this.download_status = download_status;
     }
 
@@ -84,11 +132,11 @@ public class FormInfo {
         this.utilitySystemCode = utilitySystemCode;
     }
 
-    public int getFormId() {
+    public String getFormId() {
         return formId;
     }
 
-    public void setFormId(int formId) {
+    public void setFormId(String formId) {
         this.formId = formId;
     }
 

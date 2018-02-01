@@ -29,8 +29,8 @@ import com.zetavision.panda.ums.R;
 import java.io.Closeable;
 import java.io.IOException;
 
-import static com.zetavision.panda.ums.Utils.Constant.IS_PLAY_BEEP;
-import static com.zetavision.panda.ums.Utils.Constant.IS_VIBRATE;
+import static com.zetavision.panda.ums.utils.Constant.IS_PLAY_BEEP;
+import static com.zetavision.panda.ums.utils.Constant.IS_VIBRATE;
 
 /**
  * Manages beeps and vibrations for

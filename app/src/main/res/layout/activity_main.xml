@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:orientation="horizontal"
-    tools:context="com.zetavision.panda.ums.LoginActivity">
+    tools:context="com.zetavision.panda.ums.ui.MainActivity">
     <LinearLayout
         android:orientation="vertical"
         android:id="@+id/leftLayout"
@@ -115,7 +115,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <RelativeLayout
+        <!--<RelativeLayout
             android:background="#ffffff"
             android:layout_width="match_parent"
             android:layout_height="50dp">
@@ -141,14 +141,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="2dp" />
             </LinearLayout>
+
             <TextView
                 android:id="@+id/title"
-                android:text="@string/form_download"
-                android:layout_centerInParent="true"
-                android:gravity="center"
-                android:textSize="18sp"
                 android:layout_width="match_parent"
-                android:layout_height="50dp" />
+                android:layout_height="50dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:gravity="center"
+                android:text="@string/form_download"
+                android:textSize="18sp" />
             <ImageView
                 android:id="@+id/logout"
                 android:scaleType="fitCenter"
@@ -172,7 +174,7 @@
                 android:padding="10dp"
                 android:layout_width="50dp"
                 android:layout_height="50dp" />
-        </RelativeLayout>
+        </RelativeLayout>-->
         <FrameLayout
             android:id="@+id/content"
             android:layout_width="match_parent"

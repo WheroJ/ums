@@ -9,11 +9,15 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.zetavision.panda.ums.R;
-import com.zetavision.panda.ums.fragments.DownloadFragment;
+import com.zetavision.panda.ums.fragments.base.BaseFragment;
 import com.zetavision.panda.ums.model.FormInfo;
 import com.zetavision.panda.ums.service.UmsService;
+import com.zetavision.panda.ums.ui.formdownload.DownloadFragment;
+import com.zetavision.panda.ums.ui.formup.UploadFragment;
+import com.zetavision.panda.ums.utils.Constant;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import butterknife.BindView;
@@ -24,9 +28,9 @@ public class DownloadAdapter extends BaseAdapter {
 
     private Context mContext;
     private List<FormInfo> list = new ArrayList<>();
-    private DownloadFragment fragment;
+    private BaseFragment fragment;
 
-    public DownloadAdapter(Context mContext, DownloadFragment fragment) {
+    public DownloadAdapter(Context mContext, BaseFragment fragment) {
         this.mContext = mContext;
         this.fragment = fragment;
     }
@@ -38,6 +42,8 @@ public class DownloadAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
+        if (list == null)
+            return 0;
         return list.size();
     }
 
@@ -48,7 +54,7 @@ public class DownloadAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return getItem(position).getFormId();
+        return position;
     }
 
     @Override
@@ -81,6 +87,16 @@ public class DownloadAdapter extends BaseAdapter {
 
         private FormInfo data;
 
+        private HashMap<String, String> statusMap;
+
+        public ViewHolder() {
+            statusMap = new HashMap<>();
+            statusMap.put(Constant.MAINT_FORM_STATUS_PLANNED, "已计划");
+            statusMap.put(Constant.MAINT_FORM_STATUS_INPROGRESS, "进行中");
+            statusMap.put(Constant.MAINT_FORM_STATUS_COMPLETED, "已完成");
+            statusMap.put(Constant.MAINT_FORM_STATUS_CLOSED, "已结束");
+        }
+
         public void setData(FormInfo data) {
             this.data = data;
 
@@ -88,24 +104,24 @@ public class DownloadAdapter extends BaseAdapter {
             category.setText(data.getActionType());
             line_or_eqp.setText(data.getLineOrEqp());
             desc.setText(data.getDesc());
-            status.setText(data.getStatus());
+            status.setText(statusMap.get(data.getStatus()));
 
             switch (data.getDownload_status()) {
-                case DONE:
+                case FormInfo.DONE:
                     downloadBtn.setVisibility(View.GONE);
                     progressBar.setVisibility(View.GONE);
                     pauseBtn.setVisibility(View.GONE);
                     doneImg.setVisibility(View.VISIBLE);
                     textInfo.setText("完成");
                     break;
-                case FAIL:
+                case FormInfo.FAIL:
                     downloadBtn.setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.GONE);
                     pauseBtn.setVisibility(View.GONE);
                     doneImg.setVisibility(View.GONE);
                     textInfo.setText("失败");
                     break;
-                case PROGRESS:
+                case FormInfo.PROGRESS:
                     downloadBtn.setVisibility(View.GONE);
                     progressBar.setVisibility(View.VISIBLE);
                     pauseBtn.setVisibility(View.VISIBLE);
@@ -123,8 +139,16 @@ public class DownloadAdapter extends BaseAdapter {
         }
 
         @OnClick(R.id.downloadBtn) void download() {
-            if (fragment.umsService!=null) {
-                fragment.umsService.startDownload(data);
+            if (fragment instanceof DownloadFragment) {
+                UmsService umsService = ((DownloadFragment) fragment).umsService;
+                if (umsService != null) {
+                    umsService.startDownload(data.getFormId());
+                }
+            } else if (fragment instanceof UploadFragment) {
+                UmsService umsService = ((UploadFragment) fragment).umsService;
+                if (umsService != null) {
+                    umsService.startDownload(data.getFormId());
+                }
             }
         }
 

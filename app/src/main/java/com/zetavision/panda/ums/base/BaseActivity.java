@@ -1,7 +1,6 @@
 package com.zetavision.panda.ums.base;
 
 import android.app.Fragment;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -14,14 +13,24 @@ import android.widget.LinearLayout;
 
 import com.zetavision.panda.ums.R;
 import com.zetavision.panda.ums.fragments.base.BaseFragment;
+import com.zetavision.panda.ums.model.Result;
+import com.zetavision.panda.ums.model.User;
 import com.zetavision.panda.ums.utils.ActivityCollector;
 import com.zetavision.panda.ums.utils.Constant;
 import com.zetavision.panda.ums.utils.IntentUtils;
+import com.zetavision.panda.ums.utils.SPUtil;
+import com.zetavision.panda.ums.utils.ToastUtils;
 import com.zetavision.panda.ums.utils.UserPreferences;
+import com.zetavision.panda.ums.utils.UserUtils;
+import com.zetavision.panda.ums.utils.network.Client;
+import com.zetavision.panda.ums.utils.network.RxUtils;
+import com.zetavision.panda.ums.utils.network.UmsApi;
 import com.zetavision.panda.ums.widget.ViewHeaderBar;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
@@ -71,7 +80,24 @@ abstract public class BaseActivity extends AppCompatActivity {
 
                 @Override
                 public void onLogoutClick() {
-                    IntentUtils.INSTANCE.goLogout(mContext);
+                    User loginUser = UserUtils.INSTANCE.getCurretnLoginUser();
+                    if (loginUser != null) {
+                        RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class).logout(loginUser.USERNAME)
+                                , new RxUtils.DialogListener(getThis()) {
+                            @Override
+                            public void onResult(@NotNull Result result) {
+                                IntentUtils.INSTANCE.goLogout(mContext);
+                            }
+
+                            @Override
+                            public void onError(@NotNull Throwable e) {
+                                super.onError(e);
+                                ToastUtils.show(e.getMessage());
+                            }
+                        });
+                    } else {
+                        IntentUtils.INSTANCE.goLogout(mContext);
+                    }
                 }
 
                 @Override
@@ -173,11 +199,7 @@ abstract public class BaseActivity extends AppCompatActivity {
         switch (str) {
             case Constant.EVENT_REFRESH_LANGUAGE:
                 changeAppLanguage();
-                //有待测试
-//                onCreate(null);
-                finish();
-                Intent intent = new Intent(this, this.getClass());
-                startActivity(intent);
+                IntentUtils.INSTANCE.reOpenActivity(this);
                 break;
         }
     }
@@ -185,20 +207,34 @@ abstract public class BaseActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        //建议需要的时候在对应界面开启，基类调用这样会占用资源
-//        EventBus.getDefault().register(this);
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //从后台运行 转到前台运行
+        if (SPUtil.getBoolean(Constant.IS_RUN_BACK, false)) {
+            //APP 前台运行重新开启服务
+            SPUtil.saveBoolean(Constant.IS_RUN_BACK, false);
+            IntentUtils.INSTANCE.startReLoginService();
+        }
     }
 
     @Override
     public void onStop() {
+        EventBus.getDefault().unregister(this);
         super.onStop();
-//        EventBus.getDefault().unregister(this);
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         ActivityCollector.removeActivity(this);
+
+        if (ActivityCollector.mActivities.size() == 0) {
+            IntentUtils.INSTANCE.clearBuffer(false);
+        }
         mContext = null;
+        super.onDestroy();
     }
 }

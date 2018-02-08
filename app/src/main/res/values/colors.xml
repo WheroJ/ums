@@ -19,7 +19,10 @@
     <!--#62a7ea-->
     <color name="main_color">#7ba1df</color>
     <color name="gray3">#333333</color>
+    <color name="gray_f0">#f0f0f0</color>
     <color name="blue_back">#f4f9fa</color>
     <color name="blue_00">@color/primary</color>
+    <color name="black_80">#80000000</color>
+    <drawable name="transparent">#00000000</drawable>
 
 </resources>

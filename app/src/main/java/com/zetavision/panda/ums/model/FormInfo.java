@@ -21,7 +21,7 @@ public class FormInfo extends DataSupport{
     public static final String MAINT_TYPE_TBM= "TBM";
     public static final String MAINT_TYPE_CBM= "CBM";
 
-    private int utilitySystemId;
+    public int utilitySystemId;
     private String utilitySystemCode;
 
     /**
@@ -77,6 +77,7 @@ public class FormInfo extends DataSupport{
     // 点检表单
     private String inspectRouteCode;
     private String inspectRouteDescription;
+    public String inspectPeriodDescription;
 
     @Override
     public boolean equals(Object obj) {

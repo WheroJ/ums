@@ -4,48 +4,6 @@
     android:background="@color/light"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <RelativeLayout
-        android:background="#ffffff"
-        android:layout_width="match_parent"
-        android:layout_height="50dp">
-        <ImageView
-            android:id="@+id/back"
-            android:src="@mipmap/back"
-            android:layout_marginStart="16dp"
-            android:layout_centerVertical="true"
-            android:layout_width="33dp"
-            android:layout_height="33dp" />
-        <TextView
-            android:text="设备SN445455454保养表单"
-            android:layout_centerInParent="true"
-            android:gravity="center"
-            android:textSize="18sp"
-            android:layout_width="match_parent"
-            android:layout_height="50dp" />
-        <ImageView
-            android:id="@+id/logout"
-            android:scaleType="fitCenter"
-            android:padding="8dp"
-            android:layout_alignParentRight="true"
-            android:src="@mipmap/logout"
-            android:layout_width="50dp"
-            android:layout_height="50dp" />
-        <TextView
-            android:id="@+id/username"
-            android:text="admin"
-            android:layout_toStartOf="@id/logout"
-            android:gravity="center_vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp" />
-        <ImageView
-            android:src="@mipmap/panda"
-            android:layout_toStartOf="@id/username"
-            android:layout_marginEnd="6dp"
-            android:scaleType="fitCenter"
-            android:padding="10dp"
-            android:layout_width="50dp"
-            android:layout_height="50dp" />
-    </RelativeLayout>
 
     <LinearLayout
         android:layout_marginTop="20dp"
@@ -56,22 +14,27 @@
         android:layout_width="match_parent"
         android:layout_height="30dp">
         <TextView
+            android:id="@+id/label1"
             style="@style/list_header_text"
             android:text="@string/device_name"
-            android:layout_weight="0.2" />
-        <TextView
-            style="@style/list_header_text"
-            android:text="@string/form_number"
             android:layout_weight="0.15" />
         <TextView
+            android:id="@+id/label2"
+            style="@style/list_header_text"
+            android:text="@string/form_number"
+            android:layout_weight="0.2" />
+        <TextView
+            android:id="@+id/label3"
             style="@style/list_header_text"
             android:text="@string/maintain_cycle"
             android:layout_weight="0.15" />
         <TextView
+            android:id="@+id/label4"
             style="@style/list_header_text"
             android:text="@string/maintain_cycle_desc"
             android:layout_weight="0.2" />
         <TextView
+            android:id="@+id/label5"
             style="@style/list_header_text"
             android:text="@string/maintain_plan_date"
             android:layout_weight="0.15" />
@@ -86,8 +49,9 @@
         android:background="@color/light"
         android:layout_width="match_parent"
         android:layout_height="1dp" />
-    <ListView
-        android:id="@+id/listView"
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingStart="8dp"

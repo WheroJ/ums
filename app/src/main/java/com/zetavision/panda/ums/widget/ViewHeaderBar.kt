@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import com.zetavision.panda.ums.R
+import com.zetavision.panda.ums.utils.UIUtils
 import com.zetavision.panda.ums.utils.UserPreferences
 
 /**
@@ -54,7 +55,7 @@ class ViewHeaderBar: RelativeLayout {
         mIvBack.setImageResource(resId)
         mIvBack.setOnClickListener {
             if (listener != null)
-                listener.onLeftClick()
+                listener?.onLeftClick()
         }
     }
 
@@ -64,20 +65,22 @@ class ViewHeaderBar: RelativeLayout {
 
         mViewPick.setOnClickListener {
             if (listener != null)
-                listener.onLeftClick()
+                listener?.onLeftClick()
         }
     }
 
     fun setRightText(text: String, color: Int) {
         mIvLogo.visibility = View.GONE
-        mIvLogout.visibility = View.INVISIBLE
+        mIvLogout.visibility = View.GONE
 
         mTvUserName.text = text
         mTvUserName.setTextColor(resources.getColor(color))
         mTvUserName.visibility = View.VISIBLE
+        mTvUserName.setPadding(UIUtils.dip2px(15), 0
+                , UIUtils.dip2px(15), 0)
         if (listener != null)
             mTvUserName.setOnClickListener {
-                listener.onRightTextClick()
+                listener?.onRightTextClick()
             }
     }
 
@@ -96,19 +99,27 @@ class ViewHeaderBar: RelativeLayout {
             var preferences = UserPreferences()
             val user = preferences.user
             if (user != null) {
-                mTvUserName.text = (user!!.username)
+                mTvUserName.text = (user.USERNAME)
             }
         }
 
         mViewPick.setOnClickListener {
-            if (listener != null)
-                listener.onLeftClick()
+            listener?.onLeftClick()
         }
 
         mIvLogout.setOnClickListener {
-            if (listener != null)
-                listener.onLogoutClick()
+            listener?.onLogoutClick()
         }
+
+        mTvUserName.setOnClickListener{
+            listener?.onRightTextClick()
+        }
+    }
+
+    fun setHiddenRight() {
+        mIvLogo.visibility = View.GONE
+        mIvLogout.visibility = View.GONE
+        mTvUserName.visibility = View.GONE
     }
 
     interface OnItemClickListener {
@@ -117,7 +128,7 @@ class ViewHeaderBar: RelativeLayout {
         fun onRightTextClick()
     }
 
-    private lateinit var listener: OnItemClickListener
+    private var listener: OnItemClickListener? = null
     fun setOnItemClickListener(listener: OnItemClickListener) {
         this.listener = listener
     }

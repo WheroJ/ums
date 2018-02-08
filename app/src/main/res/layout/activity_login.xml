@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    tools:context="com.zetavision.panda.ums.LoginActivity">
+    tools:context="com.zetavision.panda.ums.ui.LoginActivity">
 
     <ImageView
         android:src="@mipmap/login_bg"
@@ -38,7 +38,7 @@
                 <!--android:layout_width="match_parent"-->
                 <!--android:layout_height="wrap_content" />-->
             <EditText
-                android:id="@+id/username"
+                android:id="@+id/userName"
                 android:hint="@string/input_username"
                 android:inputType="text"
                 android:lines="1"

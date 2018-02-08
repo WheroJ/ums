@@ -3,10 +3,10 @@ package com.zetavision.panda.ums.ui.formdownload;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.zetavision.panda.ums.R;
 import com.zetavision.panda.ums.adapter.ActionSpinnerAdapter;
@@ -21,6 +21,7 @@ import com.zetavision.panda.ums.model.SystemInfo;
 import com.zetavision.panda.ums.service.UmsService;
 import com.zetavision.panda.ums.utils.IntentUtils;
 import com.zetavision.panda.ums.utils.LoadingDialog;
+import com.zetavision.panda.ums.utils.NetUtils;
 import com.zetavision.panda.ums.utils.ToastUtils;
 import com.zetavision.panda.ums.utils.network.Client;
 import com.zetavision.panda.ums.utils.network.RxUtils;
@@ -30,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -52,7 +54,12 @@ public class DownloadFragment extends BaseFragment {
     Spinner actionSpinner;
     @BindView(R.id.listView)
     ListView listView;
+    @BindView(R.id.progressText)
+    TextView progressText;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
 
+    private boolean downLoadAll = false;
     private SystemSpinnerAdapter systemSpinnerAdapter;
     private ActionSpinnerAdapter actionSpinnerAdapter;
     private DownloadAdapter downLoadAdapter;
@@ -66,6 +73,7 @@ public class DownloadFragment extends BaseFragment {
     void downloadAll() {
         if (umsService != null) {
             umsService.startDownloadAll();
+            downLoadAll = true;
         }
     }
 
@@ -81,7 +89,7 @@ public class DownloadFragment extends BaseFragment {
         listView.setAdapter(downLoadAdapter);
 
         // 绑定service
-        IntentUtils.INSTANCE.startDownloadService(getActivity(), connection);
+        IntentUtils.INSTANCE.bindService(getActivity(), connection);
         getData();
     }
 
@@ -100,28 +108,20 @@ public class DownloadFragment extends BaseFragment {
                     // 设置下载列表
                     List<FormInfo> formInfos = result.getList(FormInfo.class);
 
+                    ArrayList<FormInfo> sortFormInfo = new ArrayList<>();
                     if (formInfos != null && !formInfos.isEmpty()) {
                         for (int i = 0; i < formInfos.size(); i++) {
                             FormInfo formInfo = formInfos.get(i);
                             List<FormInfoDetail> formInfoDetails = DataSupport.where("formId='" + formInfo.getFormId() + "'").find(FormInfoDetail.class);
                             if (formInfoDetails != null && !formInfoDetails.isEmpty()) {
                                 formInfo.setDownload_status(FormInfo.DONE);
-                                Spinner spinner = new Spinner(getContext());
-                                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                                    @Override
-                                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                                    }
-
-                                    @Override
-                                    public void onNothingSelected(AdapterView<?> parent) {
-
-                                    }
-                                });
+                                sortFormInfo.add(formInfo);
+                            } else {
+                                sortFormInfo.add(0, formInfo);
                             }
                         }
                     }
-                    umsService.setDownloadList(formInfos);
+                    umsService.setDownloadList(sortFormInfo);
                 }
             }
 
@@ -134,62 +134,81 @@ public class DownloadFragment extends BaseFragment {
     }
 
     private void getData() {
-        final LoadingDialog dialog = new LoadingDialog();
-        dialog.show(getFragmentManager(), null);
+        if (!NetUtils.INSTANCE.isNetConnect(getContext())) {
+            List<SystemInfo> systemInfos = DataSupport.findAll(SystemInfo.class);
+            List<ActionInfo> actions = DataSupport.findAll(ActionInfo.class);
+            systemSpinnerAdapter.notifyDataSetChanged(systemInfos);
+            actionSpinnerAdapter.notifyDataSetChanged(actions);
+        } else {
+            final LoadingDialog dialog = new LoadingDialog();
+            dialog.show(getFragmentManager(), null);
 
-        Observable<Result> queryUtilitySystem = Client.getApi(UmsApi.class).queryUtilitySystem().map(new Function<ResponseBody, Result>() {
-            @Override
-            public Result apply(ResponseBody responseBody) throws Exception {
-                JSONObject resultObject = new JSONObject(responseBody.string());
-                Result result = new Result();
-                result.setReturnCode(resultObject.getInt("returnCode"));
-                result.setReturnMessage(resultObject.getString("returnMessage"));
-                result.setReturnData(resultObject.getString("returnData"));
-                return result;
-            }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+            Observable<Result> queryUtilitySystem = Client.getApi(UmsApi.class).queryUtilitySystem().map(new Function<ResponseBody, Result>() {
+                @Override
+                public Result apply(ResponseBody responseBody) throws Exception {
+                    JSONObject resultObject = new JSONObject(responseBody.string());
+                    Result result = new Result();
+                    result.setReturnCode(resultObject.getInt("returnCode"));
+                    result.setReturnMessage(resultObject.getString("returnMessage"));
+                    result.setReturnData(resultObject.getString("returnData"));
+                    return result;
+                }
+            }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
 
-        Observable<Result> queryActionType = Client.getApi(UmsApi.class).queryActionType().map(new Function<ResponseBody, Result>() {
-            @Override
-            public Result apply(ResponseBody responseBody) throws Exception {
-                JSONObject resultObject = new JSONObject(responseBody.string());
-                Result result = new Result();
-                result.setReturnCode(resultObject.getInt("returnCode"));
-                result.setReturnMessage(resultObject.getString("returnMessage"));
-                result.setReturnData(resultObject.getString("returnData"));
-                return result;
-            }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+            Observable<Result> queryActionType = Client.getApi(UmsApi.class).queryActionType().map(new Function<ResponseBody, Result>() {
+                @Override
+                public Result apply(ResponseBody responseBody) throws Exception {
+                    JSONObject resultObject = new JSONObject(responseBody.string());
+                    Result result = new Result();
+                    result.setReturnCode(resultObject.getInt("returnCode"));
+                    result.setReturnMessage(resultObject.getString("returnMessage"));
+                    result.setReturnData(resultObject.getString("returnData"));
+                    return result;
+                }
+            }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
 
-        Observable.zip(queryUtilitySystem, queryActionType, new BiFunction<Result, Result, HashMap<String, Result>>() {
-            @Override
-            public HashMap<String, Result> apply(Result result, Result result2) throws Exception {
-                HashMap<String, Result> hashMap = new HashMap<>();
-                hashMap.put("SystemInfo", result);
-                hashMap.put("Action", result2);
-                return hashMap;
-            }
-        }).subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<HashMap<String, Result>>() {
-            @Override
-            public void accept(HashMap<String, Result> hashMap) throws Exception {
-                List<SystemInfo> systemInfos = hashMap.get("SystemInfo").getList(SystemInfo.class);
-                systemSpinnerAdapter.notifyDataSetChanged(systemInfos);
-                List<ActionInfo> actions = hashMap.get("Action").getList(ActionInfo.class);
-                actionSpinnerAdapter.notifyDataSetChanged(actions);
-            }
-        }, new Consumer<Throwable>() {
-            @Override
-            public void accept(Throwable throwable) throws Exception {
-                dialog.dismiss();
-                ToastUtils.show(throwable.getMessage());
-            }
-        }, new Action() {
-            @Override
-            public void run() throws Exception {
-                dialog.dismiss();
-            }
-        });
+            Observable.zip(queryUtilitySystem, queryActionType, new BiFunction<Result, Result, HashMap<String, Result>>() {
+                @Override
+                public HashMap<String, Result> apply(Result result, Result result2) throws Exception {
+                    HashMap<String, Result> hashMap = new HashMap<>();
+                    hashMap.put("SystemInfo", result);
+                    hashMap.put("Action", result2);
+                    return hashMap;
+                }
+            }).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<HashMap<String, Result>>() {
+                @Override
+                public void accept(HashMap<String, Result> hashMap) throws Exception {
+                    List<SystemInfo> systemInfos = hashMap.get("SystemInfo").getList(SystemInfo.class);
+                    if (systemInfos != null) {
+                        for (int i = 0; i < systemInfos.size(); i++) {
+                            systemInfos.get(i).saveOrUpdate("utilitySystemId=" + systemInfos.get(i).getUtilitySystemId());
+                        }
+                    }
+
+                    List<ActionInfo> actions = hashMap.get("Action").getList(ActionInfo.class);
+                    if (actions != null) {
+                        for (int i = 0; i < actions.size(); i++) {
+                            actions.get(i).saveOrUpdate("actionType='" + actions.get(i).getActionType() + "'");
+                        }
+                    }
+
+                    systemSpinnerAdapter.notifyDataSetChanged(systemInfos);
+                    actionSpinnerAdapter.notifyDataSetChanged(actions);
+                }
+            }, new Consumer<Throwable>() {
+                @Override
+                public void accept(Throwable throwable) throws Exception {
+                    dialog.dismiss();
+                    ToastUtils.show(throwable.getMessage());
+                }
+            }, new Action() {
+                @Override
+                public void run() throws Exception {
+                    dialog.dismiss();
+                }
+            });
+        }
     }
 
     public UmsService umsService;
@@ -204,6 +223,19 @@ public class DownloadFragment extends BaseFragment {
                 public void onUpdate(List<FormInfo> list) {
                     if (list != null) {
                         downLoadAdapter.notifyDataSetChanged(list);
+                        if (downLoadAll) {
+                            int count = 0, size = list.size();
+                            for (int i = 0; i < size; i++) {
+                                if (list.get(i).getDownload_status() == FormInfo.DONE) {
+                                    count++;
+                                }
+                            }
+
+                            if (count == size) downLoadAll = false;
+                            double ratio = count * 100.0 / list.size();
+                            progressBar.setProgress((int) (ratio / 100));
+                            progressText.setText(getString(R.string.have_finish) + ratio + "%");
+                        }
                     }
                 }
             });

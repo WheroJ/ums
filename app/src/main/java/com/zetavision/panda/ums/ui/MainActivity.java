@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.view.KeyEvent;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -19,6 +20,8 @@ import com.zetavision.panda.ums.ui.spotcheck.SpotCheckFragment;
 import com.zetavision.panda.ums.ui.upkeep.UpKeepFragment;
 import com.zetavision.panda.ums.utils.Common;
 import com.zetavision.panda.ums.utils.Constant;
+import com.zetavision.panda.ums.utils.IntentUtils;
+import com.zetavision.panda.ums.utils.ToastUtils;
 import com.zetavision.panda.ums.utils.UserPreferences;
 
 import org.greenrobot.eventbus.EventBus;
@@ -111,8 +114,10 @@ public class MainActivity extends BaseActivity {
         anim.start();
     }
 
-    /*@OnClick(R.id.username)*/public void onChangeLanguage() {
-        // 中英文切换
+    /**
+     * 中英文切换
+     */
+    public void onChangeLanguage() {
         UserPreferences preferences = new UserPreferences();
         if (preferences.getLanguage().equals(Locale.CHINESE.getLanguage())) {//中文
             preferences.setLanguage(Locale.ENGLISH.getLanguage());
@@ -136,5 +141,21 @@ public class MainActivity extends BaseActivity {
             default:
                 break;
         }
+    }
+
+    private long backPressTimeRecord = 0l;
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+            long currentTime = System.currentTimeMillis();
+            if ((currentTime - backPressTimeRecord) < 2000) {
+                IntentUtils.INSTANCE.goExit(this);
+            } else {
+                backPressTimeRecord = currentTime;
+                ToastUtils.show(R.string.rt_exit);
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

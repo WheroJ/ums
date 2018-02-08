@@ -69,9 +69,9 @@ object RxUtils {
                 .map { t: ResponseBody ->
                     val resultObject = JSONObject(t.string())
                     val result = Result()
-                    result.returnCode = resultObject.getInt("returnCode")
-                    result.returnMessage = resultObject.getString("returnMessage")
-                    result.returnData = resultObject.getString("returnData")
+                    result.returnCode = resultObject.optInt("returnCode")
+                    result.returnMessage = resultObject.optString("returnMessage")
+                    result.returnData = resultObject.optString("returnData")
                     return@map result
                 }
                 .subscribe(object : Observer<Result> {

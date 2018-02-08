@@ -1,6 +1,8 @@
 package com.zetavision.panda.ums
 
 import android.content.Context
+import com.zetavision.panda.ums.utils.Constant
+import com.zetavision.panda.ums.utils.CrashHandler
 import com.zetavision.panda.ums.utils.UIUtils
 import org.litepal.LitePalApplication
 
@@ -15,5 +17,7 @@ class UmsApplication : LitePalApplication() {
 
         application = this
         UIUtils.init(application)
+
+        if(!Constant.DEBUG) CrashHandler.getInstance().init(application)
     }
 }

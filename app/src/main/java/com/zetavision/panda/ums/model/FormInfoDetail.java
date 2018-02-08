@@ -12,7 +12,19 @@ import java.util.ArrayList;
 
 public class FormInfoDetail extends DataSupport{
     public String formId;
+
+    /**
+     * 设备code
+     */
     public String equipmentCode;
+
+    /**
+     * 点检路线
+     */
+    public String inspectRouteCode;
+
+    public String actionType;
+    public int utilitySystemId;
 
     public static int SYNC = 2;
     public static int UNSYNC = 1;

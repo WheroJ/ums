@@ -1,6 +1,8 @@
 package com.zetavision.panda.ums.model;
 
-public class SystemInfo {
+import org.litepal.crud.DataSupport;
+
+public class SystemInfo extends DataSupport {
     private int utilitySystemId;
     private String utilitySystemCode;
     private String utilitySystemName;

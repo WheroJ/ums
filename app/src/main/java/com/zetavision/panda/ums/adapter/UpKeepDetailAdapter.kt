@@ -9,23 +9,57 @@ import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.BaseViewHolder
 import com.zetavision.panda.ums.R
 import com.zetavision.panda.ums.model.FormItem
+import com.zetavision.panda.ums.utils.Constant
 
 /**
  * Created by wheroj on 2018/1/31 17:08.
  * @describe
  */
-class UpKeepDetailAdapter(data: List<FormItem>): BaseQuickAdapter<FormItem, BaseViewHolder>(R.layout.item_upkeep_param, data) {
+class UpKeepDetailAdapter(data: List<FormItem>, var status: String): BaseQuickAdapter<FormItem, BaseViewHolder>(R.layout.item_upkeep_param, data) {
     override fun convert(helper: BaseViewHolder?, item: FormItem?) {
         if (item != null) {
             helper?.setText(R.id.itemUpKeepParam_order, (data.indexOf(item) + 1).toString())
                     ?.setText(R.id.itemUpKeepParam_code, item.basicActionName)
                     ?.setText(R.id.itemUpKeepParam_unit, item.unit)
 
+            var tvValue = helper?.getView<TextView>(R.id.itemUpKeepParam_tvValue)
+            var tvRemark = helper?.getView<TextView>(R.id.itemUpKeepParam_tvRemark)
             var rlInput = helper?.getView<RelativeLayout>(R.id.itemUpKeepParam_rlInput)
             var etInput = helper?.getView<EditText>(R.id.itemUpKeepParam_etInput)
             var inputNotice = helper?.getView<TextView>(R.id.itemUpKeepParam_inputNotice)
             var inputNoticeImg = helper?.getView<ImageView>(R.id.itemUpKeepParam_inputNoticeImg)
+            var rlChoose = helper?.getView<RelativeLayout>(R.id.itemUpKeepParam_choose)
+            var spinner = helper?.getView<Spinner>(R.id.itemUpKeepParam_spinner)
             var etRemark = helper?.getView<EditText>(R.id.itemUpKeepParam_remark)
+            when(status) {
+                Constant.FORM_STATUS_COMPLETED,
+                    Constant.FORM_STATUS_CLOSED,
+                    Constant.FORM_STATUS_PLANNED -> {
+                    tvValue?.text = item.presetValue.toString()
+                    tvRemark?.text = item.remarks
+                    tvValue?.visibility = View.VISIBLE
+                    tvRemark?.visibility = View.VISIBLE
+                    rlInput?.visibility = View.GONE
+                    rlChoose?.visibility = View.GONE
+                    etRemark?.visibility = View.GONE
+                }
+                Constant.FORM_STATUS_INPROGRESS -> {
+                    when(item.valueType) {
+                        "N", "T" -> {
+                            rlInput?.visibility = View.VISIBLE
+                            rlChoose?.visibility = View.GONE
+                        }
+                        "O", "B" -> {
+                            rlInput?.visibility = View.GONE
+                            rlChoose?.visibility = View.VISIBLE
+                        }
+                    }
+                    tvValue?.visibility = View.GONE
+                    tvRemark?.visibility = View.GONE
+                    etRemark?.visibility = View.VISIBLE
+                }
+            }
+
             etRemark?.setText(item.remarks)
             etRemark?.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -39,13 +73,8 @@ class UpKeepDetailAdapter(data: List<FormItem>): BaseQuickAdapter<FormItem, Base
                 }
             })
 
-            var rlChoose = helper?.getView<RelativeLayout>(R.id.itemUpKeepParam_choose)
-            var spinner = helper?.getView<Spinner>(R.id.itemUpKeepParam_spinner)
-
             when (item.valueType) {
                 "N", "T" -> {
-                    rlInput?.visibility = View.VISIBLE
-                    rlChoose?.visibility = View.GONE
                     helper?.setText(R.id.itemUpKeepParam_lowerLimit, item.lowerLimit)
                             ?.setText(R.id.itemUpKeepParam_upperLimit, item.upperLimit)
                     if (!TextUtils.isEmpty(item.presetValue)) {
@@ -63,18 +92,30 @@ class UpKeepDetailAdapter(data: List<FormItem>): BaseQuickAdapter<FormItem, Base
                                 item.presetValue = s.toString()
                             } else {
                                 try {
-                                    val intValue = s.toString().toInt()
-                                    val lowerLimit = item.lowerLimit.toInt()
-                                    val upperLimit = item.upperLimit.toInt()
-                                    if (intValue < lowerLimit || intValue > upperLimit) {
-                                        inputNotice?.visibility = View.VISIBLE
-                                        inputNoticeImg?.visibility = View.VISIBLE
-                                        etInput.setBackgroundResource(R.drawable.radius_red_5)
-                                    } else {
-                                        inputNotice?.visibility = View.GONE
-                                        inputNoticeImg?.visibility = View.INVISIBLE
-                                        etInput.setBackgroundResource(R.drawable.radius_blue_5)
-                                        item.presetValue = s.toString()
+                                    val intValue = s.toString().toFloat()
+                                    val lowerLimit = item.lowerLimit.toFloat()
+                                    val upperLimit = item.upperLimit.toFloat()
+                                    when {
+                                        intValue < lowerLimit -> {
+                                            inputNotice?.visibility = View.VISIBLE
+                                            inputNoticeImg?.visibility = View.VISIBLE
+                                            inputNotice?.text = mContext.resources.getString(R.string.too_lower)
+                                            etInput.setBackgroundResource(R.drawable.radius_red_5)
+                                            item.presetValue = s.toString()
+                                        }
+                                        intValue > upperLimit -> {
+                                            inputNotice?.visibility = View.VISIBLE
+                                            inputNoticeImg?.visibility = View.VISIBLE
+                                            inputNotice?.text = mContext.resources.getString(R.string.too_upper)
+                                            etInput.setBackgroundResource(R.drawable.radius_red_5)
+                                            item.presetValue = s.toString()
+                                        }
+                                        else -> {
+                                            inputNotice?.visibility = View.GONE
+                                            inputNoticeImg?.visibility = View.INVISIBLE
+                                            etInput.setBackgroundResource(R.drawable.radius_blue_5)
+                                            item.presetValue = s.toString()
+                                        }
                                     }
                                 } catch (e: NumberFormatException) {
                                     e.printStackTrace()
@@ -86,9 +127,6 @@ class UpKeepDetailAdapter(data: List<FormItem>): BaseQuickAdapter<FormItem, Base
                     })
                 }
                 "O", "B" -> {
-                    rlInput?.visibility = View.GONE
-                    rlChoose?.visibility = View.VISIBLE
-
                     val list = item.optionValues.split("|")
                     val spinnerAdapter = CommonSpinnerAdapter(mContext)
                     spinner?.adapter = spinnerAdapter
@@ -118,5 +156,10 @@ class UpKeepDetailAdapter(data: List<FormItem>): BaseQuickAdapter<FormItem, Base
                 }
             }
         }
+    }
+
+    fun updateData(status: String) {
+        this.status = status
+        notifyDataSetChanged()
     }
 }

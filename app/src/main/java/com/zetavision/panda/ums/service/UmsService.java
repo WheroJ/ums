@@ -2,6 +2,9 @@ package com.zetavision.panda.ums.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.text.TextUtils;
@@ -11,6 +14,10 @@ import com.zetavision.panda.ums.model.FormInfoDetail;
 import com.zetavision.panda.ums.model.FormItem;
 import com.zetavision.panda.ums.model.Result;
 import com.zetavision.panda.ums.utils.Constant;
+import com.zetavision.panda.ums.utils.IntentUtils;
+import com.zetavision.panda.ums.utils.SPUtil;
+import com.zetavision.panda.ums.utils.UIUtils;
+import com.zetavision.panda.ums.utils.UserUtils;
 import com.zetavision.panda.ums.utils.network.Client;
 import com.zetavision.panda.ums.utils.network.RxUtils;
 import com.zetavision.panda.ums.utils.network.UmsApi;
@@ -24,12 +31,15 @@ import org.litepal.crud.DataSupport;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Predicate;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -67,7 +77,7 @@ public class UmsService extends Service {
     public void startUpload(String formId) {
         final FormInfoDetail formInfoDetail = getFormInfoDetail(formId);
 
-        if (formInfoDetail != null && Constant.MAINT_FORM_STATUS_COMPLETED.equals(formInfoDetail.form.getStatus())) {
+        if (formInfoDetail != null && Constant.FORM_STATUS_COMPLETED.equals(formInfoDetail.form.getStatus())) {
             JSONObject requestJson = new JSONObject();
             try {
                 JSONArray forms = new JSONArray();
@@ -120,7 +130,8 @@ public class UmsService extends Service {
                 @Override
                 public void onResult(@NotNull Result result) {
                     formInfoDetail.isUpload = FormInfo.DONE;
-                    formInfoDetail.saveOrUpdate("(formId='" + formInfoDetail.formId + "')");
+//                    formInfoDetail.saveOrUpdate("(formId='" + formInfoDetail.formId + "')");
+                    formInfoDetail.delete();
                     if (uploadListener != null) {
                         uploadListener.onUpdate(uploadList);
                     }
@@ -176,6 +187,9 @@ public class UmsService extends Service {
                                 FormInfoDetail formInfoDetail = formInfoDetails.get(0);
                                 formInfoDetail.formId = formInfoDetail.form.getFormId();
                                 formInfoDetail.equipmentCode = formInfoDetail.form.getEquipmentCode();
+                                formInfoDetail.inspectRouteCode = formInfoDetail.form.getInspectRouteCode();
+                                formInfoDetail.actionType = formInfoDetail.form.getActionType();
+                                formInfoDetail.utilitySystemId = formInfoDetail.form.getUtilitySystemId();
                                 formInfoDetail.form.saveOrUpdate("(formId='" + formInfoDetail.form.getFormId() + "')");
                                 DataSupport.saveAll(formInfoDetail.formItemList);
                                 formInfoDetail.saveOrUpdate("(formId='" + formInfoDetail.formId + "')");
@@ -344,5 +358,60 @@ public class UmsService extends Service {
         public UmsService getService() {
             return UmsService.this;
         }
+    }
+
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private ReLoginReceiver receiver;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        boolean haveInit = SPUtil.getBoolean(Constant.IS_SERVICE_INIT, false);
+        if (!haveInit) {
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(Constant.RELOGINACTION);
+            intentFilter.addAction(Constant.REGETTOKEN);
+            intentFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+            intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+            receiver = new ReLoginReceiver();
+            registerReceiver(receiver, intentFilter);
+
+            compositeDisposable.add(Observable.interval(0, 1, TimeUnit.MINUTES, Schedulers.io())
+                    .subscribe(new Consumer<Long>() {
+                        @Override
+                        public void accept(Long aLong) throws Exception {
+                        /*if (UserUtils.INSTANCE.isTokenGoingOutOfDate() && !UserUtils.INSTANCE.isTokenOutOfDate()) {
+                            Intent intent = new Intent();
+                            intent.setAction(Constant.REGETTOKEN);
+                            sendBroadcast(intent);
+                        } else */
+                            if (UserUtils.INSTANCE.isTokenOutOfDate()) {
+                                Intent intent = new Intent();
+                                intent.setAction(Constant.RELOGINACTION);
+                                sendBroadcast(intent);
+                                IntentUtils.INSTANCE.stopServcie(UIUtils.getContext());
+                                compositeDisposable.dispose();
+                            }
+                        }
+                    }));
+            SPUtil.saveBoolean(Constant.IS_SERVICE_INIT, true);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public boolean stopService(Intent name) {
+        compositeDisposable.dispose();
+        if (receiver != null)
+            unregisterReceiver(receiver);
+        SPUtil.saveBoolean(Constant.IS_SERVICE_INIT, false);
+        return super.stopService(name);
     }
 }

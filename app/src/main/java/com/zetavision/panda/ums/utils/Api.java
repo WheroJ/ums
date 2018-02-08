@@ -41,13 +41,13 @@ public class Api {
                     public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
                         Gson gson = new Gson();
                         UserPreferences userPreferences = new UserPreferences();
-                        userPreferences.setCookie(url.host(), gson.toJson(cookies));
+                        userPreferences.setCookie(gson.toJson(cookies));
                     }
                     @Override
                     public List<Cookie> loadForRequest(HttpUrl url) {
                         Gson gson = new Gson();
                         UserPreferences userPreferences = new UserPreferences();
-                        return gson.fromJson(userPreferences.getCookie(url.host()), new TypeToken<List<Cookie>>() {}.getType());
+                        return gson.fromJson(userPreferences.getCookie(), new TypeToken<List<Cookie>>() {}.getType());
                     }
                 }).build();
     }

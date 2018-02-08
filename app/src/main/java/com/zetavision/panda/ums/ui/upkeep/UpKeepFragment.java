@@ -8,23 +8,29 @@ import com.google.zxing.Result;
 import com.zetavision.panda.ums.R;
 import com.zetavision.panda.ums.fragments.base.CaptureFragment;
 import com.zetavision.panda.ums.utils.IntentUtils;
+import com.zetavision.panda.ums.utils.ToastUtils;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 
 public class UpKeepFragment extends CaptureFragment {
-//    public class UpKeepFragment extends BaseFragment {
 
     @BindView(R.id.switchInput) public View switchInput;
     @BindView(R.id.inputLayout) public View inputLayout;
     @BindView(R.id.device_name) public EditText device_name;
 
+    /**
+     * 默认处理二维码扫描结果
+     */
+    private boolean dealDecode = true;
     @Override
     public void handleDecode(Result rawResult, Bitmap barcode, float scaleFactor) {
         super.handleDecode(rawResult, barcode, scaleFactor);
-        // 处理扫描结果
-        if(!rawResult.getText().equals("")) {
-            IntentUtils.INSTANCE.goUpKeep(getContext(), rawResult.getText().trim());
+        if (dealDecode) {
+            // 处理扫描结果
+            if (!rawResult.getText().equals("")) {
+                IntentUtils.INSTANCE.goUpKeep(getContext(), rawResult.getText().trim());
+            }
         }
     }
 
@@ -33,10 +39,12 @@ public class UpKeepFragment extends CaptureFragment {
         if (view.getId() == R.id.switchInput) {
             this.inputLayout.setVisibility(View.VISIBLE);
             this.switchInput.setVisibility(View.GONE);
+            dealDecode = false;
         }
         if (view.getId() == R.id.switchScan) {
             this.inputLayout.setVisibility(View.GONE);
             this.switchInput.setVisibility(View.VISIBLE);
+            dealDecode = true;
         }
     }
 
@@ -44,6 +52,8 @@ public class UpKeepFragment extends CaptureFragment {
     public void onOk() {
         if(!device_name.getText().toString().equals("")) {
             IntentUtils.INSTANCE.goUpKeep(getContext(), device_name.getText().toString());
+        } else {
+            ToastUtils.show(getString(R.string.device_name_notnull));
         }
     }
 

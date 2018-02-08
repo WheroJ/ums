@@ -4,11 +4,13 @@
     android:layout_height="match_parent">
     <SurfaceView android:id="@+id/preview_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:visibility="visible"/>
     <com.zetavision.panda.ums.zxing.ViewfinderView
         android:id="@+id/finderView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:visibility="visible"/>
     <LinearLayout
         android:id="@+id/inputLayout"
         android:visibility="gone"

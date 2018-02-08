@@ -13,9 +13,7 @@ import com.zetavision.panda.ums.R
 import com.zetavision.panda.ums.adapter.CommonSpinnerAdapter
 import com.zetavision.panda.ums.adapter.UpKeepDetailAdapter
 import com.zetavision.panda.ums.base.BaseActivity
-import com.zetavision.panda.ums.model.FormInfoDetail
-import com.zetavision.panda.ums.model.Result
-import com.zetavision.panda.ums.model.User
+import com.zetavision.panda.ums.model.*
 import com.zetavision.panda.ums.utils.Constant
 import com.zetavision.panda.ums.utils.TimeUtils
 import com.zetavision.panda.ums.utils.ToastUtils
@@ -23,7 +21,12 @@ import com.zetavision.panda.ums.utils.network.Client
 import com.zetavision.panda.ums.utils.network.RxUtils
 import com.zetavision.panda.ums.utils.network.UmsApi
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.BiFunction
+import io.reactivex.schedulers.Schedulers
+import okhttp3.ResponseBody
+import org.json.JSONObject
 import org.litepal.crud.DataSupport
 import java.util.concurrent.TimeUnit
 
@@ -34,14 +37,14 @@ import java.util.concurrent.TimeUnit
 class UpKeepDetailActivity: BaseActivity() {
 
     var recyclerView: RecyclerView? = null
-    private var formInfoDetail = FormInfoDetail()
+    private var formInfoDetail: FormInfoDetail? = null
+    private var weatherList: List<Weather>? = null
+    private var shiftList: List<Shift>? = null
     private lateinit var maintFormId: String
-
-    private val tempers = arrayListOf("默认不填写", "晴", "多云", "多云转小雨", "小雨", "大雨", "暴雨", "小雪", "大雪", "暴雪")
-    private val classes = arrayListOf("白班", "夜班")
 
     private var temperSpinnerAdapter: CommonSpinnerAdapter? = null
     private var classesSpinnerAdapter: CommonSpinnerAdapter? = null
+    private  var upKeepDetailAdapter: UpKeepDetailAdapter? = null
 
     private var compositeDisposable = CompositeDisposable()
     override fun getContentLayoutId(): Int {
@@ -50,19 +53,62 @@ class UpKeepDetailActivity: BaseActivity() {
 
     override fun init() {
         header.setLeftImage(R.mipmap.back)
-        header.setRightText("保存数据", R.color.main_color)
+        header.setRightText(getString(R.string.common_savedata), R.color.main_color)
+        header.setTitle(resources.getString(R.string.maint_fill))
+
         recyclerView = findViewById(R.id.activityUpKeepDetail_recyclerView)
         recyclerView?.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
         maintFormId = intent.getStringExtra("maintFormId")
-
-
-
         loadData()
     }
 
     private fun loadData() {
 
+        Observable.zip(Client.getApi(UmsApi::class.java).queryWeather(), Client.getApi(UmsApi::class.java).queryShift()
+                , BiFunction<ResponseBody, ResponseBody, HashMap<String, Result>> { t1, t2 ->
+            var map = HashMap<String, Result>()
+
+            var resultObject = JSONObject(t1.string())
+            val resultWeather = Result()
+            resultWeather.returnCode = resultObject.getInt("returnCode")
+            resultWeather.returnMessage = resultObject.getString("returnMessage")
+            resultWeather.returnData = resultObject.getString("returnData")
+            map["weather"] = resultWeather
+
+            resultObject = JSONObject(t2.string())
+            val resultShift = Result()
+            resultShift.returnCode = resultObject.getInt("returnCode")
+            resultShift.returnMessage = resultObject.getString("returnMessage")
+            resultShift.returnData = resultObject.getString("returnData")
+            map["shift"] = resultShift
+
+            return@BiFunction map
+        }).subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe{
+            map ->
+            var weather = map["weather"]
+            weatherList = weather?.getList(Weather::class.java)
+            if (weatherList != null) {
+                for (i in weatherList!!.indices) {
+                    weatherList!![i].saveOrUpdate("weather='" + weatherList!![i].weather + "'")
+                }
+            }
+
+            var shift = map["shift"]
+            shiftList = shift?.getList(Shift::class.java)
+            if (shiftList != null) {
+                for (i in shiftList!!.indices) {
+                    shiftList!![i].saveOrUpdate("shift='" + shiftList!![i].shift + "'")
+                }
+            }
+
+            loadLocalData()
+        }
+    }
+
+    private fun loadLocalData() {
         formInfoDetail = DataSupport.where("(formId = '$maintFormId')").findFirst(FormInfoDetail::class.java, true)
         if(formInfoDetail == null) {
             RxUtils.acquireString(Client.getApi(UmsApi::class.java).downloadMaintForm(maintFormId)
@@ -70,146 +116,190 @@ class UpKeepDetailActivity: BaseActivity() {
                 override fun onResult(result: Result) {
                     val formInfoDetails = result.getList(FormInfoDetail::class.java)
                     if (formInfoDetails != null && formInfoDetails.size > 0) {
-                        recyclerView?.adapter = UpKeepDetailAdapter(formInfoDetails[0].formItemList)
+                        formInfoDetail = formInfoDetails[0]
+                        initView(formInfoDetail)
+                        initSpinner(formInfoDetail, weatherList, shiftList)
                     }
                 }
             })
         } else {
-            recyclerView?.adapter = UpKeepDetailAdapter(formInfoDetail!!.formItemList)
+            initView(formInfoDetail)
+            initSpinner(formInfoDetail, weatherList, shiftList)
         }
+    }
 
-        initView()
+    private fun initSpinner(formInfoDetail: FormInfoDetail?, weatherList: List<Weather>?, shiftList: List<Shift>?) {
+
+        if (formInfoDetail != null) {
+            val temperSpinner = findViewById<Spinner>(R.id.activityUpKeepDetail_temperSpinner)
+            val classesSpinner = findViewById<Spinner>(R.id.activityUpKeepDetail_classesSpinner)
+
+            var weathers: List<String> = arrayListOf()
+            if (weatherList != null) {
+                weathers = weatherList.indices.map { weatherList[it].description }
+            }
+
+            var shifts: List<String> = arrayListOf()
+            if (shiftList != null) {
+                shifts = shiftList.indices.map { shiftList[it].description }
+            }
+
+            if (temperSpinnerAdapter == null) {
+                temperSpinnerAdapter = CommonSpinnerAdapter(this)
+                temperSpinner.adapter = temperSpinnerAdapter
+                temperSpinnerAdapter!!.notifyDataSetChanged(weathers)
+                temperSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                    }
+
+                    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                        formInfoDetail.form.weather = weatherList!![position].weather
+                    }
+                }
+            }
+
+            if (TextUtils.isEmpty(formInfoDetail.form.weather)) {
+                temperSpinner.setSelection(0)
+            } else {
+                var weather = Weather()
+                weather.weather = formInfoDetail.form.weather
+                val indexOf = weatherList?.indexOf(weather) ?: -1
+                if (indexOf in weathers.indices) temperSpinner.setSelection(indexOf)
+                else {
+                    formInfoDetail.form.weather = weatherList!![0].description
+                    temperSpinner.setSelection(0)
+                }
+            }
+
+            if (classesSpinnerAdapter == null) {
+                classesSpinnerAdapter = CommonSpinnerAdapter(this)
+                classesSpinner.adapter = classesSpinnerAdapter
+                classesSpinnerAdapter!!.notifyDataSetChanged(shifts)
+                classesSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                    }
+
+                    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                        formInfoDetail.form.shift = shiftList!![position].shift
+                    }
+                }
+            }
+            if (TextUtils.isEmpty(formInfoDetail.form.shift)) {
+                classesSpinner.setSelection(0)
+            } else {
+                var shift = Shift()
+                shift.shift = formInfoDetail.form.shift
+                val indexOf = shiftList?.indexOf(shift) ?: -1
+                if (indexOf in shifts.indices) classesSpinner.setSelection(indexOf)
+                else {
+                    formInfoDetail.form.shift = shiftList!![0].shift
+                    classesSpinner.setSelection(0)
+                }
+            }
+        }
     }
 
     @SuppressLint("WrongViewCast")
-    private fun initView() {
-        val temperSpinner = findViewById<Spinner>(R.id.activityUpKeepDetail_temperSpinner)
-        val classesSpinner = findViewById<Spinner>(R.id.activityUpKeepDetail_temperSpinner)
+    private fun initView(formInfoDetail: FormInfoDetail?) {
 
-        if (temperSpinnerAdapter == null) {
-            temperSpinnerAdapter = CommonSpinnerAdapter(this)
-            temperSpinner.adapter = temperSpinnerAdapter
-            temperSpinnerAdapter!!.notifyDataSetChanged(tempers)
-            temperSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                }
-
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    formInfoDetail.form.weather = tempers[position]
-                }
-            }
-        }
-
-        if (TextUtils.isEmpty(formInfoDetail.form.weather)) {
-            temperSpinner.setSelection(0)
-        } else {
-            val indexOf = tempers.indexOf(formInfoDetail.form.weather)
-            if (indexOf in tempers.indices) temperSpinner.setSelection(indexOf)
-            else {
-                formInfoDetail.form.weather = tempers[0]
-                temperSpinner.setSelection(0)
-            }
-        }
-
-        if (classesSpinnerAdapter == null) {
-            classesSpinnerAdapter = CommonSpinnerAdapter(this)
-            classesSpinner.adapter = classesSpinnerAdapter
-            classesSpinnerAdapter!!.notifyDataSetChanged(classes)
-            classesSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-
-                }
-
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    formInfoDetail.form.shift = classes[position]
-                }
-            }
-        }
-        if (TextUtils.isEmpty(formInfoDetail.form.shift)) {
-            classesSpinner.setSelection(0)
-        } else {
-            val indexOf = classes.indexOf(formInfoDetail.form.shift)
-            if (indexOf in classes.indices) classesSpinner.setSelection(indexOf)
-            else {
-                formInfoDetail.form.shift = classes[0]
-                classesSpinner.setSelection(0)
-            }
-        }
-
-
-        findViewById<TextView>(R.id.activityUpKeepDetail_deviceName).text = formInfoDetail.form.formCode
-        findViewById<TextView>(R.id.activityUpKeepDetail_maintPeroid).text = formInfoDetail.form.maintPeriodName
-        val etRemark = findViewById<EditText>(R.id.activityUpKeepDetail_etRemark)
-        etRemark.setText(formInfoDetail.form.desc)
-        etRemark.addTextChangedListener(object : TextWatcher{
-            override fun afterTextChanged(s: Editable?) {
-                formInfoDetail.form.fillinRemarks = s.toString()
+        if (formInfoDetail != null) {
+            if (upKeepDetailAdapter == null) {
+                upKeepDetailAdapter = UpKeepDetailAdapter(formInfoDetail.formItemList, formInfoDetail.form.status)
+                recyclerView?.adapter = upKeepDetailAdapter
+            } else {
+                upKeepDetailAdapter!!.updateData(formInfoDetail.form.status)
             }
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            findViewById<TextView>(R.id.activityUpKeepDetail_deviceName).text = formInfoDetail.form.formCode
+            findViewById<TextView>(R.id.activityUpKeepDetail_maintPeroid).text = formInfoDetail.form.maintPeriodName
+            val etRemark = findViewById<EditText>(R.id.activityUpKeepDetail_etRemark)
+            val tvRemark = findViewById<TextView>(R.id.activityUpKeepDetail_tvRemark)
+            if (Constant.FORM_STATUS_CLOSED == formInfoDetail.form.status
+                    || Constant.FORM_STATUS_COMPLETED == formInfoDetail.form.status
+                    || Constant.FORM_STATUS_PLANNED == formInfoDetail.form.status) {
+                header.setHiddenRight()
+                tvRemark.visibility = View.VISIBLE
+                etRemark.visibility = View.GONE
+            } else {
+                header.setRightText(getString(R.string.common_savedata), R.color.main_color)
+                tvRemark.visibility = View.GONE
+                etRemark.visibility = View.VISIBLE
+                etRemark.setText(formInfoDetail.form.fillinRemarks)
+                etRemark.addTextChangedListener(object : TextWatcher {
+                    override fun afterTextChanged(s: Editable?) {
+                        formInfoDetail.form.fillinRemarks = s.toString()
+                    }
 
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+                    }
+
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+                    }
+                })
             }
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-            }
-        })
-
-
-        val btnMaintStatus = findViewById<Button>(R.id.activityUpKeepDetail_btnMaintStatus)
-        val tvMaintStatus = findViewById<TextView>(R.id.activityUpKeepDetail_tvMaintStatus)
-        val tvMaintStatusStr = findViewById<TextView>(R.id.activityUpKeepDetail_tvMaintStatusStr)
-        when (formInfoDetail.form.status) {
-            Constant.MAINT_FORM_STATUS_CLOSED -> tvMaintStatusStr.text = "表单状态：已结束"
-            Constant.MAINT_FORM_STATUS_PLANNED -> {
-                tvMaintStatusStr.text = "表单状态：已计划"
-                btnMaintStatus.text = "保养开始"
-                var drawable: Drawable = resources.getDrawable(R.mipmap.start)
-//                drawable.bounds = Rect(0, 0, drawable.minimumWidth, drawable.minimumHeight)
-                btnMaintStatus.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
-            }
-            Constant.MAINT_FORM_STATUS_INPROGRESS -> {
-                compositeDisposable.add(Observable.interval(0, 1, TimeUnit.SECONDS)
-                        .subscribe {
-                            val useTime = TimeUtils.getUseTime(System.currentTimeMillis() / 1000 - formInfoDetail.form.startTime)
-                            tvMaintStatusStr.text = "表单状态：已进行".plus(useTime)
-                        })
-
-                btnMaintStatus.text = "保养完成"
-                var drawable: Drawable = resources.getDrawable(R.mipmap.done)
-//                drawable.bounds = Rect(0, 0, drawable.minimumWidth, drawable.minimumHeight)
-                btnMaintStatus.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
-            }
-            Constant.MAINT_FORM_STATUS_COMPLETED -> {
-                compositeDisposable.dispose()
-                compositeDisposable.clear()
-
-                tvMaintStatusStr.text = "表单状态：已完成"
-                btnMaintStatus.visibility = View.GONE
-                tvMaintStatus.visibility = View.VISIBLE
-            }
-        }
-        btnMaintStatus.setOnClickListener {
+            val btnMaintStatus = findViewById<Button>(R.id.activityUpKeepDetail_btnMaintStatus)
+            val tvMaintStatus = findViewById<TextView>(R.id.activityUpKeepDetail_tvMaintStatus)
+            val tvMaintStatusStr = findViewById<TextView>(R.id.activityUpKeepDetail_tvMaintStatusStr)
             when (formInfoDetail.form.status) {
-                Constant.MAINT_FORM_STATUS_PLANNED -> {
-                    formInfoDetail.form.status = Constant.MAINT_FORM_STATUS_INPROGRESS
-                    formInfoDetail.form.startTime = System.currentTimeMillis() / 1000
-                    val user = DataSupport.findLast(User::class.java)
-                    if (user != null) formInfoDetail.form.startUser = user.username
-                    initView()
+                Constant.FORM_STATUS_CLOSED -> tvMaintStatusStr.text = "表单状态：已结束"
+                Constant.FORM_STATUS_PLANNED -> {
+                    tvMaintStatusStr.text = "表单状态：已计划"
+                    btnMaintStatus.text = "保养开始"
+                    var drawable: Drawable = resources.getDrawable(R.mipmap.start)
+//                drawable.bounds = Rect(0, 0, drawable.minimumWidth, drawable.minimumHeight)
+                    btnMaintStatus.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
                 }
-                Constant.MAINT_FORM_STATUS_INPROGRESS -> {
-                    formInfoDetail.form.status = Constant.MAINT_FORM_STATUS_COMPLETED
-                    formInfoDetail.form.completeTime = System.currentTimeMillis() / 1000
-                    val user = DataSupport.findLast(User::class.java)
-                    if (user != null) formInfoDetail.form.completeUser = user.username
-                    initView()
+                Constant.FORM_STATUS_INPROGRESS -> {
+                    compositeDisposable.add(Observable.interval(0, 1, TimeUnit.SECONDS)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeOn(Schedulers.io())
+                            .subscribe {
+                                val useTime = TimeUtils.getUseTime(formInfoDetail.form.startTime)
+                                tvMaintStatusStr.text = "表单状态：已进行".plus(useTime)
+                            })
+
+                    btnMaintStatus.text = "保养完成"
+                    var drawable: Drawable = resources.getDrawable(R.mipmap.done)
+//                drawable.bounds = Rect(0, 0, drawable.minimumWidth, drawable.minimumHeight)
+                    btnMaintStatus.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
+                }
+                Constant.FORM_STATUS_COMPLETED -> {
+                    compositeDisposable.dispose()
+                    compositeDisposable.clear()
+
+                    tvMaintStatusStr.text = "表单状态：已完成"
+                    btnMaintStatus.visibility = View.GONE
+                    tvMaintStatus.visibility = View.VISIBLE
+                }
+            }
+            btnMaintStatus.setOnClickListener {
+                when (formInfoDetail.form.status) {
+                    Constant.FORM_STATUS_PLANNED -> {
+                        formInfoDetail.form.status = Constant.FORM_STATUS_INPROGRESS
+                        formInfoDetail.form.startTime = System.currentTimeMillis() / 1000
+                        val user = DataSupport.findLast(User::class.java)
+                        if (user != null) formInfoDetail.form.startUser = user.USERNAME
+                        formInfoDetail.form.saveOrUpdate("formId='${formInfoDetail.form.formId}'")
+                        formInfoDetail.saveOrUpdate("formId='${formInfoDetail.formId}'")
+                        initView(formInfoDetail)
+                    }
+                    Constant.FORM_STATUS_INPROGRESS -> {
+                        formInfoDetail.form.status = Constant.FORM_STATUS_COMPLETED
+                        formInfoDetail.form.completeTime = System.currentTimeMillis() / 1000
+                        val user = DataSupport.findLast(User::class.java)
+                        if (user != null) formInfoDetail.form.completeUser = user.USERNAME
+                        formInfoDetail.form.saveOrUpdate("formId='${formInfoDetail.form.formId}'")
+                        formInfoDetail.saveOrUpdate("formId='${formInfoDetail.formId}'")
+                        initView(formInfoDetail)
+                    }
                 }
             }
         }
-        findViewById<EditText>(R.id.activityUpKeepDetail_etRemark).setText(formInfoDetail.form.desc)
-        findViewById<EditText>(R.id.activityUpKeepDetail_etRemark).setText(formInfoDetail.form.desc)
     }
 
     override fun getHasTitle(): Boolean {
@@ -221,8 +311,8 @@ class UpKeepDetailActivity: BaseActivity() {
     }
 
     override fun onRightTextClick() {
-        if (checkData()) {
-            if (saveData()) {
+        if (checkData(formInfoDetail)) {
+            if (saveData(formInfoDetail)) {
                 ToastUtils.show(R.string.save_success)
                 finish()
             } else {
@@ -231,43 +321,54 @@ class UpKeepDetailActivity: BaseActivity() {
         }
     }
 
-    private fun checkData(): Boolean {
-        for (i in formInfoDetail.formItemList.indices) {
-            val formItem = formInfoDetail.formItemList[i]
-            if ("N" == formItem.valueType) {
-                try {
-                    val intValue = formItem.presetValue.toInt()
-                    val lowerLimit = formItem.lowerLimit.toInt()
-                    val upperLimit = formItem.upperLimit.toInt()
-                    if (intValue < lowerLimit || intValue > upperLimit) {
-                        ToastUtils.show("序号" + (i+1) + "设定的值超出了范围")
+    private fun checkData(formInfoDetail: FormInfoDetail?): Boolean {
+        if (formInfoDetail != null) {
+            for (i in formInfoDetail.formItemList.indices) {
+                val formItem = formInfoDetail.formItemList[i]
+                if ("N" == formItem.valueType) {
+                    try {
+                        val intValue = formItem.presetValue.toFloat()
+                        val lowerLimit = formItem.lowerLimit.toFloat()
+                        val upperLimit = formItem.upperLimit.toFloat()
+                        if (intValue < lowerLimit || intValue > upperLimit) {
+                            ToastUtils.show("序号" + (i + 1) + "设定的值超出了范围")
+                            return false
+                        }
+                    } catch (e: NumberFormatException) {
+                        e.printStackTrace()
+                        return false
+                    } catch (e: NullPointerException) {
+                        e.printStackTrace()
                         return false
                     }
-                } catch (e: NumberFormatException) {
-                    e.printStackTrace()
-                    return false
-                } catch (e: NullPointerException) {
-                    e.printStackTrace()
-                    return false
                 }
             }
+            return true
         }
-        return true
+        return false
     }
 
-    private fun saveData(): Boolean {
-        var isSuccessSave: Boolean
-        formInfoDetail.formItemList.indices
-                .map { formInfoDetail.formItemList[it] }
-                .forEach {
-                    isSuccessSave = it.saveOrUpdate("(formId='${it.formId}')")
-                    if (!isSuccessSave) return isSuccessSave
-                }
+    private fun saveData(formInfoDetail: FormInfoDetail?): Boolean {
+        if (formInfoDetail != null) {
+            var isSuccessSave: Boolean
+            formInfoDetail.formItemList.indices
+                    .map { formInfoDetail.formItemList[it] }
+                    .forEach {
+                        isSuccessSave = it.saveOrUpdate("(formId='${it.formId}')")
+                        if (!isSuccessSave) return isSuccessSave
+                    }
 
-        val formInfo = formInfoDetail.form
-        isSuccessSave = formInfo.saveOrUpdate("(formId='${formInfo.formId}')")
-        if (!isSuccessSave) return isSuccessSave
-        formInfoDetail.isUpload = 1
-        return formInfoDetail.saveOrUpdate("(formId='${formInfoDetail.formId}')")
+            val formInfo = formInfoDetail.form
+            isSuccessSave = formInfo.saveOrUpdate("(formId='${formInfo.formId}')")
+            if (!isSuccessSave) return isSuccessSave
+            formInfoDetail.isUpload = 1
+            return formInfoDetail.saveOrUpdate("(formId='${formInfoDetail.formId}')")
+        }
+        return false
+    }
+
+    override fun onPause() {
+        super.onPause()
+        compositeDisposable.dispose()
     }
 }

@@ -138,6 +138,7 @@ public class UIUtils {
         } else {
             dirFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + mContext.getPackageName() + File.separator + "cache");
         }
+        dirFile = UIUtils.getContext().getCacheDir();
         if (!dirFile.exists()) {
             dirFile.mkdirs();
         }

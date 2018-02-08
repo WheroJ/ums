@@ -1,6 +1,9 @@
 package com.zetavision.panda.ums.utils;
 
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 public class Constant {
     /**
      * 记录当前是否为debug状态
@@ -10,10 +13,12 @@ public class Constant {
     /**
      * 1: 内网   2：外网
      */
-    private static final int net_type = 2;
+    private static final int net_type = 1;
 
     public static final String EVENT_REFRESH_LANGUAGE = "LANGUAGE";
     public static final String EVENT_REFRESH_USER = "USER";
+    public static final String COOKIE = "cookie";
+
     public static String API_BASE_URL;
     static {
         switch (net_type) {
@@ -48,8 +53,25 @@ public class Constant {
     public static final boolean IS_DECODE_PDF417 = false;           //PDF417 测试
 
 
-    public static final String MAINT_FORM_STATUS_PLANNED = "PLANNED";
-    public static final String MAINT_FORM_STATUS_INPROGRESS = "INPROGRESS";
-    public static final String MAINT_FORM_STATUS_COMPLETED = "COMPLETED";
-    public static final String MAINT_FORM_STATUS_CLOSED = "CLOSED";
+    public static final String FORM_STATUS_PLANNED = "PLANNED";
+    public static final String FORM_STATUS_INPROGRESS = "INPROGRESS";
+    public static final String FORM_STATUS_COMPLETED = "COMPLETED";
+    public static final String FORM_STATUS_CLOSED = "CLOSED";
+
+    public static final String RELOGINACTION = "com.cmcc.pp.ui.LoginActivity";
+    public static final String REGETTOKEN = "com.cmcc.pp.ui.LoginActivity.reGetToken";
+    public static final String SYSTEM_DIALOG_REASON_KEY = "reason";
+    public static final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
+    public static final String SYSTEM_DIALOG_REASON_LOCK = "lock";
+    public static final String IS_RUN_BACK = "isBackRun";
+    public static final String WAIT_UPLOAD_CRASH_LOG = "WAIT_UPLOAD_CRASH_LOG";
+    public static final String IS_SERVICE_INIT = "IS_SERVICE_INIT";
+    @NotNull
+    public static final String RE_LOGIN = "re_login";
+    @Nullable
+    public static final String PHOTOPATH = "loadFromPicturePath";
+    public static final int REC_RADIUS_5 = 5;
+    @NotNull
+    public static final String TAKE_PHOTO = "take_photo";
+    public static final String TAKE_VIDEO = "take_video";
 }

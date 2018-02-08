@@ -3,15 +3,25 @@ package com.zetavision.panda.ums.fragments.base;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.zetavision.panda.ums.R;
+import com.zetavision.panda.ums.model.Result;
+import com.zetavision.panda.ums.model.User;
 import com.zetavision.panda.ums.ui.MainActivity;
 import com.zetavision.panda.ums.utils.IntentUtils;
+import com.zetavision.panda.ums.utils.ToastUtils;
+import com.zetavision.panda.ums.utils.UserUtils;
+import com.zetavision.panda.ums.utils.network.Client;
+import com.zetavision.panda.ums.utils.network.RxUtils;
+import com.zetavision.panda.ums.utils.network.UmsApi;
 import com.zetavision.panda.ums.widget.ViewHeaderBar;
+
+import org.jetbrains.annotations.NotNull;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -85,7 +95,24 @@ public abstract class BaseFragment extends Fragment {
     }
 
     public void onLogoutClick() {
-        IntentUtils.INSTANCE.goLogout(getContext());
+        User loginUser = UserUtils.INSTANCE.getCurretnLoginUser();
+        if (loginUser != null) {
+            RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class).logout(loginUser.USERNAME)
+                    , new RxUtils.DialogListener((AppCompatActivity) getActivity()) {
+                @Override
+                public void onResult(@NotNull Result result) {
+                    IntentUtils.INSTANCE.goLogout(getContext());
+                }
+
+                @Override
+                public void onError(@NotNull Throwable e) {
+                    super.onError(e);
+                    ToastUtils.show(e.getMessage());
+                }
+            });
+        } else {
+            IntentUtils.INSTANCE.goLogout(getContext());
+        }
     }
 
     public void onRightTextClick() {

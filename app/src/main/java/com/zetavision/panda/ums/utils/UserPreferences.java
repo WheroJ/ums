@@ -27,16 +27,16 @@ public class UserPreferences {
         return SPUtil.getString(Constant.EVENT_REFRESH_LANGUAGE, Locale.CHINESE.getLanguage());
     }
 
-    public void setCookie(String host, String cookies) {
-        SPUtil.saveString(host, cookies);
+    public void setCookie(String cookies) {
+        SPUtil.saveString(Constant.COOKIE, cookies);
     }
 
-    public String getCookie(String host) {
-        return SPUtil.getString(host,"[]");
+    public String getCookie() {
+        return SPUtil.getString(Constant.COOKIE,"");
     }
 
     public void clearCookie() {
-        SPUtil.clearCookie();
+        SPUtil.removeKey(Constant.COOKIE);
     }
 
     public void saveUser(User user) {

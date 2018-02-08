@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">UMS</string>
-    <string name="input_username">Input a username</string>
+    <string name="input_username">Input a userName</string>
     <string name="input_password">Input a password</string>
     <string name="login">Login</string>
     <string name="form_download">DOWNLOAD</string>

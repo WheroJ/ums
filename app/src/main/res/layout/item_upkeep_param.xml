@@ -17,33 +17,28 @@
         <TextView
             android:id="@+id/itemUpKeepParam_order"
             style="@style/list_header_text"
-            android:text="@string/device_name"
             android:layout_weight="0.1"
-            tools:text="序号"/>
+            tools:text="@string/formdetail_sort"/>
         <TextView
             android:id="@+id/itemUpKeepParam_code"
             style="@style/list_header_text"
-            android:text="@string/form_number"
             android:layout_weight="0.2"
-            tools:text="保养编号"/>
+            tools:text="@string/formdetail_num"/>
         <TextView
             android:id="@+id/itemUpKeepParam_lowerLimit"
             style="@style/list_header_text"
-            android:text="@string/maintain_cycle"
             android:layout_weight="0.1"
-            tools:text="下限"/>
+            tools:text="@string/formdetail_lower"/>
         <TextView
             android:id="@+id/itemUpKeepParam_upperLimit"
             style="@style/list_header_text"
-            android:text="@string/maintain_cycle"
             android:layout_weight="0.1"
-            tools:text="上限"/>
+            tools:text="@string/formdetail_upper"/>
         <TextView
             android:id="@+id/itemUpKeepParam_unit"
             style="@style/list_header_text"
-            android:text="@string/maintain_cycle_desc"
             android:layout_weight="0.1"
-            tools:text="单位"/>
+            tools:text="@string/formdetail_unit"/>
 
         <FrameLayout
             android:layout_width="0dp"
@@ -118,17 +113,53 @@
 
             </RelativeLayout>
 
+            <TextView
+                android:id="@+id/itemUpKeepParam_tvValue"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="8dp"
+                android:paddingStart="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_10"
+                android:paddingBottom="@dimen/dp_10"
+                android:gravity="center_vertical"
+                android:background="@drawable/radius_blue_5"
+                android:visibility="visible"
+                tools:text="這是取值" />
+
         </FrameLayout>
 
-        <EditText
-            android:id="@+id/itemUpKeepParam_remark"
+        <RelativeLayout
             style="@style/list_header_text"
-            android:text="@string/form_status"
             android:layout_weight="0.2"
-            android:layout_marginStart="@dimen/dp_10"
-            android:textSize="@dimen/sp_12"
-            android:background="@drawable/radius_blue_5"
-            tools:hint="备注"/>
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:layout_marginStart="@dimen/dp_10">
+            <EditText
+                android:id="@+id/itemUpKeepParam_remark"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="@dimen/dp_10"
+                android:paddingEnd="@dimen/dp_10"
+                android:hint="@string/remark"
+                android:textSize="@dimen/sp_12"
+                android:background="@drawable/radius_blue_5"
+                tools:hint="备注"
+                android:visibility="visible"
+                android:gravity="center_vertical|start"/>
+
+            <TextView
+                android:id="@+id/itemUpKeepParam_tvRemark"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/radius_blue_5"
+                android:textSize="@dimen/sp_12"
+                android:paddingStart="@dimen/dp_10"
+                android:paddingEnd="@dimen/dp_10"
+                tools:text="哈哈哈"
+                android:gravity="center_vertical|start"
+                android:visibility="gone"/>
+        </RelativeLayout>
     </LinearLayout>
 
     <View

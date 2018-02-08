@@ -6,6 +6,14 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
 
     <application
         android:fullBackupContent="false"
@@ -27,10 +35,16 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.MainActivity" android:configChanges="orientation|screenSize" />
-        <activity android:name=".ui.spotcheck.SpotCheckActivity" android:configChanges="orientation|screenSize" />
-        <activity android:name=".ui.upkeep.UpKeepActivity" android:configChanges="orientation|screenSize" />
+        <activity android:name=".ui.CheckListActivity" android:configChanges="orientation|screenSize" />
         <activity android:name=".ui.upkeep.UpKeepDetailActivity" android:configChanges="orientation|screenSize" />
+        <activity android:name=".ui.spotcheck.SpotCheckDetailActivity" android:configChanges="orientation|screenSize" />
         <service android:name=".service.UmsService" />
+
+        <activity
+            android:name=".Main2Activity"
+            android:screenOrientation="landscape"
+            android:label="@string/app_name"
+            android:exported="false"/>
     </application>
 
 </manifest>

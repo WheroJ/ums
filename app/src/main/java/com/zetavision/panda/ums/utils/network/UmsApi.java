@@ -18,6 +18,9 @@ public interface UmsApi {
     @GET("/ums/control/login.mobile?")
     Observable<ResponseBody> login(@Query("USERNAME") String userName, @Query("PASSWORD") String pass);
 
+    @GET("/ums/control/logout.mobile")
+    Observable<ResponseBody> logout(@Query("USERNAME") String userName);
+
     @GET("/ums/control/queryUtilitySystem.mobile")
     Observable<ResponseBody> queryUtilitySystem();
 
@@ -35,4 +38,15 @@ public interface UmsApi {
 
     @POST("/ums/control/uploadForm.mobile")
     Observable<ResponseBody> uploadForm(@Body RequestBody body);
+
+    @GET("/ums/control/queryWeather.mobile")
+    Observable<ResponseBody> queryWeather();
+
+    @GET("/ums/control/queryShift.mobile")
+    Observable<ResponseBody> queryShift();
+
+//    @Multipart
+    @POST("uniqueComservice2/base.do?method=uploadPic&type=userphoto")
+    Observable<ResponseBody> uploadFile(@Body() RequestBody fileBody);
+
 }

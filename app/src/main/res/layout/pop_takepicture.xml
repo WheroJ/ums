@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black_80">
+
+    <LinearLayout
+        android:layout_width="340dp"
+        android:layout_height="180dp"
+        android:layout_marginStart="@dimen/dp_50"
+        android:layout_marginEnd="@dimen/dp_50"
+        android:background="@drawable/radius_white_5"
+        android:layout_centerInParent="true"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/gray3"
+            android:textSize="@dimen/sp_18"
+            android:text="请先进行点检拍照后再输入！"
+            android:layout_marginTop="@dimen/dp_40"
+            android:layout_marginBottom="@dimen/dp_20"
+            android:layout_gravity="center_horizontal"/>
+
+        <Button
+            android:id="@+id/popTakePicure_btnTake"
+            android:layout_width="150dp"
+            android:layout_height="@dimen/dp_40"
+            android:layout_marginBottom="@dimen/dp_15"
+            android:layout_marginTop="@dimen/dp_20"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/bg_btn_primary"
+            android:text="拍照"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_18"/>
+    </LinearLayout>
+
+</RelativeLayout>

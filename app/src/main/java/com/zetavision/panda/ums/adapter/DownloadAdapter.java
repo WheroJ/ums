@@ -91,10 +91,10 @@ public class DownloadAdapter extends BaseAdapter {
 
         public ViewHolder() {
             statusMap = new HashMap<>();
-            statusMap.put(Constant.MAINT_FORM_STATUS_PLANNED, "已计划");
-            statusMap.put(Constant.MAINT_FORM_STATUS_INPROGRESS, "进行中");
-            statusMap.put(Constant.MAINT_FORM_STATUS_COMPLETED, "已完成");
-            statusMap.put(Constant.MAINT_FORM_STATUS_CLOSED, "已结束");
+            statusMap.put(Constant.FORM_STATUS_PLANNED, mContext.getString(R.string.status_planed));
+            statusMap.put(Constant.FORM_STATUS_INPROGRESS, mContext.getString(R.string.status_inprogress));
+            statusMap.put(Constant.FORM_STATUS_COMPLETED, mContext.getString(R.string.status_complete));
+            statusMap.put(Constant.FORM_STATUS_CLOSED, mContext.getString(R.string.status_closed));
         }
 
         public void setData(FormInfo data) {
@@ -112,28 +112,28 @@ public class DownloadAdapter extends BaseAdapter {
                     progressBar.setVisibility(View.GONE);
                     pauseBtn.setVisibility(View.GONE);
                     doneImg.setVisibility(View.VISIBLE);
-                    textInfo.setText("完成");
+                    textInfo.setText(R.string.common_finish);
                     break;
                 case FormInfo.FAIL:
                     downloadBtn.setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.GONE);
                     pauseBtn.setVisibility(View.GONE);
                     doneImg.setVisibility(View.GONE);
-                    textInfo.setText("失败");
+                    textInfo.setText(R.string.common_fail);
                     break;
                 case FormInfo.PROGRESS:
                     downloadBtn.setVisibility(View.GONE);
                     progressBar.setVisibility(View.VISIBLE);
                     pauseBtn.setVisibility(View.VISIBLE);
                     doneImg.setVisibility(View.GONE);
-                    textInfo.setText("暂停");
+                    textInfo.setText(R.string.common_pause);
                     break;
                 default:
                     downloadBtn.setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.GONE);
                     pauseBtn.setVisibility(View.GONE);
                     doneImg.setVisibility(View.GONE);
-                    textInfo.setText("下载");
+                    textInfo.setText(R.string.common_download);
             }
 
         }

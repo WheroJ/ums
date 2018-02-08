@@ -1,6 +1,8 @@
 package com.zetavision.panda.ums.model;
 
-public class ActionInfo {
+import org.litepal.crud.DataSupport;
+
+public class ActionInfo extends DataSupport{
     private String actionType;
     private String description;
 

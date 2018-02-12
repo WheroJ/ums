@@ -68,7 +68,7 @@ public class DownloadAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder)view.getTag();
         }
-        holder.setData(getItem(position));
+        holder.setData(getItem(position), position);
         return view;
     }
 
@@ -84,6 +84,7 @@ public class DownloadAdapter extends BaseAdapter {
         @BindView(R.id.pauseBtn) ImageView pauseBtn;
         @BindView(R.id.doneImg) ImageView doneImg;
         @BindView(R.id.textInfo) TextView textInfo;
+        @BindView(R.id.form_sort) TextView formSort;
 
         private FormInfo data;
 
@@ -97,7 +98,7 @@ public class DownloadAdapter extends BaseAdapter {
             statusMap.put(Constant.FORM_STATUS_CLOSED, mContext.getString(R.string.status_closed));
         }
 
-        public void setData(FormInfo data) {
+        public void setData(FormInfo data, int position) {
             this.data = data;
 
             form_number.setText(data.getFormCode());
@@ -105,6 +106,7 @@ public class DownloadAdapter extends BaseAdapter {
             line_or_eqp.setText(data.getLineOrEqp());
             desc.setText(data.getDesc());
             status.setText(statusMap.get(data.getStatus()));
+            formSort.setText(String.valueOf(position + 1));
 
             switch (data.getDownload_status()) {
                 case FormInfo.DONE:
@@ -153,7 +155,17 @@ public class DownloadAdapter extends BaseAdapter {
         }
 
         @OnClick(R.id.pauseBtn) void pause() {
-            System.out.println("pause");
+            if (fragment instanceof DownloadFragment) {
+                UmsService umsService = ((DownloadFragment) fragment).umsService;
+                if (umsService != null) {
+                    umsService.stopDownload(data.getFormId());
+                }
+            } else if (fragment instanceof UploadFragment) {
+                UmsService umsService = ((UploadFragment) fragment).umsService;
+                if (umsService != null) {
+                    umsService.stopUpload(data.getFormId());
+                }
+            }
         }
     }
 }

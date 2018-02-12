@@ -2,10 +2,9 @@ package com.zetavision.panda.ums.utils.network
 
 import android.app.Activity
 import android.support.v7.app.AppCompatActivity
+import com.zetavision.panda.ums.R
 import com.zetavision.panda.ums.model.Result
-import com.zetavision.panda.ums.utils.Constant
-import com.zetavision.panda.ums.utils.LoadingDialog
-import com.zetavision.panda.ums.utils.LogPrinter
+import com.zetavision.panda.ums.utils.*
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -52,6 +51,10 @@ object RxUtils {
         override fun onStart(d: Disposable) {
             progressDlg?.show(context?.fragmentManager, null)
         }
+
+        fun getDialogContext(): Activity? {
+            return context
+        }
     }
 
 
@@ -64,22 +67,25 @@ object RxUtils {
 
     fun acquireString(observable: Observable<ResponseBody>
                       , httpListener: HttpListener? = null) {
+        //访问接口需要有用户登录信息才能访问
         observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map { t: ResponseBody ->
                     val resultObject = JSONObject(t.string())
                     val result = Result()
-                    result.returnCode = resultObject.optInt("returnCode")
+                    result.returnCode = resultObject.optString("returnCode")
                     result.returnMessage = resultObject.optString("returnMessage")
                     result.returnData = resultObject.optString("returnData")
                     return@map result
                 }
                 .subscribe(object : Observer<Result> {
                     override fun onNext(result: Result) {
-                        if (result.returnCode == 0) {
-                            httpListener?.onResult(result)
-                        } else {
-                            httpListener?.onError(Throwable("error-"+result.returnCode + ":" + result.returnMessage))
+                        when (result.returnCode) {
+                            "0" -> httpListener?.onResult(result)
+                            "-99" -> {
+                                logout(httpListener)
+                            }
+                            else -> httpListener?.onError(Throwable("error-" + result.returnCode + ":" + result.returnMessage))
                         }
                     }
 
@@ -98,8 +104,23 @@ object RxUtils {
                 })
     }
 
+    private fun logout(httpListener: HttpListener?) {
+        ToastUtils.show(R.string.token_outdate)
+        if (httpListener is DialogListener) {
+            val activity = httpListener.getDialogContext()
+            if (activity == null) {
+                IntentUtils.goLogout(UIUtils.getContext())
+            } else {
+                IntentUtils.goLogout(activity)
+            }
+        } else {
+            IntentUtils.goLogout(UIUtils.getContext())
+        }
+    }
+
     fun cancelRequest() {
         compositeDisposable.dispose()
         compositeDisposable.clear()
+        compositeDisposable = CompositeDisposable()
     }
 }

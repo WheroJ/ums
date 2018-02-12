@@ -11,6 +11,8 @@ import java.util.*
 object UserUtils {
 
     private var advanceRemindDate = 3*60
+
+
     /**
      * 获取当前登录的用户
      */
@@ -69,7 +71,7 @@ object UserUtils {
             calendar.add(Calendar.SECOND, userEntity.expireIn - advanceRemindDate)
             println("outDateSaveTime=" + calendar.timeInMillis)
             println("currentSystemTime=" + System.currentTimeMillis())
-            calendar.timeInMillis >= System.currentTimeMillis()
+            calendar.timeInMillis <= System.currentTimeMillis()
         } else true
     }
 
@@ -85,7 +87,15 @@ object UserUtils {
             calendar.add(Calendar.SECOND, userEntity.expireIn)
             println("outDateSaveTime=" + calendar.timeInMillis)
             println("currentSystemTime=" + System.currentTimeMillis())
-            calendar.timeInMillis >= System.currentTimeMillis()
+            calendar.timeInMillis <= System.currentTimeMillis()
         } else true
+    }
+
+    /**
+     * 根据UserName获取用户
+     */
+    fun getUserByName(userName: String): User? {
+        val sql = "USERNAME = '$userName'"
+        return DataSupport.where(sql).findFirst(User::class.java)
     }
 }

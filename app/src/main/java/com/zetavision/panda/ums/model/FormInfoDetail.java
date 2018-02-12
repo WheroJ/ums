@@ -31,7 +31,7 @@ public class FormInfoDetail extends DataSupport{
     /**
      * 是否上传，默认为已经和服务器同步   1:还未同步   2:已经同步
      */
-    public int isUpload = SYNC;
+    public int isUpload = FormInfo.DONE;
 
     public FormInfo form;
     public ArrayList<FormItem> formItemList;

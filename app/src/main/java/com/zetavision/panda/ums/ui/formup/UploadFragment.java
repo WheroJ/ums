@@ -3,6 +3,7 @@ package com.zetavision.panda.ums.ui.formup;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -19,6 +20,7 @@ import com.zetavision.panda.ums.model.FormInfoDetail;
 import com.zetavision.panda.ums.model.Result;
 import com.zetavision.panda.ums.model.SystemInfo;
 import com.zetavision.panda.ums.service.UmsService;
+import com.zetavision.panda.ums.ui.MainActivity;
 import com.zetavision.panda.ums.utils.Constant;
 import com.zetavision.panda.ums.utils.IntentUtils;
 import com.zetavision.panda.ums.utils.LoadingDialog;
@@ -78,7 +80,7 @@ public class UploadFragment extends BaseFragment{
 
     @Override
     protected void init() {
-        getHeader().setTitle("表单下载");
+        getHeader().setTitle(getString(R.string.form_upload));
 
         systemSpinnerAdapter = new SystemSpinnerAdapter(getContext());
         actionSpinnerAdapter = new ActionSpinnerAdapter(getContext());
@@ -104,23 +106,49 @@ public class UploadFragment extends BaseFragment{
             ArrayList<FormInfoDetail> uploadList = new ArrayList<>();
             for (int i = 0; i < formInfoDetails.size(); i++) {
                 FormInfoDetail formInfoDetail = formInfoDetails.get(i);
-                if (formInfoDetail.utilitySystemId == systemInfo.getUtilitySystemId()
-                        && formInfoDetail.actionType.equals(actionInfo.getActionType())
-                        && formInfoDetail.isUpload == FormInfo.WAIT) {
-                    FormInfoDetail infoDetail = DataSupport.where("formId='" + formInfoDetail.formId + "'").findFirst(FormInfoDetail.class, true);
-                    if (infoDetail.form.getStatus().equals(Constant.FORM_STATUS_COMPLETED))
-                        uploadList.add(infoDetail);
+                if (systemInfo.getUtilitySystemId() == -1 && TextUtils.isEmpty(actionInfo.getActionType())) {
+                    if (formInfoDetail.isUpload == FormInfo.WAIT) {
+                        findFormInfoDetail(uploadList, formInfoDetail.formId);
+                    }
+                } else if (systemInfo.getUtilitySystemId() == -1) {
+                    if (formInfoDetail.actionType.equals(actionInfo.getActionType())
+                            && formInfoDetail.isUpload == FormInfo.WAIT) {
+                        findFormInfoDetail(uploadList, formInfoDetail.formId);
+                    }
+                } else if (TextUtils.isEmpty(actionInfo.getActionType())) {
+                    if (formInfoDetail.utilitySystemId == systemInfo.getUtilitySystemId()
+                            && formInfoDetail.isUpload == FormInfo.WAIT) {
+                        findFormInfoDetail(uploadList, formInfoDetail.formId);
+                    }
+                } else {
+                    if (formInfoDetail.utilitySystemId == systemInfo.getUtilitySystemId()
+                            && formInfoDetail.actionType.equals(actionInfo.getActionType())
+                            && formInfoDetail.isUpload == FormInfo.WAIT) {
+                        findFormInfoDetail(uploadList, formInfoDetail.formId);
+                    }
                 }
             }
 
-            umsService.setUploadList(uploadList);
+            if (uploadList.isEmpty()) {
+                ToastUtils.show(R.string.no_data);
+            } else {
+                umsService.setUploadList(uploadList);
+            }
         }
+    }
+
+    private void findFormInfoDetail(ArrayList<FormInfoDetail> uploadList, String formId) {
+        FormInfoDetail infoDetail = DataSupport.where("formId='" + formId + "'").findFirst(FormInfoDetail.class, true);
+        if (infoDetail.form.getStatus().equals(Constant.FORM_STATUS_COMPLETED))
+            uploadList.add(infoDetail);
     }
 
     private void getData() {
         if (!NetUtils.INSTANCE.isNetConnect(getContext())) {
             List<SystemInfo> systemInfos = DataSupport.findAll(SystemInfo.class);
+            addFirstSystemItem(systemInfos);
             List<ActionInfo> actions = DataSupport.findAll(ActionInfo.class);
+            addFirstActionItem(actions);
             systemSpinnerAdapter.notifyDataSetChanged(systemInfos);
             actionSpinnerAdapter.notifyDataSetChanged(actions);
         } else {
@@ -132,9 +160,9 @@ public class UploadFragment extends BaseFragment{
                 public Result apply(ResponseBody responseBody) throws Exception {
                     JSONObject resultObject = new JSONObject(responseBody.string());
                     Result result = new Result();
-                    result.setReturnCode(resultObject.getInt("returnCode"));
-                    result.setReturnMessage(resultObject.getString("returnMessage"));
-                    result.setReturnData(resultObject.getString("returnData"));
+                    result.setReturnCode(resultObject.optString("returnCode"));
+                    result.setReturnMessage(resultObject.optString("returnMessage"));
+                    result.setReturnData(resultObject.optString("returnData"));
                     return result;
                 }
             }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
@@ -144,9 +172,9 @@ public class UploadFragment extends BaseFragment{
                 public Result apply(ResponseBody responseBody) throws Exception {
                     JSONObject resultObject = new JSONObject(responseBody.string());
                     Result result = new Result();
-                    result.setReturnCode(resultObject.getInt("returnCode"));
-                    result.setReturnMessage(resultObject.getString("returnMessage"));
-                    result.setReturnData(resultObject.getString("returnData"));
+                    result.setReturnCode(resultObject.optString("returnCode"));
+                    result.setReturnMessage(resultObject.optString("returnMessage"));
+                    result.setReturnData(resultObject.optString("returnData"));
                     return result;
                 }
             }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
@@ -169,13 +197,16 @@ public class UploadFragment extends BaseFragment{
                             systemInfos.get(i).saveOrUpdate("utilitySystemId=" + systemInfos.get(i).getUtilitySystemId());
                         }
                     }
+                    addFirstSystemItem(systemInfos);
                     systemSpinnerAdapter.notifyDataSetChanged(systemInfos);
+
                     List<ActionInfo> actions = hashMap.get("Action").getList(ActionInfo.class);
                     if (actions != null) {
                         for (int i = 0; i < actions.size(); i++) {
                             actions.get(i).saveOrUpdate("actionType='" + actions.get(i).getActionType() + "'");
                         }
                     }
+                    addFirstActionItem(actions);
                     actionSpinnerAdapter.notifyDataSetChanged(actions);
                 }
             }, new Consumer<Throwable>() {
@@ -193,6 +224,21 @@ public class UploadFragment extends BaseFragment{
         }
     }
 
+    private void addFirstActionItem(List<ActionInfo> actions) {
+        ActionInfo actionInfo = new ActionInfo();
+        actionInfo.setActionType("");
+        actionInfo.setDescription(getString(R.string.all));
+        actions.add(0, actionInfo);
+    }
+
+    private void addFirstSystemItem(List<SystemInfo> systemInfos) {
+        SystemInfo systemInfo = new SystemInfo();
+        systemInfo.setUtilitySystemId(-1);
+        systemInfo.setUtilitySystemCode("");
+        systemInfo.setUtilitySystemName(getString(R.string.all));
+        systemInfos.add(0, systemInfo);
+    }
+
     public UmsService umsService;
     // service连接
     public ServiceConnection connection = new ServiceConnection() {
@@ -205,6 +251,9 @@ public class UploadFragment extends BaseFragment{
                 public void onUpdate(List<FormInfoDetail> list) {
                     if (list != null) {
                         uploadAdapter.notifyDataSetChanged(list);
+                        if (getActivity() instanceof MainActivity) {
+                            ((MainActivity) getActivity()).updateUnUploadCount();
+                        }
                         if (uploadAll) {
                             int count = 0, size = list.size();
                             for (int i = 0; i < size; i++) {

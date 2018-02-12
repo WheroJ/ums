@@ -26,13 +26,19 @@
         <TextView
             android:id="@+id/itemUpKeepParam_order"
             style="@style/list_header_text"
+            android:layout_weight="0.07"
+            android:text="@string/formdetail_sort"/>
+
+        <TextView
+            android:id="@+id/itemUpKeepParam_deviceName"
+            style="@style/list_header_text"
             android:layout_weight="0.1"
-            tools:text="@string/formdetail_sort"/>
+            tools:text="@string/device_name"/>
         <TextView
             android:id="@+id/itemUpKeepParam_code"
             style="@style/list_header_text"
             android:layout_weight="0.2"
-            tools:text="@string/formdetail_num"/>
+            tools:text="@string/spotcheck_item"/>
         <TextView
             android:id="@+id/itemUpKeepParam_lowerLimit"
             style="@style/list_header_text"
@@ -52,7 +58,7 @@
         <FrameLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.25">
+            android:layout_weight="0.18">
             <RelativeLayout
                 android:id="@+id/itemUpKeepParam_choose"
                 android:layout_width="match_parent"

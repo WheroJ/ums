@@ -1,4 +1,4 @@
-package com.zetavision.panda.ums.ui
+package com.zetavision.panda.ums.ui.upkeep
 
 import android.annotation.SuppressLint
 import android.support.v7.widget.LinearLayoutManager
@@ -6,11 +6,11 @@ import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
 import android.widget.TextView
 import com.zetavision.panda.ums.R
-import com.zetavision.panda.ums.adapter.CheckListAdapter
+import com.zetavision.panda.ums.adapter.UpKeepListAdapter
 import com.zetavision.panda.ums.base.BaseActivity
 import com.zetavision.panda.ums.model.FormInfo
-import com.zetavision.panda.ums.model.FormItem
 import com.zetavision.panda.ums.utils.Constant
+import com.zetavision.panda.ums.utils.IntentUtils
 import com.zetavision.panda.ums.utils.ToastUtils
 import org.litepal.crud.DataSupport
 
@@ -18,14 +18,14 @@ import org.litepal.crud.DataSupport
  * Created by wheroj on 2018/1/30.
  * @describeb
  */
-class CheckListActivity : BaseActivity() {
+class UpKeepListActivity : BaseActivity() {
 
     private var deviceName: String? = null
     private var actionType: String? = null
     private var recyclerView:RecyclerView? = null
 
     override fun getContentLayoutId(): Int {
-        return R.layout.activity_checklist
+        return R.layout.activity_upkeeplist
     }
 
     override fun init() {
@@ -75,41 +75,22 @@ class CheckListActivity : BaseActivity() {
         super.onResume()
 
         var formList = ArrayList<FormInfo>()
-        if (FormInfo.ACTION_TYPE_M == actionType) {
-            var sql = "equipmentcode = '$deviceName' and actionType='$actionType'"
-            val elements = DataSupport.where(sql).find(FormInfo::class.java)
-            elements.indices
-                    .filter {
-                        (Constant.FORM_STATUS_INPROGRESS == elements[it].status
-                                || Constant.FORM_STATUS_PLANNED == elements[it].status)
-                    }
-                    .mapTo(formList) { elements[it] }
-        } else {
-            var where =  "(equipmentCode = '$deviceName')"
-            val itemList = DataSupport.where(where).find(FormItem::class.java)
-
-            var formIds = ArrayList<String>()
-            for (i in itemList.indices) {
-                val formId = itemList[i].formId
-                if (!formIds.contains(formId)) {
-                    formIds.add(formId)
-                    val sql = "formId='$formId' and actionType='$actionType'"
-                    val formInfo = DataSupport.where(sql).findFirst(FormInfo::class.java)
-                    if (formInfo != null) {
-                        if (Constant.FORM_STATUS_INPROGRESS == formInfo.status
-                                || Constant.FORM_STATUS_PLANNED == formInfo.status) {
-                            formList.add(formInfo)
-                        }
-                    }
+        var sql = "equipmentcode = '$deviceName' and actionType='$actionType'"
+        val elements = DataSupport.where(sql).find(FormInfo::class.java)
+        elements.indices
+                .filter {
+                    (Constant.FORM_STATUS_INPROGRESS == elements[it].status
+                            || Constant.FORM_STATUS_PLANNED == elements[it].status)
                 }
-            }
-        }
+                .mapTo(formList) { elements[it] }
 
         if (formList.isEmpty()) {
             ToastUtils.show(R.string.no_data)
+        } else if (formList.size == 1) {
+            IntentUtils.goUpKeepDetail(`this`, formList[0].formId)
         } else {
             if (!TextUtils.isEmpty(actionType)) {
-                val adapter = CheckListAdapter(formList, actionType!!)
+                val adapter = UpKeepListAdapter(formList, actionType!!)
                 recyclerView?.adapter = adapter
             }
         }

@@ -55,7 +55,11 @@ public class FormItem extends DataSupport{
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof FormItem) {
-            return ((FormItem) obj).equipmentId != null && ((FormItem) obj).equipmentId.equals(equipmentId);
+            if (formItemId != null) {
+                return formItemId.equals(((FormItem) obj).formItemId);
+            } else if (equipmentId != null) {
+                return equipmentId.equals(((FormItem) obj).equipmentId);
+            } else return super.equals(obj);
         }
         return super.equals(obj);
     }

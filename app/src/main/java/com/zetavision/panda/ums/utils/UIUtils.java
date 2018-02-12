@@ -9,6 +9,7 @@ import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
+import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
@@ -29,8 +30,9 @@ public class UIUtils {
      */
     public static int getWinWidth() {
         WindowManager wm = (WindowManager) mContext.getSystemService(WINDOW_SERVICE);
-        int width = wm.getDefaultDisplay().getWidth();
-        return width;
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(outMetrics);
+        return outMetrics.widthPixels;
     }
 
     /**

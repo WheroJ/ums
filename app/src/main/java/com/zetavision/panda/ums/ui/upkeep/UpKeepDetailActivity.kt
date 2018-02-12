@@ -1,6 +1,7 @@
 package com.zetavision.panda.ums.ui.upkeep
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.graphics.drawable.Drawable
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -15,6 +16,7 @@ import com.zetavision.panda.ums.adapter.UpKeepDetailAdapter
 import com.zetavision.panda.ums.base.BaseActivity
 import com.zetavision.panda.ums.model.*
 import com.zetavision.panda.ums.utils.Constant
+import com.zetavision.panda.ums.utils.NetUtils
 import com.zetavision.panda.ums.utils.TimeUtils
 import com.zetavision.panda.ums.utils.ToastUtils
 import com.zetavision.panda.ums.utils.network.Client
@@ -54,7 +56,6 @@ class UpKeepDetailActivity: BaseActivity() {
     override fun init() {
         header.setLeftImage(R.mipmap.back)
         header.setRightText(getString(R.string.common_savedata), R.color.main_color)
-        header.setTitle(resources.getString(R.string.maint_fill))
 
         recyclerView = findViewById(R.id.activityUpKeepDetail_recyclerView)
         recyclerView?.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -65,49 +66,55 @@ class UpKeepDetailActivity: BaseActivity() {
 
     private fun loadData() {
 
-        Observable.zip(Client.getApi(UmsApi::class.java).queryWeather(), Client.getApi(UmsApi::class.java).queryShift()
-                , BiFunction<ResponseBody, ResponseBody, HashMap<String, Result>> { t1, t2 ->
-            var map = HashMap<String, Result>()
+        if(NetUtils.isNetConnect(`this`)) {
+            Observable.zip(Client.getApi(UmsApi::class.java).queryWeather(), Client.getApi(UmsApi::class.java).queryShift()
+                    , BiFunction<ResponseBody, ResponseBody, HashMap<String, Result>> { t1, t2 ->
+                var map = HashMap<String, Result>()
 
-            var resultObject = JSONObject(t1.string())
-            val resultWeather = Result()
-            resultWeather.returnCode = resultObject.getInt("returnCode")
-            resultWeather.returnMessage = resultObject.getString("returnMessage")
-            resultWeather.returnData = resultObject.getString("returnData")
-            map["weather"] = resultWeather
+                var resultObject = JSONObject(t1.string())
+                val resultWeather = Result()
+                resultWeather.returnCode = resultObject.optString("returnCode")
+                resultWeather.returnMessage = resultObject.optString("returnMessage")
+                resultWeather.returnData = resultObject.optString("returnData")
+                map["weather"] = resultWeather
 
-            resultObject = JSONObject(t2.string())
-            val resultShift = Result()
-            resultShift.returnCode = resultObject.getInt("returnCode")
-            resultShift.returnMessage = resultObject.getString("returnMessage")
-            resultShift.returnData = resultObject.getString("returnData")
-            map["shift"] = resultShift
+                resultObject = JSONObject(t2.string())
+                val resultShift = Result()
+                resultShift.returnCode = resultObject.optString("returnCode")
+                resultShift.returnMessage = resultObject.optString("returnMessage")
+                resultShift.returnData = resultObject.optString("returnData")
+                map["shift"] = resultShift
 
-            return@BiFunction map
-        }).subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe{
-            map ->
-            var weather = map["weather"]
-            weatherList = weather?.getList(Weather::class.java)
-            if (weatherList != null) {
-                for (i in weatherList!!.indices) {
-                    weatherList!![i].saveOrUpdate("weather='" + weatherList!![i].weather + "'")
-                }
-            }
+                return@BiFunction map
+            }).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { map ->
+                        var weather = map["weather"]
+                        weatherList = weather?.getList(Weather::class.java)
+                        if (weatherList != null) {
+                            for (i in weatherList!!.indices) {
+                                weatherList!![i].saveOrUpdate("weather='" + weatherList!![i].weather + "'")
+                            }
+                        }
 
-            var shift = map["shift"]
-            shiftList = shift?.getList(Shift::class.java)
-            if (shiftList != null) {
-                for (i in shiftList!!.indices) {
-                    shiftList!![i].saveOrUpdate("shift='" + shiftList!![i].shift + "'")
-                }
-            }
+                        var shift = map["shift"]
+                        shiftList = shift?.getList(Shift::class.java)
+                        if (shiftList != null) {
+                            for (i in shiftList!!.indices) {
+                                shiftList!![i].saveOrUpdate("shift='" + shiftList!![i].shift + "'")
+                            }
+                        }
 
+                        loadLocalData()
+                    }
+        } else {
+            weatherList = DataSupport.findAll(Weather::class.java)
+            shiftList = DataSupport.findAll(Shift::class.java)
             loadLocalData()
         }
     }
 
+    @SuppressLint("StringFormatInvalid")
     private fun loadLocalData() {
         formInfoDetail = DataSupport.where("(formId = '$maintFormId')").findFirst(FormInfoDetail::class.java, true)
         if(formInfoDetail == null) {
@@ -117,14 +124,18 @@ class UpKeepDetailActivity: BaseActivity() {
                     val formInfoDetails = result.getList(FormInfoDetail::class.java)
                     if (formInfoDetails != null && formInfoDetails.size > 0) {
                         formInfoDetail = formInfoDetails[0]
+                        header.setTitle(resources.getString(R.string.maint_fill, formInfoDetail!!.form.formCode))
                         initView(formInfoDetail)
                         initSpinner(formInfoDetail, weatherList, shiftList)
+                    } else {
+                        ToastUtils.show(R.string.data_exception)
                     }
                 }
             })
         } else {
             initView(formInfoDetail)
             initSpinner(formInfoDetail, weatherList, shiftList)
+            header.setTitle(resources.getString(R.string.maint_fill, formInfoDetail!!.form.formCode))
         }
     }
 
@@ -212,7 +223,7 @@ class UpKeepDetailActivity: BaseActivity() {
                 upKeepDetailAdapter!!.updateData(formInfoDetail.form.status)
             }
 
-            findViewById<TextView>(R.id.activityUpKeepDetail_deviceName).text = formInfoDetail.form.formCode
+            findViewById<TextView>(R.id.activityUpKeepDetail_deviceCode).text = formInfoDetail.form.equipmentCode
             findViewById<TextView>(R.id.activityUpKeepDetail_maintPeroid).text = formInfoDetail.form.maintPeriodName
             val etRemark = findViewById<EditText>(R.id.activityUpKeepDetail_etRemark)
             val tvRemark = findViewById<TextView>(R.id.activityUpKeepDetail_tvRemark)
@@ -222,6 +233,7 @@ class UpKeepDetailActivity: BaseActivity() {
                 header.setHiddenRight()
                 tvRemark.visibility = View.VISIBLE
                 etRemark.visibility = View.GONE
+                tvRemark.text = formInfoDetail.form.fillinRemarks
             } else {
                 header.setRightText(getString(R.string.common_savedata), R.color.main_color)
                 tvRemark.visibility = View.GONE
@@ -289,13 +301,17 @@ class UpKeepDetailActivity: BaseActivity() {
                         initView(formInfoDetail)
                     }
                     Constant.FORM_STATUS_INPROGRESS -> {
-                        formInfoDetail.form.status = Constant.FORM_STATUS_COMPLETED
-                        formInfoDetail.form.completeTime = System.currentTimeMillis() / 1000
-                        val user = DataSupport.findLast(User::class.java)
-                        if (user != null) formInfoDetail.form.completeUser = user.USERNAME
-                        formInfoDetail.form.saveOrUpdate("formId='${formInfoDetail.form.formId}'")
-                        formInfoDetail.saveOrUpdate("formId='${formInfoDetail.formId}'")
-                        initView(formInfoDetail)
+//                        formInfoDetail.form.saveOrUpdate("formId='${formInfoDetail.form.formId}'")
+//                        formInfoDetail.saveOrUpdate("formId='${formInfoDetail.formId}'")
+                        if (checkAndSaveData(true)) {
+                            formInfoDetail.form.status = Constant.FORM_STATUS_COMPLETED
+                            formInfoDetail.form.completeTime = System.currentTimeMillis() / 1000
+                            val user = DataSupport.findLast(User::class.java)
+                            if (user != null) formInfoDetail.form.completeUser = user.USERNAME
+                            formInfoDetail.form.saveOrUpdate("formId='${formInfoDetail.form.formId}'")
+                            formInfoDetail.saveOrUpdate("formId='${formInfoDetail.formId}'")
+                            initView(formInfoDetail)
+                        }
                     }
                 }
             }
@@ -307,40 +323,108 @@ class UpKeepDetailActivity: BaseActivity() {
     }
 
     override fun onLeftClick() {
-        finish()
-    }
-
-    override fun onRightTextClick() {
-        if (checkData(formInfoDetail)) {
-            if (saveData(formInfoDetail)) {
-                ToastUtils.show(R.string.save_success)
-                finish()
-            } else {
-                ToastUtils.show(R.string.save_fail)
-            }
+        if (formInfoDetail?.form?.status == Constant.FORM_STATUS_INPROGRESS) {
+            showDialog()
         }
     }
 
-    private fun checkData(formInfoDetail: FormInfoDetail?): Boolean {
+    private fun showDialog() {
+        var builder = AlertDialog.Builder(`this`)
+        builder.setMessage(R.string.notice_save_data)
+        builder.setNeutralButton(R.string.cancel) { dialog, which ->
+            builder.create().dismiss()
+        }
+
+        builder.setPositiveButton(R.string.back) { dialog, which ->
+            finish()
+        }
+        builder.create().show()
+    }
+
+    override fun onBackPressed() {
+        if (formInfoDetail?.form?.status == Constant.FORM_STATUS_INPROGRESS) {
+            showDialog()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    override fun onRightTextClick() {
+        checkAndSaveData(false)
+    }
+
+    /**
+     * 是否进行拍照检测
+     */
+    private fun checkAndSaveData(checkPhoto: Boolean):Boolean {
+        if (checkData(formInfoDetail, checkPhoto)) {
+            return if (saveData(formInfoDetail)) {
+                ToastUtils.show(R.string.save_success)
+                true
+            } else {
+                ToastUtils.show(R.string.save_fail)
+                false
+            }
+        }
+        return false
+    }
+
+    private fun checkData(formInfoDetail: FormInfoDetail?, checkDetail: Boolean): Boolean {
         if (formInfoDetail != null) {
             for (i in formInfoDetail.formItemList.indices) {
                 val formItem = formInfoDetail.formItemList[i]
                 if ("N" == formItem.valueType) {
                     try {
-                        val intValue = formItem.presetValue.toFloat()
-                        val lowerLimit = formItem.lowerLimit.toFloat()
-                        val upperLimit = formItem.upperLimit.toFloat()
-                        if (intValue < lowerLimit || intValue > upperLimit) {
-                            ToastUtils.show("序号" + (i + 1) + "设定的值超出了范围")
-                            return false
+                        if (TextUtils.isEmpty(formItem.presetValue)) {
+                            if (!checkDetail) {
+                                val findFirst = DataSupport.where("formItemId='${formItem.formItemId}'").findFirst(FormItem::class.java)
+                                if (findFirst != null) formItem.presetValue = findFirst.presetValue
+                            }
+                        } else {
+                            val intValue = formItem.presetValue.toFloat()
+//                            val lowerLimit = formItem.lowerLimit.toFloat()
+//                            val upperLimit = formItem.upperLimit.toFloat()
+//                            if (intValue < lowerLimit || intValue > upperLimit) {
+//                                ToastUtils.show("序号" + (i + 1) + "设定的值超出了范围")
+//                                return false
+//                            }
                         }
                     } catch (e: NumberFormatException) {
                         e.printStackTrace()
+                        ToastUtils.show("序号" + (i + 1) + "的取值必须是数字")
                         return false
                     } catch (e: NullPointerException) {
                         e.printStackTrace()
+                        ToastUtils.show("序号" + (i + 1) + "的取值不能为空")
                         return false
                     }
+                }
+
+                if (checkDetail && TextUtils.isEmpty(formItem.presetValue)) {
+                    ToastUtils.show("序号" + (i + 1) + "保养数据未录入，请录入数据！")
+                    return false
+                }
+
+                if (!TextUtils.isEmpty(formItem.remarks)) {
+                    if (formItem.remarks.length > Constant.MAX_LEN) {
+                        ToastUtils.show("序号" + (i + 1) + "的备注超过200的长度限制")
+                        return false
+                    }
+                }
+
+                if (checkDetail) {
+                    if ("Y" == formItem.photoMust) {
+                        if (formItem.photoPaths == null || formItem.photoPaths.isEmpty()) {
+                            ToastUtils.show("序号" + (i + 1) + "的必须进行现场拍照才能保存")
+                            return false
+                        }
+                    }
+                }
+            }
+            if (!TextUtils.isEmpty(formInfoDetail.form.fillinRemarks)) {
+                if (formInfoDetail.form.fillinRemarks.length > Constant.MAX_LEN) {
+                    ToastUtils.show("备注超过200的长度限制")
+                    return false
                 }
             }
             return true
@@ -354,7 +438,7 @@ class UpKeepDetailActivity: BaseActivity() {
             formInfoDetail.formItemList.indices
                     .map { formInfoDetail.formItemList[it] }
                     .forEach {
-                        isSuccessSave = it.saveOrUpdate("(formId='${it.formId}')")
+                        isSuccessSave = it.saveOrUpdate("(formItemId='${it.formItemId}')")
                         if (!isSuccessSave) return isSuccessSave
                     }
 

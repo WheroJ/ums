@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@color/light"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="30dp">
+        <TextView
+            android:id="@+id/label1"
+            style="@style/list_header_text"
+            android:text="@string/device_code"
+            android:layout_weight="0.15" />
+        <TextView
+            android:id="@+id/label7"
+            style="@style/list_header_text"
+            android:text="@string/device_description"
+            android:layout_weight="0.15" />
+        <TextView
+            android:id="@+id/label3"
+            style="@style/list_header_text"
+            android:text="@string/maintain_cycle"
+            android:layout_weight="0.15" />
+        <TextView
+            android:id="@+id/label4"
+            style="@style/list_header_text"
+            android:text="@string/maintain_cycle_desc"
+            android:layout_weight="0.15" />
+        <TextView
+            android:id="@+id/label2"
+            style="@style/list_header_text"
+            android:text="@string/form_number"
+            android:layout_weight="0.15" />
+        <TextView
+            android:id="@+id/label5"
+            style="@style/list_header_text"
+            android:text="@string/maintain_plan_date"
+            android:layout_weight="0.15" />
+        <TextView
+            android:id="@+id/label6"
+            style="@style/list_header_text"
+            android:text="@string/form_status"
+            android:layout_weight="0.1" />
+    </LinearLayout>
+    <View
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@color/light"
+        android:layout_width="match_parent"
+        android:layout_height="1dp" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:layout_marginBottom="8dp" />
+</LinearLayout>

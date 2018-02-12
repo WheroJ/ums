@@ -9,7 +9,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import com.zetavision.panda.ums.R
 import com.zetavision.panda.ums.utils.UIUtils
-import com.zetavision.panda.ums.utils.UserPreferences
+import com.zetavision.panda.ums.utils.UserUtils
 
 /**
  * Created by wheroj on 2018/1/31 10:13.
@@ -92,14 +92,13 @@ class ViewHeaderBar: RelativeLayout {
         mIvLogout.setImageResource(resId)
     }
 
-    fun setDefaultRight(text: String? = null) {
+    private fun setDefaultRight(text: String? = null) {
         if (!TextUtils.isEmpty(text)) {
             mTvUserName.text = text
         } else {
-            var preferences = UserPreferences()
-            val user = preferences.user
-            if (user != null) {
-                mTvUserName.text = (user.USERNAME)
+            var loginUser = UserUtils.getCurretnLoginUser()
+            if (loginUser != null) {
+                mTvUserName.text = (loginUser.USERNAME)
             }
         }
 

@@ -32,6 +32,8 @@ public class CommonSpinnerAdapter extends BaseAdapter implements SpinnerAdapter{
 
     @Override
     public int getCount() {
+        if (list == null)
+            return 0;
         return list.size();
     }
 

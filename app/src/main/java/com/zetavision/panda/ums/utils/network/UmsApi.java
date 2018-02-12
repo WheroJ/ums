@@ -16,7 +16,7 @@ import retrofit2.http.Query;
 public interface UmsApi {
 
     @GET("/ums/control/login.mobile?")
-    Observable<ResponseBody> login(@Query("USERNAME") String userName, @Query("PASSWORD") String pass);
+    Observable<ResponseBody> login(@Query("USERNAME") String userName, @Query("PASSWORD") String pass, @Query("USERLOCALE") String userLocale);
 
     @GET("/ums/control/logout.mobile")
     Observable<ResponseBody> logout(@Query("USERNAME") String userName);
@@ -39,14 +39,23 @@ public interface UmsApi {
     @POST("/ums/control/uploadForm.mobile")
     Observable<ResponseBody> uploadForm(@Body RequestBody body);
 
+    @POST("/ums/control/uploadForm.mobile")
+    Observable<ResponseBody> uploadForm(@Query("forms") String forms);
+
     @GET("/ums/control/queryWeather.mobile")
     Observable<ResponseBody> queryWeather();
 
     @GET("/ums/control/queryShift.mobile")
     Observable<ResponseBody> queryShift();
 
-//    @Multipart
-    @POST("uniqueComservice2/base.do?method=uploadPic&type=userphoto")
-    Observable<ResponseBody> uploadFile(@Body() RequestBody fileBody);
+    @POST("/ums/control/uploadFile.mobile")
+    Observable<ResponseBody> uploadFile(@Query("functionType") String functionType
+            , @Query("fileCategory") String fileCategory, @Body() RequestBody fileBody);
 
+    @POST("/ums/control/uploadFileBatch.mobile")
+    Observable<ResponseBody> uploadFileBatch(@Query("functionType") String functionType
+            , @Query("fileCategory") String fileCategory, @Body() RequestBody fileBody);
+
+    @GET("/ums/control/setUserLocale.mobile")
+    Observable<ResponseBody> setUserLocale(@Query("USERLOCALE") String userLocale);
 }

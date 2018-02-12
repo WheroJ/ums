@@ -3,6 +3,7 @@ package com.zetavision.panda.ums.ui.formdownload;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -15,13 +16,13 @@ import com.zetavision.panda.ums.adapter.SystemSpinnerAdapter;
 import com.zetavision.panda.ums.fragments.base.BaseFragment;
 import com.zetavision.panda.ums.model.ActionInfo;
 import com.zetavision.panda.ums.model.FormInfo;
-import com.zetavision.panda.ums.model.FormInfoDetail;
 import com.zetavision.panda.ums.model.Result;
 import com.zetavision.panda.ums.model.SystemInfo;
 import com.zetavision.panda.ums.service.UmsService;
 import com.zetavision.panda.ums.utils.IntentUtils;
 import com.zetavision.panda.ums.utils.LoadingDialog;
 import com.zetavision.panda.ums.utils.NetUtils;
+import com.zetavision.panda.ums.utils.TimeUtils;
 import com.zetavision.panda.ums.utils.ToastUtils;
 import com.zetavision.panda.ums.utils.network.Client;
 import com.zetavision.panda.ums.utils.network.RxUtils;
@@ -95,42 +96,114 @@ public class DownloadFragment extends BaseFragment {
 
     @OnClick(R.id.search)
     void onSearch() {
-        SystemInfo systemInfo = (SystemInfo) systemSpinner.getSelectedItem();
-        ActionInfo actionInfo = (ActionInfo) actionSpinner.getSelectedItem();
+        final SystemInfo systemInfo = (SystemInfo) systemSpinner.getSelectedItem();
+        final ActionInfo actionInfo = (ActionInfo) actionSpinner.getSelectedItem();
 
-        RxUtils.INSTANCE.acquireString(
-                Client.getApi(UmsApi.class)
-                .queryPlannedForm(systemInfo.getUtilitySystemId(), actionInfo.getActionType())
-                , new RxUtils.DialogListener() {
-            @Override
-            public void onResult(@NotNull Result result) {
-                if (umsService != null) {
-                    // 设置下载列表
-                    List<FormInfo> formInfos = result.getList(FormInfo.class);
+        if (!NetUtils.INSTANCE.isNetConnect(getContext())) {
+            List<FormInfo> downloadList = loadLocalFormInfos(systemInfo, actionInfo);
+            if (!downloadList.isEmpty()) {
+                umsService.setDownloadList(downloadList);
+            } else {
+                ToastUtils.show(R.string.no_local_data);
+            }
+        } else {
+            RxUtils.INSTANCE.acquireString(
+                    Client.getApi(UmsApi.class)
+                            .queryPlannedForm(systemInfo.getUtilitySystemId(), actionInfo.getActionType())
+                    , new RxUtils.DialogListener() {
+                        @Override
+                        public void onResult(@NotNull Result result) {
+                            if (umsService != null) {
+                                // 设置下载列表
+                                List<FormInfo> formInfos = result.getList(FormInfo.class);
 
-                    ArrayList<FormInfo> sortFormInfo = new ArrayList<>();
-                    if (formInfos != null && !formInfos.isEmpty()) {
-                        for (int i = 0; i < formInfos.size(); i++) {
-                            FormInfo formInfo = formInfos.get(i);
-                            List<FormInfoDetail> formInfoDetails = DataSupport.where("formId='" + formInfo.getFormId() + "'").find(FormInfoDetail.class);
-                            if (formInfoDetails != null && !formInfoDetails.isEmpty()) {
-                                formInfo.setDownload_status(FormInfo.DONE);
-                                sortFormInfo.add(formInfo);
-                            } else {
-                                sortFormInfo.add(0, formInfo);
+                                List<FormInfo> downloadList = loadLocalFormInfos(systemInfo, actionInfo);
+
+                                ArrayList<FormInfo> sortFormInfo = new ArrayList<>();
+
+                                int unDownCount = 0;
+                                if (formInfos != null && !formInfos.isEmpty()) {
+                                    for (int i = 0; i < formInfos.size(); i++) {
+                                        FormInfo formInfo = formInfos.get(i);
+                                        int indexOf = downloadList.indexOf(formInfo);
+                                        if (indexOf != -1) {
+                                            formInfo.setStatus(downloadList.get(indexOf).getStatus());
+                                            formInfo.setDownload_status(FormInfo.DONE);
+                                            sortFormInfo.add(formInfo);
+                                        } else {
+                                            sortFormInfo.add(unDownCount, formInfo);
+                                            unDownCount++;
+                                        }
+                                    }
+                                } else {
+                                    ToastUtils.show(R.string.no_data);
+                                }
+                                umsService.setDownloadList(sortFormInfo);
+                            }
+                        }
+
+                        @Override
+                        public void onError(@NotNull Throwable e) {
+                            super.onError(e);
+                            ToastUtils.show(e.getMessage());
+                            loadLocalFormInfos(systemInfo, actionInfo);
+                        }
+                    });
+        }
+    }
+
+    private  List<FormInfo> loadLocalFormInfos(SystemInfo systemInfo, ActionInfo actionInfo) {
+        if (systemInfo != null && actionInfo != null && umsService != null) {
+            String where = "(utilitySystemId='" + systemInfo.getUtilitySystemId() + "' and actionType='" + actionInfo.getActionType() + "') ";
+            List<FormInfo> formInfos = DataSupport.where(where).find(FormInfo.class);
+            return formInfos;
+        }
+        return null;
+    }
+
+    private void sortByPlanDate(ArrayList<FormInfo> sortFormInfo) {
+//        planDate倒序  formCode升序
+        int sortSize = 0;
+        for (int i = 0; i < sortFormInfo.size(); i++) {
+            if (sortFormInfo.get(i).getDownload_status() == FormInfo.DONE) {
+                sortSize = i + 1;
+                break;
+            }
+        }
+
+        for (int i = 0; i < sortSize - 1; i++) {
+            for (int j = i + 1; j < sortSize; j++) {
+                FormInfo formInfo = sortFormInfo.get(i);
+                FormInfo formInfoJ = sortFormInfo.get(j);
+                int second = TimeUtils.INSTANCE.getSecond(formInfo.getPlanDate());
+                int secondJ = TimeUtils.INSTANCE.getSecond(formInfoJ.getPlanDate());
+                if (second < secondJ) {
+                    sortFormInfo.set(i, formInfoJ);
+                    sortFormInfo.set(j, formInfo);
+                } else if (second == secondJ) {
+                    String formCode = formInfo.getFormCode();
+                    String formCodeJ = formInfoJ.getFormCode();
+                    if (!TextUtils.isEmpty(formCode) && !TextUtils.isEmpty(formCodeJ)) {
+                        int indexOf = formCode.lastIndexOf("-");
+                        int indexOfJ = formCodeJ.lastIndexOf("-");
+                        if (indexOf != -1 && indexOfJ != -1) {
+                            String sortCode = formCode.substring(indexOf + 1);
+                            String sortCodeJ = formCodeJ.substring(indexOfJ + 1);
+                            try {
+                                int sort = Integer.parseInt(sortCode);
+                                int sortJ = Integer.parseInt(sortCodeJ);
+                                if (sort > sortJ) {
+                                    sortFormInfo.set(i, formInfoJ);
+                                    sortFormInfo.set(j, formInfo);
+                                }
+                            } catch (NumberFormatException e) {
+                                e.printStackTrace();
                             }
                         }
                     }
-                    umsService.setDownloadList(sortFormInfo);
                 }
             }
-
-            @Override
-            public void onError(@NotNull Throwable e) {
-                super.onError(e);
-                ToastUtils.show(e.getMessage());
-            }
-        });
+        }
     }
 
     private void getData() {
@@ -148,9 +221,9 @@ public class DownloadFragment extends BaseFragment {
                 public Result apply(ResponseBody responseBody) throws Exception {
                     JSONObject resultObject = new JSONObject(responseBody.string());
                     Result result = new Result();
-                    result.setReturnCode(resultObject.getInt("returnCode"));
-                    result.setReturnMessage(resultObject.getString("returnMessage"));
-                    result.setReturnData(resultObject.getString("returnData"));
+                    result.setReturnCode(resultObject.optString("returnCode"));
+                    result.setReturnMessage(resultObject.optString("returnMessage"));
+                    result.setReturnData(resultObject.optString("returnData"));
                     return result;
                 }
             }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
@@ -160,9 +233,9 @@ public class DownloadFragment extends BaseFragment {
                 public Result apply(ResponseBody responseBody) throws Exception {
                     JSONObject resultObject = new JSONObject(responseBody.string());
                     Result result = new Result();
-                    result.setReturnCode(resultObject.getInt("returnCode"));
-                    result.setReturnMessage(resultObject.getString("returnMessage"));
-                    result.setReturnData(resultObject.getString("returnData"));
+                    result.setReturnCode(resultObject.optString("returnCode"));
+                    result.setReturnMessage(resultObject.optString("returnMessage"));
+                    result.setReturnData(resultObject.optString("returnData"));
                     return result;
                 }
             }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());

@@ -1,6 +1,7 @@
 package com.zetavision.panda.ums.ui.spotcheck
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -55,20 +56,17 @@ class SpotCheckDetailActivity: BaseActivity() {
 
     private var compositeDisposable = CompositeDisposable()
     override fun getContentLayoutId(): Int {
-        return R.layout.activity_upkeep_detail
+        return R.layout.activity_spotcheck_detail
     }
 
     @SuppressLint("WrongViewCast")
     override fun init() {
         header.setLeftImage(R.mipmap.back)
         header.setRightText(getString(R.string.common_savedata), R.color.main_color)
-        header.setTitle(resources.getString(R.string.spotcheck_fill))
 
-        findViewById<LinearLayout>(R.id.formDetail_upkeepTitle).visibility = View.GONE
-        findViewById<LinearLayout>(R.id.formDetail_spotTitle).visibility = View.VISIBLE
         findViewById<TextView>(R.id.activityFormDetail_tvRemark).text = getString(R.string.spotcheck_remark)
 
-        recyclerView = findViewById(R.id.activityUpKeepDetail_recyclerView)
+        recyclerView = findViewById(R.id.activitySpotCheckDetail_recyclerView)
         recyclerView?.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
         maintFormId = intent.getStringExtra("maintFormId")
@@ -77,6 +75,16 @@ class SpotCheckDetailActivity: BaseActivity() {
 
     private fun loadData() {
 
+        if (NetUtils.isNetConnect(`this`)) {
+            loadWeatherAndShiftInNet()
+        } else {
+            weatherList = DataSupport.findAll(Weather::class.java)
+            shiftList = DataSupport.findAll(Shift::class.java)
+            loadLocalData()
+        }
+    }
+
+    private fun loadWeatherAndShiftInNet() {
         Observable.zip(Client.getApi(UmsApi::class.java).queryWeather(), Client.getApi(UmsApi::class.java).queryShift()
                 , BiFunction<ResponseBody, ResponseBody, HashMap<String, Result>> { t1, t2 ->
             var map = HashMap<String, Result>()
@@ -84,16 +92,16 @@ class SpotCheckDetailActivity: BaseActivity() {
             try {
                 var resultObject = JSONObject(t1.string())
                 val resultWeather = Result()
-                resultWeather.returnCode = resultObject.getInt("returnCode")
-                resultWeather.returnMessage = resultObject.getString("returnMessage")
-                resultWeather.returnData = resultObject.getString("returnData")
+                resultWeather.returnCode = resultObject.optString("returnCode")
+                resultWeather.returnMessage = resultObject.optString("returnMessage")
+                resultWeather.returnData = resultObject.optString("returnData")
                 map["weather"] = resultWeather
 
                 resultObject = JSONObject(t2.string())
                 val resultShift = Result()
-                resultShift.returnCode = resultObject.getInt("returnCode")
-                resultShift.returnMessage = resultObject.getString("returnMessage")
-                resultShift.returnData = resultObject.getString("returnData")
+                resultShift.returnCode = resultObject.optString("returnCode")
+                resultShift.returnMessage = resultObject.optString("returnMessage")
+                resultShift.returnData = resultObject.optString("returnData")
                 map["shift"] = resultShift
             } catch (e: JSONException) {
                 e.printStackTrace()
@@ -102,8 +110,7 @@ class SpotCheckDetailActivity: BaseActivity() {
             return@BiFunction map
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe{
-                    map ->
+                .subscribe { map ->
                     var weather = map["weather"]
                     weatherList = weather?.getList(Weather::class.java)
                     if (weatherList != null) {
@@ -124,6 +131,7 @@ class SpotCheckDetailActivity: BaseActivity() {
                 }
     }
 
+    @SuppressLint("StringFormatInvalid")
     private fun loadLocalData() {
         formInfoDetail = DataSupport.where("(formId = '$maintFormId')").findFirst(FormInfoDetail::class.java, true)
         if(formInfoDetail == null) {
@@ -133,6 +141,7 @@ class SpotCheckDetailActivity: BaseActivity() {
                     val formInfoDetails = result.getList(FormInfoDetail::class.java)
                     if (formInfoDetails != null && formInfoDetails.size > 0) {
                         formInfoDetail = formInfoDetails[0]
+                        header.setTitle(resources.getString(R.string.spotcheck_fill, formInfoDetail!!.form.formCode))
                         initView(formInfoDetail)
                         initSpinner(formInfoDetail, weatherList, shiftList)
                     }
@@ -141,14 +150,15 @@ class SpotCheckDetailActivity: BaseActivity() {
         } else {
             initView(formInfoDetail)
             initSpinner(formInfoDetail, weatherList, shiftList)
+            header.setTitle(resources.getString(R.string.spotcheck_fill, formInfoDetail!!.form.formCode))
         }
     }
 
     private fun initSpinner(formInfoDetail: FormInfoDetail?, weatherList: List<Weather>?, shiftList: List<Shift>?) {
 
         if (formInfoDetail != null) {
-            val temperSpinner = findViewById<Spinner>(R.id.activityUpKeepDetail_temperSpinner)
-            val classesSpinner = findViewById<Spinner>(R.id.activityUpKeepDetail_classesSpinner)
+            val temperSpinner = findViewById<Spinner>(R.id.activitySpotCheckDetail_temperSpinner)
+            val classesSpinner = findViewById<Spinner>(R.id.activitySpotCheckDetail_classesSpinner)
 
             var weathers: List<String> = arrayListOf()
             if (weatherList != null) {
@@ -237,10 +247,10 @@ class SpotCheckDetailActivity: BaseActivity() {
                 spotCheckDetailAdapter!!.updateData(formInfoDetail.form.status)
             }
 
-            findViewById<TextView>(R.id.activityUpKeepDetail_deviceName).text = formInfoDetail.form.formCode
-            findViewById<TextView>(R.id.activityUpKeepDetail_maintPeroid).text = formInfoDetail.form.maintPeriodName
-            val etRemark = findViewById<EditText>(R.id.activityUpKeepDetail_etRemark)
-            val tvRemark = findViewById<TextView>(R.id.activityUpKeepDetail_tvRemark)
+            findViewById<TextView>(R.id.activitySpotCheckDetail_inspectRouteCode).text = formInfoDetail.form.inspectRouteCode
+            findViewById<TextView>(R.id.activitySpotCheckDetail_maintPeroid).text = formInfoDetail.form.inspectPeriodCode
+            val etRemark = findViewById<EditText>(R.id.activitySpotCheckDetail_etRemark)
+            val tvRemark = findViewById<TextView>(R.id.activitySpotCheckDetail_tvRemark)
             if (Constant.FORM_STATUS_CLOSED == formInfoDetail.form.status
                     || Constant.FORM_STATUS_COMPLETED == formInfoDetail.form.status
                     || Constant.FORM_STATUS_PLANNED == formInfoDetail.form.status) {
@@ -267,14 +277,16 @@ class SpotCheckDetailActivity: BaseActivity() {
                 })
             }
 
-            val btnMaintStatus = findViewById<Button>(R.id.activityUpKeepDetail_btnMaintStatus)
-            val tvMaintStatus = findViewById<TextView>(R.id.activityUpKeepDetail_tvMaintStatus)
-            val tvMaintStatusStr = findViewById<TextView>(R.id.activityUpKeepDetail_tvMaintStatusStr)
+            val btnMaintStatus = findViewById<Button>(R.id.activitySpotCheckDetail_btnMaintStatus)
+            val tvMaintStatus = findViewById<TextView>(R.id.activitySpotCheckDetail_tvMaintStatus)
+            val tvMaintStatusStr = findViewById<TextView>(R.id.activitySpotCheckDetail_tvMaintStatusStr)
             when (formInfoDetail.form.status) {
-                Constant.FORM_STATUS_CLOSED -> tvMaintStatusStr.text = "表单状态：已结束"
+//                "表单状态：已结束"
+                Constant.FORM_STATUS_CLOSED -> tvMaintStatusStr.text = getString(R.string.formstatus).plus(getString(R.string.formstatus_end))
                 Constant.FORM_STATUS_PLANNED -> {
-                    tvMaintStatusStr.text = "表单状态：已计划"
-                    btnMaintStatus.text = "保养开始"
+//                    "表单状态：已计划"
+                    tvMaintStatusStr.text = getString(R.string.formstatus).plus(getString(R.string.formstatus_planed))
+                    btnMaintStatus.text = resources.getString(R.string.spotcheck_start)
                     var drawable: Drawable = resources.getDrawable(R.mipmap.start)
 //                drawable.bounds = Rect(0, 0, drawable.minimumWidth, drawable.minimumHeight)
                     btnMaintStatus.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
@@ -285,19 +297,19 @@ class SpotCheckDetailActivity: BaseActivity() {
                             .subscribeOn(Schedulers.io())
                             .subscribe {
                                 val useTime = TimeUtils.getUseTime(formInfoDetail.form.startTime)
-                                tvMaintStatusStr.text = "表单状态：已进行".plus(useTime)
+                                tvMaintStatusStr.text = getString(R.string.formstatus).plus(getString(R.string.formstatus_ing)).plus(useTime)
                             })
 
-                    btnMaintStatus.text = "保养完成"
+                    btnMaintStatus.text = resources.getString(R.string.spotcheck_finish)
                     var drawable: Drawable = resources.getDrawable(R.mipmap.done)
-//                drawable.bounds = Rect(0, 0, drawable.minimumWidth, drawable.minimumHeight)
                     btnMaintStatus.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
                 }
                 Constant.FORM_STATUS_COMPLETED -> {
                     compositeDisposable.dispose()
                     compositeDisposable.clear()
 
-                    tvMaintStatusStr.text = "表单状态：已完成"
+//                    "表单状态：已完成"
+                    tvMaintStatusStr.text = getString(R.string.formstatus).plus(getString(R.string.formstatus_finish))
                     btnMaintStatus.visibility = View.GONE
                     tvMaintStatus.visibility = View.VISIBLE
                 }
@@ -314,13 +326,17 @@ class SpotCheckDetailActivity: BaseActivity() {
                         initView(formInfoDetail)
                     }
                     Constant.FORM_STATUS_INPROGRESS -> {
-                        formInfoDetail.form.status = Constant.FORM_STATUS_COMPLETED
-                        formInfoDetail.form.completeTime = System.currentTimeMillis() / 1000
-                        val user = DataSupport.findLast(User::class.java)
-                        if (user != null) formInfoDetail.form.completeUser = user.USERNAME
-                        formInfoDetail.form.saveOrUpdate("formId='${formInfoDetail.form.formId}'")
-                        formInfoDetail.saveOrUpdate("formId='${formInfoDetail.formId}'")
-                        initView(formInfoDetail)
+//                        formInfoDetail.form.saveOrUpdate("formId='${formInfoDetail.form.formId}'")
+//                        formInfoDetail.saveOrUpdate("formId='${formInfoDetail.formId}'")
+                        if (checkAndSaveData(true)) {
+                            formInfoDetail.form.status = Constant.FORM_STATUS_COMPLETED
+                            formInfoDetail.form.completeTime = System.currentTimeMillis() / 1000
+                            val user = DataSupport.findLast(User::class.java)
+                            if (user != null) formInfoDetail.form.completeUser = user.USERNAME
+                            formInfoDetail.form.saveOrUpdate("formId='${formInfoDetail.form.formId}'")
+//                            formInfoDetail.saveOrUpdate("formId='${formInfoDetail.formId}'")
+                            initView(formInfoDetail)
+                        }
                     }
                 }
             }
@@ -356,40 +372,108 @@ class SpotCheckDetailActivity: BaseActivity() {
     }
 
     override fun onLeftClick() {
-        finish()
-    }
-
-    override fun onRightTextClick() {
-        if (checkData(formInfoDetail)) {
-            if (saveData(formInfoDetail)) {
-                ToastUtils.show(R.string.save_success)
-                finish()
-            } else {
-                ToastUtils.show(R.string.save_fail)
-            }
+        if (formInfoDetail?.form?.status == Constant.FORM_STATUS_INPROGRESS) {
+            showDialog()
         }
     }
 
-    private fun checkData(formInfoDetail: FormInfoDetail?): Boolean {
+    private fun showDialog() {
+        var builder = AlertDialog.Builder(`this`)
+        builder.setMessage(R.string.notice_save_data)
+        builder.setNeutralButton(R.string.cancel) { dialog, which ->
+            builder.create().dismiss()
+        }
+
+        builder.setPositiveButton(R.string.back) { dialog, which ->
+            finish()
+        }
+        builder.create().show()
+    }
+
+    override fun onBackPressed() {
+        if (formInfoDetail?.form?.status == Constant.FORM_STATUS_INPROGRESS) {
+            showDialog()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    override fun onRightTextClick() {
+        checkAndSaveData(false)
+    }
+
+    /**
+     * 是否进行拍照检测
+     */
+    private fun checkAndSaveData(checkPhoto: Boolean):Boolean {
+        if (checkData(formInfoDetail, checkPhoto)) {
+            return if (saveData(formInfoDetail)) {
+                ToastUtils.show(R.string.save_success)
+//                finish()
+                true
+            } else {
+                ToastUtils.show(R.string.save_fail)
+                false
+            }
+        }
+        return false
+    }
+
+    private fun checkData(formInfoDetail: FormInfoDetail?, checkDetail: Boolean): Boolean {
         if (formInfoDetail != null) {
             for (i in formInfoDetail.formItemList.indices) {
                 val formItem = formInfoDetail.formItemList[i]
                 if ("N" == formItem.valueType) {
                     try {
-                        val intValue = formItem.presetValue.toFloat()
-                        val lowerLimit = formItem.lowerLimit.toFloat()
-                        val upperLimit = formItem.upperLimit.toFloat()
-                        if (intValue < lowerLimit || intValue > upperLimit) {
-                            ToastUtils.show("序号" + (i + 1) + "设定的值超出了范围")
-                            return false
+                        if (TextUtils.isEmpty(formItem.presetValue)) {
+                            if (!checkDetail) {
+                                val findFirst = DataSupport.where("formItemId='${formItem.formItemId}'").findFirst(FormItem::class.java)
+                                if (findFirst != null) formItem.presetValue = findFirst.presetValue
+                            }
+                        } else {
+                            val intValue = formItem.presetValue.toFloat()
+//                            val lowerLimit = formItem.lowerLimit.toFloat()
+//                            val upperLimit = formItem.upperLimit.toFloat()
+//                            if (intValue < lowerLimit || intValue > upperLimit) {
+//                                ToastUtils.show("序号" + (i + 1) + "设定的值超出了范围")
+//                                return false
+//                            }
                         }
                     } catch (e: NumberFormatException) {
                         e.printStackTrace()
+                        ToastUtils.show("序号" + (i + 1) + "的取值必须是数字")
                         return false
                     } catch (e: NullPointerException) {
                         e.printStackTrace()
+                        ToastUtils.show("序号" + (i + 1) + "的取值不能为空")
                         return false
                     }
+                }
+                if (checkDetail && TextUtils.isEmpty(formItem.presetValue)) {
+                    ToastUtils.show("序号" + (i + 1) + "保养数据未录入，请录入数据！")
+                    return false
+                }
+
+                if (!TextUtils.isEmpty(formItem.remarks)) {
+                    if (formItem.remarks.length > Constant.MAX_LEN) {
+                        ToastUtils.show("序号" + (i + 1) + "的备注超过200的长度限制")
+                        return false
+                    }
+                }
+
+                if (checkDetail) {
+                    if ("Y" == formItem.photoMust) {
+                        if (formItem.photoPaths == null || formItem.photoPaths.isEmpty()) {
+                            ToastUtils.show("序号" + (i + 1) + "的必须进行现场拍照才能保存")
+                            return false
+                        }
+                    }
+                }
+            }
+            if (!TextUtils.isEmpty(formInfoDetail.form.fillinRemarks)) {
+                if (formInfoDetail.form.fillinRemarks.length > Constant.MAX_LEN) {
+                    ToastUtils.show("备注超过200的长度限制")
+                    return false
                 }
             }
             return true
@@ -403,7 +487,7 @@ class SpotCheckDetailActivity: BaseActivity() {
             formInfoDetail.formItemList.indices
                     .map { formInfoDetail.formItemList[it] }
                     .forEach {
-                        isSuccessSave = it.saveOrUpdate("(formId='${it.formId}')")
+                        isSuccessSave = it.saveOrUpdate("(formItemId='${it.formItemId}')")
                         if (!isSuccessSave) return isSuccessSave
                     }
 
@@ -436,15 +520,15 @@ class SpotCheckDetailActivity: BaseActivity() {
                         drawTime(mPhotoPath)
                         formItemList[position].photoPaths.add(Constant.TAKE_PHOTO.plus(";").plus(mPhotoPath))
 
-                        UploadUtils.upload(object : RxUtils.DialogListener(`this`) {
-                            override fun onResult(result: Result) {
-                                ToastUtils.show("上传成功")
-                                if (formItemList[position].photoUrls == null)
-                                    formItemList[position].photoUrls = ArrayList()
-                                formItemList[position].photoUrls.add(result.returnData)
-                                spotCheckDetailAdapter?.notifyDataSetChanged()
-                            }
-                        }, mPhotoPath)
+//                        UploadUtils.upload(object : RxUtils.DialogListener(`this`) {
+//                            override fun onResult(result: Result) {
+//                                ToastUtils.show("上传成功")
+//                                if (formItemList[position].photoUrls == null)
+//                                    formItemList[position].photoUrls = ArrayList()
+//                                formItemList[position].photoUrls.add(result.returnData)
+//                                spotCheckDetailAdapter?.notifyDataSetChanged()
+//                            }
+//                        }, mPhotoPath)
                     }
                 }
             }
@@ -454,7 +538,7 @@ class SpotCheckDetailActivity: BaseActivity() {
     /**
      * 右下角绘制日期
      */
-    fun drawTime(photoPath: String) {
+    private fun drawTime(photoPath: String) {
         val bitmap = BitmapUtils.decodeSampledBitmapFromResource(photoPath, UploadUtils.reqWidth, UploadUtils.reqHeight)
         var canvas = Canvas(bitmap)
         val currentTime: String = TimeUtils.getCurrentTime()
@@ -466,7 +550,7 @@ class SpotCheckDetailActivity: BaseActivity() {
         paint.color = resources.getColor(R.color.white)
 
         val bounds = Rect()
-        paint.getTextBounds(currentTime, 0, currentTime?.length, bounds)
+        paint.getTextBounds(currentTime, 0, currentTime.length, bounds)
         val textHeight = paint.fontMetrics.bottom - paint.fontMetrics.top
         val textWidth = bounds.right - bounds.left
 

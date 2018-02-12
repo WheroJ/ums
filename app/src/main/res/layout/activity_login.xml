@@ -32,11 +32,7 @@
                 android:textColor="@color/white"
                 android:layout_width="match_parent"
                 android:layout_height="40dp" />
-            <!--<ImageView-->
-                <!--android:src="@mipmap/logo_login"-->
-                <!--android:scaleType="fitCenter"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content" />-->
+
             <EditText
                 android:id="@+id/userName"
                 android:hint="@string/input_username"
@@ -61,6 +57,7 @@
                 android:textSize="16sp"
                 android:background="@drawable/bg_login_edit_text"
                 android:layout_height="40dp" />
+
             <Button
                 android:id="@+id/login"
                 android:background="@drawable/bg_btn_primary_light"
@@ -69,6 +66,43 @@
                 android:layout_marginTop="30dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
+
+            <RadioGroup
+                android:id="@+id/activityLogin_radioGroup"
+                android:layout_width="match_parent"
+                android:layout_marginTop="@dimen/dp_20"
+                android:layout_height="@dimen/dp_40"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/activityLogin_rbCh"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/dp_15"
+                    android:layout_marginEnd="@dimen/dp_15"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:background="@color/transparent"
+                    android:button="@drawable/radiobutton"
+                    android:checked="true"
+                    android:text="中文"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_18"/>
+
+                <RadioButton
+                    android:id="@+id/activityLogin_rbEn"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/dp_15"
+                    android:layout_marginEnd="@dimen/dp_15"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:background="@color/transparent"
+                    android:button="@drawable/radiobutton"
+                    android:text="English"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_18"/>
+            </RadioGroup>
         </LinearLayout>
     </RelativeLayout>
 

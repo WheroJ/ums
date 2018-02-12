@@ -15,6 +15,7 @@ import com.zetavision.panda.ums.R;
 import com.zetavision.panda.ums.fragments.base.BaseFragment;
 import com.zetavision.panda.ums.model.Result;
 import com.zetavision.panda.ums.model.User;
+import com.zetavision.panda.ums.ui.LoginActivity;
 import com.zetavision.panda.ums.utils.ActivityCollector;
 import com.zetavision.panda.ums.utils.Constant;
 import com.zetavision.panda.ums.utils.IntentUtils;
@@ -192,6 +193,13 @@ abstract public class BaseActivity extends AppCompatActivity {
         Configuration conf = res.getConfiguration();
         conf.locale = myLocale;
         res.updateConfiguration(conf, dm);
+        if (!(this instanceof LoginActivity)) {
+            if (preferences.getLanguage().equals(Locale.CHINESE.getLanguage())) {//中文
+                RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class).setUserLocale(Constant.LANG_CHINA), null);
+            } else {//英文
+                RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class).setUserLocale(Constant.LANG_CHINA), null);
+            }
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -225,6 +233,12 @@ abstract public class BaseActivity extends AppCompatActivity {
     public void onStop() {
         EventBus.getDefault().unregister(this);
         super.onStop();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        RxUtils.INSTANCE.cancelRequest();
     }
 
     @Override

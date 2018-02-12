@@ -8,15 +8,15 @@ import java.util.List;
 
 public class Result {
 
-    private int returnCode;
+    private String returnCode;
     private String returnMessage;
     private String returnData;
 
-    public int getReturnCode() {
+    public String getReturnCode() {
         return returnCode;
     }
 
-    public void setReturnCode(int returnCode) {
+    public void setReturnCode(String returnCode) {
         this.returnCode = returnCode;
     }
 

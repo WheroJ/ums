@@ -108,13 +108,18 @@
         android:layout_width="match_parent"
         android:layout_height="30dp">
         <TextView
+            android:id="@+id/form_sort"
+            style="@style/list_header_text"
+            android:layout_weight="0.1"
+            android:text="序号"/>
+        <TextView
             style="@style/list_header_text"
             android:text="@string/form_number"
             android:layout_weight="0.2" />
         <TextView
             style="@style/list_header_text"
             android:text="@string/category"
-            android:layout_weight="0.15" />
+            android:layout_weight="0.1" />
         <TextView
             style="@style/list_header_text"
             android:text="@string/line_or_eqp"
@@ -126,7 +131,7 @@
         <TextView
             style="@style/list_header_text"
             android:text="@string/form_status"
-            android:layout_weight="0.15" />
+            android:layout_weight="0.1" />
         <TextView
             style="@style/list_header_text"
             android:text="@string/operation"

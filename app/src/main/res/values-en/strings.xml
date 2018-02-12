@@ -25,4 +25,5 @@
     <string name="maintain_cycle">Maintain cycle</string>
     <string name="maintain_cycle_desc">Description</string>
     <string name="maintain_plan_date">Maintain plan date</string>
+    <string name="language">Language：</string>
 </resources>

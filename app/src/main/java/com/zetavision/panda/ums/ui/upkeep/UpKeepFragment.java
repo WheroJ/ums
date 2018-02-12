@@ -64,6 +64,6 @@ public class UpKeepFragment extends CaptureFragment {
 
     @Override
     protected void init() {
-        getHeader().setTitle("保养扫描");
+        getHeader().setTitle(getString(R.string.maint_scan));
     }
 }

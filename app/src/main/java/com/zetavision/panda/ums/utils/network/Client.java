@@ -3,10 +3,13 @@ package com.zetavision.panda.ums.utils.network;
 import com.zetavision.panda.ums.utils.Constant;
 import com.zetavision.panda.ums.utils.UserPreferences;
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -45,6 +48,26 @@ public class Client {
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .addInterceptor(logging)
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public Response intercept(Chain chain) throws IOException {
+//                        try {
+                            return chain.proceed(chain.request());
+//                        } catch (ConnectException e) {
+//                            e.getMessage();
+//                            if (Constant.NET_TYPE != 2) {
+//                                Constant.NET_TYPE = 2;
+//                                Constant.setBaseUrlByType();
+//                                Request request = chain.request();
+//                                String apiBaseUrl = Constant.API_BASE_URL;
+//                                HttpUrl url = request.url().newBuilder().host(apiBaseUrl).build();
+//                                request.newBuilder().url(url);
+//                                return chain.proceed(request);
+//                            }
+//                            return null;
+//                        }
+                    }
+                })
                 .addInterceptor(new AddCookiesInterceptor(lang))
                 .addInterceptor(new ReceivedCookiesInterceptor())
                 .build();

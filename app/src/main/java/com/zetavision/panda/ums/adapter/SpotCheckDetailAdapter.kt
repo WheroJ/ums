@@ -25,6 +25,7 @@ class SpotCheckDetailAdapter(data: List<FormItem>, var status: String, val conte
         if (item != null) {
             helper?.setText(R.id.itemUpKeepParam_order, (data.indexOf(item) + 1).toString())
                     ?.setText(R.id.itemUpKeepParam_code, item.basicActionName)
+                    ?.setText(R.id.itemUpKeepParam_deviceName, item.equipmentCode)
                     ?.setText(R.id.itemUpKeepParam_unit, item.unit)
 
             var tvValue = helper?.getView<TextView>(R.id.itemUpKeepParam_tvValue)
@@ -48,8 +49,21 @@ class SpotCheckDetailAdapter(data: List<FormItem>, var status: String, val conte
                 Constant.FORM_STATUS_COMPLETED,
                     Constant.FORM_STATUS_CLOSED,
                     Constant.FORM_STATUS_PLANNED -> {
-                    tvValue?.text = item.presetValue.toString()
+                    if("B" == item.valueType) {
+                        val list = item.optionValues.split("|")
+                        val valueList = item.optionValuesDescription.split("|")
+                        val indexOf = list.indexOf(item.presetValue)
+
+                        if(indexOf in valueList.indices) {
+                            tvValue?.text = valueList[indexOf]
+                        }
+                    } else {
+                        tvValue?.text = item.presetValue.toString()
+                    }
                     tvRemark?.text = item.remarks
+                    if (!TextUtils.isEmpty(item.presetValue)) {
+                        etInput?.setText(item.presetValue)
+                    }
                     tvValue?.visibility = View.VISIBLE
                     tvRemark?.visibility = View.VISIBLE
                     rlInput?.visibility = View.GONE
@@ -114,61 +128,75 @@ class SpotCheckDetailAdapter(data: List<FormItem>, var status: String, val conte
                         }
 
                         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                            when(status) {
-                                Constant.FORM_STATUS_INPROGRESS ->
-                                    //强制拍照检测
-                                    if (item.photoMust == FormItem.TYPE_Y || item.valueType == "N") {
-                                        if (item.photoUrls == null || item.photoUrls.isEmpty()) {
-                                            if (listener != null) {
-                                                listener?.takePicture(data.indexOf(item))
-                                                UIUtils.closeKeyboard(context)
-                                                etInput.clearFocus()
-                                            }
-                                        }
-                                    }
-                            }
+
                         }
 
                         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                            if ((item.presetValue != null && item.presetValue != s.toString())
+                                    || (item.presetValue == null && s != null)) {
+                                when (status) {
+                                    Constant.FORM_STATUS_INPROGRESS ->
+                                        //强制拍照检测
+                                        if (item.photoMust == FormItem.TYPE_Y) {
+                                            if (item.photoPaths == null || item.photoPaths.isEmpty()) {
+                                                if (listener != null) {
+                                                    listener?.takePicture(data.indexOf(item))
+                                                    UIUtils.closeKeyboard(context)
+                                                    etInput.clearFocus()
+                                                }
+                                            }
+                                        }
+                                }
+                            }
+
                             if ("T" == item.valueType) {
                                 item.presetValue = s.toString()
                             } else {
                                 try {
-                                    val intValue = s.toString().toFloat()
-                                    val lowerLimit = item.lowerLimit.toFloat()
-                                    val upperLimit = item.upperLimit.toFloat()
-                                    when {
-                                        intValue < lowerLimit -> {
-                                            inputNotice?.visibility = View.VISIBLE
-                                            inputNoticeImg?.visibility = View.VISIBLE
-                                            inputNotice?.text = mContext.resources.getString(R.string.too_lower)
-                                            etInput.setBackgroundResource(R.drawable.radius_red_5)
-                                            item.presetValue = s.toString()
+                                    if (!TextUtils.isEmpty(s)) {
+                                        val intValue = s.toString().toFloat()
+                                        val lowerLimit = item.lowerLimit.toFloat()
+                                        val upperLimit = item.upperLimit.toFloat()
+                                        when {
+                                            intValue < lowerLimit -> {
+                                                inputNotice?.visibility = View.VISIBLE
+                                                inputNoticeImg?.visibility = View.VISIBLE
+                                                inputNotice?.text = mContext.resources.getString(R.string.too_lower)
+                                                etInput.setBackgroundResource(R.drawable.radius_red_5)
+                                                item.presetValue = s.toString()
+                                            }
+                                            intValue > upperLimit -> {
+                                                inputNotice?.visibility = View.VISIBLE
+                                                inputNoticeImg?.visibility = View.VISIBLE
+                                                inputNotice?.text = mContext.resources.getString(R.string.too_upper)
+                                                etInput.setBackgroundResource(R.drawable.radius_red_5)
+                                                item.presetValue = s.toString()
+                                            }
+                                            else -> {
+                                                inputNotice?.visibility = View.GONE
+                                                inputNoticeImg?.visibility = View.INVISIBLE
+                                                etInput.setBackgroundResource(R.drawable.radius_blue_5)
+                                                item.presetValue = s.toString()
+                                            }
                                         }
-                                        intValue > upperLimit -> {
-                                            inputNotice?.visibility = View.VISIBLE
-                                            inputNoticeImg?.visibility = View.VISIBLE
-                                            inputNotice?.text = mContext.resources.getString(R.string.too_upper)
-                                            etInput.setBackgroundResource(R.drawable.radius_red_5)
-                                            item.presetValue = s.toString()
-                                        }
-                                        else -> {
-                                            inputNotice?.visibility = View.GONE
-                                            inputNoticeImg?.visibility = View.INVISIBLE
-                                            etInput.setBackgroundResource(R.drawable.radius_blue_5)
-                                            item.presetValue = s.toString()
-                                        }
+                                    } else {
+                                        inputNotice?.visibility = View.GONE
+                                        inputNoticeImg?.visibility = View.INVISIBLE
+                                        etInput.setBackgroundResource(R.drawable.radius_blue_5)
+                                        item.presetValue = s.toString()
                                     }
                                 } catch (e: NumberFormatException) {
                                     e.printStackTrace()
+                                    item.presetValue = s.toString()
                                 } catch (e: NullPointerException) {
+                                    item.presetValue = ""
                                     e.printStackTrace()
                                 }
                             }
                         }
                     })
                 }
-                "O", "B" -> {
+                "O" -> {
                     val list = item.optionValues.split("|")
                     val spinnerAdapter = CommonSpinnerAdapter(mContext)
                     spinner?.adapter = spinnerAdapter
@@ -189,6 +217,35 @@ class SpotCheckDetailAdapter(data: List<FormItem>, var status: String, val conte
                     spinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                             item.presetValue = list[position]
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>) {
+
+                        }
+                    }
+                }
+                "B" -> {
+                    val valueList = item.optionValues.split("|")
+                    val list = item.optionValuesDescription.split("|")
+                    val spinnerAdapter = CommonSpinnerAdapter(mContext)
+                    spinner?.adapter = spinnerAdapter
+                    spinnerAdapter.notifyDataSetChanged(list)
+                    if (!TextUtils.isEmpty(item.presetValue)) {
+                        val indexOf = valueList.indexOf(item.presetValue)
+                        if (indexOf in list.indices)
+                            spinner?.setSelection(indexOf)
+                        else {
+                            if (list.isNotEmpty())
+                                spinner?.setSelection(0)
+                        }
+                    } else {
+                        if (list.isNotEmpty())
+                            spinner?.setSelection(0)
+                    }
+
+                    spinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                            item.presetValue = valueList[position]
                         }
 
                         override fun onNothingSelected(parent: AdapterView<*>) {

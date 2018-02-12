@@ -11,15 +11,19 @@
         android:paddingEnd="@dimen/dp_10"
         android:layout_width="match_parent"
         android:layout_height="30dp"
-        android:visibility="gone">
+        android:visibility="visible">
         <TextView
             style="@style/list_header_text"
             android:layout_weight="0.1"
             android:text="@string/spotcheck_addremark"/>
         <TextView
             style="@style/list_header_text"
+            android:layout_weight="0.07"
+            android:text="@string/formdetail_sort"/>
+        <TextView
+            style="@style/list_header_text"
             android:layout_weight="0.1"
-            android:text="@string/device_name"/>
+            android:text="@string/device_code"/>
         <TextView
             style="@style/list_header_text"
             android:layout_weight="0.2"
@@ -38,7 +42,7 @@
             android:text="@string/formdetail_unit"/>
         <TextView
             style="@style/list_header_text"
-            android:layout_weight="0.25"
+            android:layout_weight="0.18"
             android:text="@string/formdetail_input"/>
         <TextView
             style="@style/list_header_text"

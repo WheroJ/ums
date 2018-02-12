@@ -38,6 +38,8 @@
         <activity android:name=".ui.CheckListActivity" android:configChanges="orientation|screenSize" />
         <activity android:name=".ui.upkeep.UpKeepDetailActivity" android:configChanges="orientation|screenSize" />
         <activity android:name=".ui.spotcheck.SpotCheckDetailActivity" android:configChanges="orientation|screenSize" />
+        <activity android:name=".ui.spotcheck.SpotCheckListActivity" android:configChanges="orientation|screenSize" />
+        <activity android:name=".ui.upkeep.UpKeepListActivity" android:configChanges="orientation|screenSize" />
         <service android:name=".service.UmsService" />
 
         <activity

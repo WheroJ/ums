@@ -1,15 +1,15 @@
 package com.zetavision.panda.ums.service
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
+import android.os.IBinder
 import com.zetavision.panda.ums.R
 import com.zetavision.panda.ums.utils.*
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import org.greenrobot.eventbus.EventBus
 import java.util.concurrent.TimeUnit
 
 
@@ -37,11 +37,29 @@ class ReLoginReceiver : BroadcastReceiver() {
                         .getParcelableExtra<NetworkInfo>(ConnectivityManager.EXTRA_NETWORK_INFO)
                 if (info != null) {
                     //如果当前的网络连接成功并且网络连接可用
+                    var bindService: UmsService? = null
+                    val connection: ServiceConnection = object : ServiceConnection {
+                        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                            var binder: UmsService.MyBinder = service as UmsService.MyBinder
+                            bindService = binder.service
+                        }
+
+                        override fun onServiceDisconnected(name: ComponentName?) {
+
+                        }
+                    }
+                    IntentUtils.bindService(UIUtils.getContext(), connection)
+
                     if (NetworkInfo.State.CONNECTED == info.state && info.isAvailable) {
-                        IntentUtils.stopServcie(context)
+//                        IntentUtils.stopServcie(context)
+                        EventBus.getDefault().post(Constant.NET_CONNECT)
+//                        bindService?.dispose()
+//                        UIUtils.getContext().unbindService(connection)
                         LogPrinter.i("TAG", getConnectionType(info.type) + "连上")
                     } else {
-                        IntentUtils.startReLoginService()
+//                        bindService?.addLoginTimeObserver()
+                        EventBus.getDefault().post(Constant.NET_DISCONNECT)
+//                        IntentUtils.startReLoginService()
                         LogPrinter.i("TAG", getConnectionType(info.type) + "断开")
                     }
                 }

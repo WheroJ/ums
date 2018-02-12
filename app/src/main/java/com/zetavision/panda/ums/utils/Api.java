@@ -80,10 +80,10 @@ public class Api {
                             LogPrinter.i("NET_API", resultString);
                             JSONObject resultObejct = new JSONObject(resultString);
                             Result result = new Result();
-                            result.setReturnCode(resultObejct.getInt("returnCode"));
+                            result.setReturnCode(resultObejct.optString("returnCode"));
                             result.setReturnMessage(resultObejct.getString("returnMessage"));
                             result.setReturnData(resultObejct.getString("returnData"));
-                            if (result.getReturnCode() == 0) {
+                            if ("0".equals(result.getReturnCode())) {
                                 emitter.onNext(result);
                                 emitter.onComplete();
                             } else {

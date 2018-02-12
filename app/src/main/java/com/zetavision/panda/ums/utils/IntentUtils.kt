@@ -2,6 +2,7 @@
 
 package com.zetavision.panda.ums.utils
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Context.BIND_AUTO_CREATE
@@ -12,11 +13,12 @@ import android.provider.MediaStore
 import com.zetavision.panda.ums.base.BaseActivity
 import com.zetavision.panda.ums.model.FormInfo
 import com.zetavision.panda.ums.service.UmsService
-import com.zetavision.panda.ums.ui.CheckListActivity
 import com.zetavision.panda.ums.ui.LoginActivity
 import com.zetavision.panda.ums.ui.MainActivity
 import com.zetavision.panda.ums.ui.spotcheck.SpotCheckDetailActivity
+import com.zetavision.panda.ums.ui.spotcheck.SpotCheckListActivity
 import com.zetavision.panda.ums.ui.upkeep.UpKeepDetailActivity
+import com.zetavision.panda.ums.ui.upkeep.UpKeepListActivity
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -28,20 +30,23 @@ import java.util.*
 object IntentUtils {
 
     fun goUpKeep(context: Context, deviceName: String) {
-        val intent = Intent(context, CheckListActivity::class.java)
+        val intent = Intent(context, UpKeepListActivity::class.java)
         intent.putExtra("deviceName", deviceName)
         intent.putExtra("actionType", FormInfo.ACTION_TYPE_M)
         context.startActivity(intent)
     }
 
-    fun bindService(activity: Activity, connection: ServiceConnection) {
-        val intent = Intent(activity, UmsService::class.java)
-        activity.bindService(intent, connection, BIND_AUTO_CREATE)
+    fun bindService(context: Context, connection: ServiceConnection) {
+        val intent = Intent(context, UmsService::class.java)
+        context.bindService(intent, connection, BIND_AUTO_CREATE)
     }
 
     fun goLogout(context: Context) {
         val login = Intent(context, LoginActivity::class.java)
         login.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+        if (context !is Activity) {
+            login.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
         login.putExtra(Constant.RE_LOGIN, Constant.RE_LOGIN)
         context.startActivity(login)
         IntentUtils.clearBuffer(true)
@@ -60,7 +65,7 @@ object IntentUtils {
     }
 
     fun goSpotCheck(context: Context, deviceName: String) {
-        val intent = Intent(context, CheckListActivity::class.java)
+        val intent = Intent(context, SpotCheckListActivity::class.java)
         intent.putExtra("deviceName", deviceName)
         intent.putExtra("actionType", FormInfo.ACTION_TYPE_P)
         context.startActivity(intent)
@@ -115,7 +120,6 @@ object IntentUtils {
      */
     fun clearBuffer(logout: Boolean) {
         LogPrinter.i("CLEAR_COOKIE", "清除缓存。。。")
-        SPUtil.removeKey(Constant.IS_SERVICE_INIT)
         IntentUtils.stopServcie(UIUtils.getContext())
         if (logout) {
             UserUtils.clearLogin()
@@ -173,6 +177,7 @@ object IntentUtils {
      *
      * @return
      */
+    @SuppressLint("SimpleDateFormat")
     private fun getPhotoFileName(): String {
         val date = Date(System.currentTimeMillis())
         val dateFormat = SimpleDateFormat("'IMG'_yyyyMMdd_HHmmss")

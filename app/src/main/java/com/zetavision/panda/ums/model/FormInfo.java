@@ -13,6 +13,7 @@ public class FormInfo extends DataSupport{
     public static final int PROGRESS = 2;
     public static final int DONE = 3;
     public static final int FAIL = 4;
+
     private int download_status = WAIT; //默认等待下载
 
     public static final String ACTION_TYPE_M = "M";
@@ -65,9 +66,11 @@ public class FormInfo extends DataSupport{
     private String status;
     private String planDate;
     private String actionType;
+    public String actionTypeDescription;
 
     // 保养表单
     private String equipmentCode;
+    public String equipmentName;
     private String maintType;
     private String maintPeriodName;
     private String maintPeriodDescription;
@@ -77,12 +80,16 @@ public class FormInfo extends DataSupport{
     // 点检表单
     private String inspectRouteCode;
     private String inspectRouteDescription;
+    public String inspectPeriodCode;
     public String inspectPeriodDescription;
+    public String inspectPeriodName;
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof FormInfo) {
-            return ((FormInfo) obj).formId.equals(formId);
+            if (formId != null) {
+                return formId.equals(((FormInfo) obj).formId);
+            } else return super.equals(obj);
         }
         return super.equals(obj);
     }

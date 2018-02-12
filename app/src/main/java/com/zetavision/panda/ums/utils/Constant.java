@@ -11,9 +11,19 @@ public class Constant {
     public static final boolean DEBUG = true;
 
     /**
-     * 1: 内网   2：外网
+     * 中文
      */
-    private static final int net_type = 1;
+    public static final String LANG_CHINA = "zh_CN";
+
+    /**
+     * 英文
+     */
+    public static final String LANG_ENGLISH = "en";
+
+    /**
+     * 1: 内网   2：外网   3:外网第二台服务器
+     */
+    public static int NET_TYPE = 1;
 
     public static final String EVENT_REFRESH_LANGUAGE = "LANGUAGE";
     public static final String EVENT_REFRESH_USER = "USER";
@@ -21,12 +31,21 @@ public class Constant {
 
     public static String API_BASE_URL;
     static {
-        switch (net_type) {
+        setBaseUrlByType();
+    }
+
+    public static final int MAX_LEN = 200;
+
+    public static void setBaseUrlByType() {
+        switch (NET_TYPE) {
             case 1:
                 API_BASE_URL = "http://192.168.0.200:8088/";
                 break;
             case 2:
                 API_BASE_URL = "http://7.177.122.179:8088/";
+                break;
+            case 3:
+                API_BASE_URL = "http://www.juyuejk.com/";
                 break;
         }
     }
@@ -65,7 +84,7 @@ public class Constant {
     public static final String SYSTEM_DIALOG_REASON_LOCK = "lock";
     public static final String IS_RUN_BACK = "isBackRun";
     public static final String WAIT_UPLOAD_CRASH_LOG = "WAIT_UPLOAD_CRASH_LOG";
-    public static final String IS_SERVICE_INIT = "IS_SERVICE_INIT";
+
     @NotNull
     public static final String RE_LOGIN = "re_login";
     @Nullable
@@ -74,4 +93,8 @@ public class Constant {
     @NotNull
     public static final String TAKE_PHOTO = "take_photo";
     public static final String TAKE_VIDEO = "take_video";
+
+    public static final String NET_CONNECT = "net_connect";
+    public static final String NET_DISCONNECT = "net_disconnect";
+
 }

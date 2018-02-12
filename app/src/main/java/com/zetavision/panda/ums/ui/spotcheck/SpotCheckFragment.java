@@ -64,6 +64,6 @@ public class SpotCheckFragment extends CaptureFragment {
 
     @Override
     protected void init() {
-        getHeader().setTitle("点检扫描");
+        getHeader().setTitle(getString(R.string.spotcheck_scan));
     }
 }

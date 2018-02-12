@@ -69,7 +69,7 @@ public class UploadAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder)view.getTag();
         }
-        holder.setData(getItem(position));
+        holder.setData(getItem(position), position);
         return view;
     }
 
@@ -85,6 +85,7 @@ public class UploadAdapter extends BaseAdapter {
         @BindView(R.id.pauseBtn) ImageView pauseBtn;
         @BindView(R.id.doneImg) ImageView doneImg;
         @BindView(R.id.textInfo) TextView textInfo;
+        @BindView(R.id.form_sort) TextView formSort;
 
         private FormInfo data;
         private HashMap<String, String> statusMap;
@@ -97,14 +98,15 @@ public class UploadAdapter extends BaseAdapter {
             statusMap.put(Constant.FORM_STATUS_CLOSED, mContext.getString(R.string.status_closed));
         }
 
-        public void setData(FormInfoDetail formInfoDetail) {
+        public void setData(FormInfoDetail formInfoDetail, int position) {
             this.data = formInfoDetail.form;
 
             form_number.setText(data.getFormCode());
-            category.setText(data.getActionType());
+            category.setText(data.actionTypeDescription);
             line_or_eqp.setText(data.getLineOrEqp());
             desc.setText(data.getDesc());
             status.setText(statusMap.get(data.getStatus()));
+            formSort.setText(String.valueOf(position + 1));
 
             switch (formInfoDetail.isUpload) {
                 case FormInfo.DONE:
@@ -130,6 +132,7 @@ public class UploadAdapter extends BaseAdapter {
                     break;
                 default:
                     downloadBtn.setVisibility(View.VISIBLE);
+                    downloadBtn.setImageResource(R.mipmap.upload_circle);
                     progressBar.setVisibility(View.GONE);
                     pauseBtn.setVisibility(View.GONE);
                     doneImg.setVisibility(View.GONE);

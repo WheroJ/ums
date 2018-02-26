@@ -178,7 +178,7 @@ class UpKeepDetailActivity: BaseActivity() {
                 val indexOf = weatherList?.indexOf(weather) ?: -1
                 if (indexOf in weathers.indices) temperSpinner.setSelection(indexOf)
                 else {
-                    formInfoDetail.form.weather = weatherList!![0].description
+                    formInfoDetail.form.weather = weatherList?.get(0)?.description ?: ""
                     temperSpinner.setSelection(0)
                 }
             }
@@ -301,21 +301,56 @@ class UpKeepDetailActivity: BaseActivity() {
                         initView(formInfoDetail)
                     }
                     Constant.FORM_STATUS_INPROGRESS -> {
-//                        formInfoDetail.form.saveOrUpdate("formId='${formInfoDetail.form.formId}'")
-//                        formInfoDetail.saveOrUpdate("formId='${formInfoDetail.formId}'")
-                        if (checkAndSaveData(true)) {
-                            formInfoDetail.form.status = Constant.FORM_STATUS_COMPLETED
-                            formInfoDetail.form.completeTime = System.currentTimeMillis() / 1000
-                            val user = DataSupport.findLast(User::class.java)
-                            if (user != null) formInfoDetail.form.completeUser = user.USERNAME
-                            formInfoDetail.form.saveOrUpdate("formId='${formInfoDetail.form.formId}'")
-                            formInfoDetail.saveOrUpdate("formId='${formInfoDetail.formId}'")
-                            initView(formInfoDetail)
+                        var emptyIndex = ArrayList<Int>()
+                        val checkData = checkData(formInfoDetail, true, emptyIndex)
+                        if (checkData) {
+                            changeStatusAndSave(formInfoDetail)
+                        } else {
+                            if (emptyIndex.isNotEmpty()) {
+                                val buffer = StringBuffer()
+                                buffer.append(getString(R.string.order).plus("："))
+                                for (i in emptyIndex.indices) {
+                                    if (i == emptyIndex.size - 1) {
+                                        buffer.append(emptyIndex[i] + 1)
+                                    } else {
+                                        buffer.append((emptyIndex[i] + 1).toString().plus("、"))
+                                    }
+                                }
+                                buffer.append("的保养数据未录入!")
+                                showNotice(buffer.toString())
+                            }
                         }
                     }
                 }
             }
         }
+    }
+
+    private fun changeStatusAndSave(formInfoDetail: FormInfoDetail) {
+        formInfoDetail.form.status = Constant.FORM_STATUS_COMPLETED
+        formInfoDetail.form.completeTime = System.currentTimeMillis() / 1000
+        val user = DataSupport.findLast(User::class.java)
+        if (user != null) formInfoDetail.form.completeUser = user.USERNAME
+
+        if (saveData(formInfoDetail)) {
+            ToastUtils.show(R.string.save_success)
+        } else {
+            ToastUtils.show(R.string.save_fail)
+        }
+        initView(formInfoDetail)
+    }
+
+    private fun showNotice(notice: String) {
+        var builder = AlertDialog.Builder(`this`)
+        builder.setMessage(notice)
+        builder.setNeutralButton(R.string.cancel) { dialog, which ->
+            builder.create().dismiss()
+        }
+
+        builder.setPositiveButton(R.string.keep_save) { dialog, which ->
+            changeStatusAndSave(formInfoDetail!!)
+        }
+        builder.create().show()
     }
 
     override fun getHasTitle(): Boolean {
@@ -325,6 +360,8 @@ class UpKeepDetailActivity: BaseActivity() {
     override fun onLeftClick() {
         if (formInfoDetail?.form?.status == Constant.FORM_STATUS_INPROGRESS) {
             showDialog()
+        } else {
+            finish()
         }
     }
 
@@ -336,7 +373,7 @@ class UpKeepDetailActivity: BaseActivity() {
         }
 
         builder.setPositiveButton(R.string.back) { dialog, which ->
-            finish()
+            `this`.finish()
         }
         builder.create().show()
     }
@@ -356,8 +393,8 @@ class UpKeepDetailActivity: BaseActivity() {
     /**
      * 是否进行拍照检测
      */
-    private fun checkAndSaveData(checkPhoto: Boolean):Boolean {
-        if (checkData(formInfoDetail, checkPhoto)) {
+    private fun checkAndSaveData(checkPhoto: Boolean, emptyIndex: ArrayList<Int>? = null):Boolean {
+        if (checkData(formInfoDetail, checkPhoto, emptyIndex)) {
             return if (saveData(formInfoDetail)) {
                 ToastUtils.show(R.string.save_success)
                 true
@@ -375,19 +412,13 @@ class UpKeepDetailActivity: BaseActivity() {
                 val formItem = formInfoDetail.formItemList[i]
                 if ("N" == formItem.valueType) {
                     try {
-                        if (TextUtils.isEmpty(formItem.presetValue)) {
+                        if (TextUtils.isEmpty(formItem.result)) {
                             if (!checkDetail) {
                                 val findFirst = DataSupport.where("formItemId='${formItem.formItemId}'").findFirst(FormItem::class.java)
-                                if (findFirst != null) formItem.presetValue = findFirst.presetValue
+                                if (findFirst != null) formItem.result = findFirst.presetValue
                             }
                         } else {
-                            val intValue = formItem.presetValue.toFloat()
-//                            val lowerLimit = formItem.lowerLimit.toFloat()
-//                            val upperLimit = formItem.upperLimit.toFloat()
-//                            if (intValue < lowerLimit || intValue > upperLimit) {
-//                                ToastUtils.show("序号" + (i + 1) + "设定的值超出了范围")
-//                                return false
-//                            }
+                            formItem.result.toFloat()
                         }
                     } catch (e: NumberFormatException) {
                         e.printStackTrace()
@@ -413,12 +444,13 @@ class UpKeepDetailActivity: BaseActivity() {
                 }
 
                 if (checkDetail) {
-                    if ("Y" == formItem.photoMust) {
-                        if (formItem.photoPaths == null || formItem.photoPaths.isEmpty()) {
-                            ToastUtils.show("序号" + (i + 1) + "的必须进行现场拍照才能保存")
-                            return false
-                        }
-                    }
+                    //TODO 方便测试，暂时屏蔽
+//                    if ("Y" == formItem.photoMust) {
+//                        if (formItem.photoPaths == null || formItem.photoPaths.isEmpty()) {
+//                            ToastUtils.show("序号" + (i + 1) + "的必须进行现场拍照才能保存")
+//                            return false
+//                        }
+//                    }
                 }
             }
             if (!TextUtils.isEmpty(formInfoDetail.form.fillinRemarks)) {
@@ -428,6 +460,57 @@ class UpKeepDetailActivity: BaseActivity() {
                 }
             }
             return true
+        }
+        return false
+    }
+
+    private fun checkData(formInfoDetail: FormInfoDetail?, checkDetail: Boolean, emptyIndex: ArrayList<Int>?): Boolean {
+        if (formInfoDetail != null) {
+            for (i in formInfoDetail.formItemList.indices) {
+                val formItem = formInfoDetail.formItemList[i]
+                if (TextUtils.isEmpty(formItem.result)) {
+                    if (checkDetail && emptyIndex != null) emptyIndex.add(i)
+                } else {
+                    if ("N" == formItem.valueType) {
+                        try {
+                            formItem.result.toFloat()
+                        } catch (e: NumberFormatException) {
+                            e.printStackTrace()
+                            ToastUtils.show("序号" + (i + 1) + "的取值必须是数字")
+                            return false
+                        } catch (e: NullPointerException) {
+                            e.printStackTrace()
+                            ToastUtils.show("序号" + (i + 1) + "的取值不能为空")
+                            return false
+                        }
+                    }
+                }
+
+                if (!TextUtils.isEmpty(formItem.remarks)) {
+                    if (formItem.remarks.length > Constant.MAX_LEN) {
+                        ToastUtils.show("序号" + (i + 1) + "的备注超过200的长度限制")
+                        return false
+                    }
+                }
+
+                if (checkDetail) {
+                    //TODO 方便测试，暂时屏蔽
+//                    if ("Y" == formItem.photoMust) {
+//                        if (formItem.photoPaths == null || formItem.photoPaths.isEmpty()) {
+//                            ToastUtils.show("序号" + (i + 1) + "的必须进行现场拍照才能保存")
+//                            return false
+//                        }
+//                    }
+                }
+            }
+
+            if (!TextUtils.isEmpty(formInfoDetail.form.fillinRemarks)) {
+                if (formInfoDetail.form.fillinRemarks.length > Constant.MAX_LEN) {
+                    ToastUtils.show("备注超过200的长度限制")
+                    return false
+                }
+            }
+            return emptyIndex?.isEmpty() ?: true
         }
         return false
     }

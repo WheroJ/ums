@@ -13,6 +13,7 @@ import com.zetavision.panda.ums.utils.Constant
 import com.zetavision.panda.ums.utils.IntentUtils
 import com.zetavision.panda.ums.utils.ToastUtils
 import org.litepal.crud.DataSupport
+import java.util.*
 
 /**
  * Created by wheroj on 2018/1/30.
@@ -85,11 +86,17 @@ class UpKeepListActivity : BaseActivity() {
                 .mapTo(formList) { elements[it] }
 
         if (formList.isEmpty()) {
+            if (!TextUtils.isEmpty(actionType)) {
+                val adapter = UpKeepListAdapter(ArrayList(), actionType!!)
+                recyclerView?.adapter = adapter
+            }
             ToastUtils.show(R.string.no_data)
-        } else if (formList.size == 1) {
+        } else if (formList.size == 1 && intent.getBooleanExtra("firstView", false)) {
             IntentUtils.goUpKeepDetail(`this`, formList[0].formId)
+            intent.removeExtra("firstView")
         } else {
             if (!TextUtils.isEmpty(actionType)) {
+                formList.sort()
                 val adapter = UpKeepListAdapter(formList, actionType!!)
                 recyclerView?.adapter = adapter
             }

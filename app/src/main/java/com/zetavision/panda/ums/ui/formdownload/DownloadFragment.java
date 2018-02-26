@@ -175,8 +175,8 @@ public class DownloadFragment extends BaseFragment {
             for (int j = i + 1; j < sortSize; j++) {
                 FormInfo formInfo = sortFormInfo.get(i);
                 FormInfo formInfoJ = sortFormInfo.get(j);
-                int second = TimeUtils.INSTANCE.getSecond(formInfo.getPlanDate());
-                int secondJ = TimeUtils.INSTANCE.getSecond(formInfoJ.getPlanDate());
+                long second = TimeUtils.INSTANCE.getSecond(formInfo.getPlanDate());
+                long secondJ = TimeUtils.INSTANCE.getSecond(formInfoJ.getPlanDate());
                 if (second < secondJ) {
                     sortFormInfo.set(i, formInfoJ);
                     sortFormInfo.set(j, formInfo);

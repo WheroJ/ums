@@ -1,9 +1,15 @@
 package com.zetavision.panda.ums.model;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
+
+import com.zetavision.panda.ums.utils.TimeUtils;
+
 import org.litepal.annotation.Column;
 import org.litepal.crud.DataSupport;
 
-public class FormInfo extends DataSupport{
+public class FormInfo extends DataSupport implements Comparable{
 
 
     /**
@@ -242,5 +248,49 @@ public class FormInfo extends DataSupport{
 
     public void setInspectRouteDescription(String inspectRouteDescription) {
         this.inspectRouteDescription = inspectRouteDescription;
+    }
+
+    @Override
+    public int compareTo(@NonNull Object o) {
+        if (o instanceof FormInfo) {
+            String planDate = ((FormInfo) o).planDate;
+            if (!TextUtils.isEmpty(planDate)) {
+                long second = TimeUtils.INSTANCE.getSecond(planDate);
+                long nowSecond = TimeUtils.INSTANCE.getSecond(this.planDate);
+                long difference  = nowSecond - second;
+                if (difference == 0) {
+                    return compareFormCode((FormInfo) o);
+                } else {
+                    if (difference > 0)
+                        return -1;
+                    else return 1;
+                }
+            } else {
+                return compareFormCode((FormInfo) o);
+            }
+        }
+        return 0;
+    }
+
+    @Nullable
+    private int compareFormCode(@NonNull FormInfo o) {
+        String formCode = o.formCode;
+        if (!TextUtils.isEmpty(formCode) && !TextUtils.isEmpty(this.formCode)) {
+            int length = formCode.length();
+            int nowLen = this.formCode.length();
+            if (length > 3 && nowLen > 3) {
+                String orderStr = formCode.substring(length - 3);
+                String orderStrNow = this.formCode.substring(nowLen - 3);
+                try {
+                    int order = Integer.parseInt(orderStr);
+                    int orderNow = Integer.parseInt(orderStrNow);
+                    return orderNow - order;
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                    return 0;
+                }
+            }
+        }
+        return 0;
     }
 }

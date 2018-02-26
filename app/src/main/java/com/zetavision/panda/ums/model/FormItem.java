@@ -19,6 +19,7 @@ public class FormItem extends DataSupport{
     public String description;//",
     public String valueType;//N",
     public String presetValue;//10",
+    public String result = "";
     public String unit;//",
     public String lowerLimit;//5",
     public String upperLimit;//10",

@@ -150,7 +150,7 @@ public class UmsService extends Service {
                     FormItem item = formInfoDetail.formItemList.get(i);
                     formItem.put("formId", item.formId);
                     formItem.put("formItemId", item.formItemId);
-                    formItem.put("result", item.presetValue);
+                    formItem.put("result", item.result);
                     formItem.put("remarks", item.remarks == null?"":item.remarks);
                     if (FormInfo.ACTION_TYPE_P.equals(formInfoDetail.actionType)) {
                         formItem.put("photoUrls", item.photoUrls);

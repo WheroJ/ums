@@ -197,7 +197,7 @@ abstract public class BaseActivity extends AppCompatActivity {
             if (preferences.getLanguage().equals(Locale.CHINESE.getLanguage())) {//中文
                 RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class).setUserLocale(Constant.LANG_CHINA), null);
             } else {//英文
-                RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class).setUserLocale(Constant.LANG_CHINA), null);
+                RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class).setUserLocale(Constant.LANG_ENGLISH), null);
             }
         }
     }

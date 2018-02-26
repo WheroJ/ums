@@ -1,5 +1,6 @@
 package com.zetavision.panda.ums.utils
 
+import android.text.TextUtils
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,9 +39,27 @@ object TimeUtils {
         return format.format(Date(System.currentTimeMillis()))
     }
 
-    fun getSecond(dateStr: String): Int {
-        var format = SimpleDateFormat("yyyy-MM-dd")
+    /**
+     * @param dateStr yyyy-MM-dd
+     * @return 当前的秒
+     */
+    fun getSecond(dateStr: String, format: String = "yyyy-MM-dd"): Long {
+        if (TextUtils.isEmpty(dateStr))
+            return -1
+        var format = SimpleDateFormat(format)
         val date = format.parse(dateStr)
-        return date.seconds
+        return date.time/1000
+    }
+
+    /**
+     * @param dateStr yyyy-MM-dd
+     * @return 当前的秒
+     */
+    fun getSecond(dateStr: String): Long {
+        if (TextUtils.isEmpty(dateStr))
+            return -1
+        val format = SimpleDateFormat("yyyy-MM-dd")
+        val date = format.parse(dateStr)
+        return date.time/1000
     }
 }

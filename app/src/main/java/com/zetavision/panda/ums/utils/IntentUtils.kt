@@ -33,6 +33,7 @@ object IntentUtils {
         val intent = Intent(context, UpKeepListActivity::class.java)
         intent.putExtra("deviceName", deviceName)
         intent.putExtra("actionType", FormInfo.ACTION_TYPE_M)
+        intent.putExtra("firstView", true)
         context.startActivity(intent)
     }
 
@@ -68,6 +69,7 @@ object IntentUtils {
         val intent = Intent(context, SpotCheckListActivity::class.java)
         intent.putExtra("deviceName", deviceName)
         intent.putExtra("actionType", FormInfo.ACTION_TYPE_P)
+        intent.putExtra("firstView", true)
         context.startActivity(intent)
     }
 

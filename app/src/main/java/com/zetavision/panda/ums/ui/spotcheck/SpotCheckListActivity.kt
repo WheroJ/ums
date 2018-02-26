@@ -7,6 +7,7 @@ import android.text.TextUtils
 import android.widget.TextView
 import com.zetavision.panda.ums.R
 import com.zetavision.panda.ums.adapter.SpotCheckListAdapter
+import com.zetavision.panda.ums.adapter.UpKeepListAdapter
 import com.zetavision.panda.ums.base.BaseActivity
 import com.zetavision.panda.ums.model.FormInfo
 import com.zetavision.panda.ums.model.FormItem
@@ -96,11 +97,17 @@ class SpotCheckListActivity : BaseActivity() {
         }
 
         if (formList.isEmpty()) {
+            if (!TextUtils.isEmpty(actionType)) {
+                val adapter = UpKeepListAdapter(ArrayList(), actionType!!)
+                recyclerView?.adapter = adapter
+            }
             ToastUtils.show(R.string.no_data)
-        } else if (formList.size == 1) {
+        } else if (formList.size == 1 && intent.getBooleanExtra("firstView", false)) {
             IntentUtils.goSpotCheckDetail(`this`, formList[0].formId)
+            intent.removeExtra("firstView")
         } else {
             if (!TextUtils.isEmpty(actionType)) {
+                formList.sort()
                 val adapter = SpotCheckListAdapter(formList, actionType!!)
                 recyclerView?.adapter = adapter
             }

@@ -78,16 +78,35 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
-                    <EditText
-                        android:id="@+id/itemUpKeepParam_etInput"
+
+                    <FrameLayout
                         android:layout_width="0dp"
                         android:layout_weight="1"
-                        android:layout_height="30dp"
-                        android:background="@drawable/radius_blue_5"
-                        android:paddingStart="@dimen/dp_5"
-                        tools:hint="haha"
-                        android:textSize="@dimen/sp_12"
-                        android:textColor="@color/gray3"/>
+                        android:layout_height="30dp">
+                        <EditText
+                            android:id="@+id/itemUpKeepParam_etInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/radius_blue_5"
+                            tools:hint="haha"
+                            android:paddingStart="@dimen/dp_5"
+                            android:gravity="center_vertical"
+                            android:textSize="@dimen/sp_12"
+                            android:textColor="@color/gray3"/>
+
+                        <TextView
+                            android:id="@+id/itemUpKeepParam_tvInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/radius_blue_5"
+                            tools:hint="haha"
+                            android:gravity="center_vertical"
+                            android:paddingStart="@dimen/dp_5"
+                            android:textSize="@dimen/sp_12"
+                            android:textColor="@color/gray3"
+                            android:visibility="gone"/>
+                    </FrameLayout>
+
 
                     <ImageView
                         android:id="@+id/itemUpKeepParam_inputNoticeImg"

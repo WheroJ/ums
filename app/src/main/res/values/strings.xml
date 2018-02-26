@@ -70,6 +70,7 @@
     <string name="take_picture">拍照</string>
     <string name="cancel">取消</string>
     <string name="back">返回</string>
+    <string name="keep_save">继续保存</string>
     <string name="spotcheck_addremark">照片/视频</string>
     <string name="spotcheck_itemname">点检项目</string>
     <string name="maint_remark">保养备注</string>
@@ -102,4 +103,5 @@
     <string name="maint_peroid">保养周期：</string>
     <string name="data_exception">数据异常</string>
     <string name="device_description">设备描述</string>
+    <string name="order">序号</string>
 </resources>

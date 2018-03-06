@@ -1,6 +1,7 @@
 package com.zetavision.panda.ums.adapter;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -15,6 +16,7 @@ import com.zetavision.panda.ums.service.UmsService;
 import com.zetavision.panda.ums.ui.formdownload.DownloadFragment;
 import com.zetavision.panda.ums.ui.formup.UploadFragment;
 import com.zetavision.panda.ums.utils.Constant;
+import com.zetavision.panda.ums.utils.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,13 +80,19 @@ public class DownloadAdapter extends BaseAdapter {
         @BindView(R.id.line_or_eqp) TextView line_or_eqp;
         @BindView(R.id.desc) TextView desc;
         @BindView(R.id.status) TextView status;
+        @BindView(R.id.form_sort) TextView formSort;
 
         @BindView(R.id.downloadBtn) ImageView downloadBtn;
         @BindView(R.id.progressBar) ProgressBar progressBar;
         @BindView(R.id.pauseBtn) ImageView pauseBtn;
         @BindView(R.id.doneImg) ImageView doneImg;
         @BindView(R.id.textInfo) TextView textInfo;
-        @BindView(R.id.form_sort) TextView formSort;
+
+        @BindView(R.id.sop_downloadBtn) ImageView sopDownloadBtn;
+        @BindView(R.id.sop_progressBar) ProgressBar sopProgressBar;
+        @BindView(R.id.sop_pauseBtn) ImageView sopPauseBtn;
+        @BindView(R.id.sop_doneImg) ImageView sopDoneImg;
+        @BindView(R.id.sop_textInfo) TextView sopTextInfo;
 
         private FormInfo data;
 
@@ -138,6 +146,55 @@ public class DownloadAdapter extends BaseAdapter {
                     textInfo.setText(R.string.common_download);
             }
 
+            if (data.getDownload_status() == FormInfo.DONE) {
+                if (!TextUtils.isEmpty(data.sopLocalPath)) {
+                    sopDoneImg.setVisibility(View.VISIBLE);
+                    sopDownloadBtn.setVisibility(View.GONE);
+                    sopPauseBtn.setVisibility(View.GONE);
+                    sopProgressBar.setVisibility(View.GONE);
+                    sopTextInfo.setVisibility(View.GONE);
+                } else if (TextUtils.isEmpty(data.sopUrl)) {
+                    sopDoneImg.setVisibility(View.GONE);
+                    sopDownloadBtn.setVisibility(View.GONE);
+                    sopPauseBtn.setVisibility(View.GONE);
+                    sopProgressBar.setVisibility(View.GONE);
+                    sopTextInfo.setVisibility(View.VISIBLE);
+                    sopTextInfo.setText("N");
+                } else {
+                    sopTextInfo.setVisibility(View.GONE);
+                    switch (data.sop_download_status) {
+                        case FormInfo.DONE:
+                            sopDownloadBtn.setVisibility(View.GONE);
+                            sopProgressBar.setVisibility(View.GONE);
+                            sopPauseBtn.setVisibility(View.GONE);
+                            sopDoneImg.setVisibility(View.VISIBLE);
+                            break;
+                        case FormInfo.FAIL:
+                            sopDownloadBtn.setVisibility(View.VISIBLE);
+                            sopProgressBar.setVisibility(View.GONE);
+                            sopPauseBtn.setVisibility(View.GONE);
+                            sopDoneImg.setVisibility(View.GONE);
+                            break;
+                        case FormInfo.PROGRESS:
+                            sopDownloadBtn.setVisibility(View.GONE);
+                            sopProgressBar.setVisibility(View.VISIBLE);
+                            sopPauseBtn.setVisibility(View.VISIBLE);
+                            sopDoneImg.setVisibility(View.GONE);
+                            break;
+                        default:
+                            sopDownloadBtn.setVisibility(View.VISIBLE);
+                            sopProgressBar.setVisibility(View.GONE);
+                            sopPauseBtn.setVisibility(View.GONE);
+                            sopDoneImg.setVisibility(View.GONE);
+                    }
+                }
+            } else {
+                sopDoneImg.setVisibility(View.GONE);
+                sopDownloadBtn.setVisibility(View.GONE);
+                sopPauseBtn.setVisibility(View.GONE);
+                sopProgressBar.setVisibility(View.GONE);
+                sopTextInfo.setVisibility(View.GONE);
+            }
         }
 
         @OnClick(R.id.downloadBtn) void download() {
@@ -159,6 +216,42 @@ public class DownloadAdapter extends BaseAdapter {
                 UmsService umsService = ((DownloadFragment) fragment).umsService;
                 if (umsService != null) {
                     umsService.stopDownload(data.getFormId());
+                }
+            } else if (fragment instanceof UploadFragment) {
+                UmsService umsService = ((UploadFragment) fragment).umsService;
+                if (umsService != null) {
+                    umsService.stopUpload(data.getFormId());
+                }
+            }
+        }
+
+        @OnClick(R.id.sop_downloadBtn) void downloadSop() {
+            if (fragment instanceof DownloadFragment) {
+                UmsService umsService = ((DownloadFragment) fragment).umsService;
+                if (umsService != null) {
+                    if (data.getDownload_status() == FormInfo.DONE) {
+                        umsService.startDownloadSop(data.getFormId());
+                    } else {
+                        ToastUtils.show(mContext.getString(R.string.notice_download_form));
+                    }
+                }
+            } else if (fragment instanceof UploadFragment) {
+                UmsService umsService = ((UploadFragment) fragment).umsService;
+                if (umsService != null) {
+                    if (data.getDownload_status() == FormInfo.DONE) {
+                        umsService.startDownloadSop(data.getFormId());
+                    } else {
+                        ToastUtils.show(mContext.getString(R.string.notice_download_form));
+                    }
+                }
+            }
+        }
+
+        @OnClick(R.id.sop_pauseBtn) void pauseSop() {
+            if (fragment instanceof DownloadFragment) {
+                UmsService umsService = ((DownloadFragment) fragment).umsService;
+                if (umsService != null) {
+                    umsService.stopDownloadSop(data.getFormId(), data.sopUrl);
                 }
             } else if (fragment instanceof UploadFragment) {
                 UmsService umsService = ((UploadFragment) fragment).umsService;

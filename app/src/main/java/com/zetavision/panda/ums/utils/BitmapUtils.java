@@ -44,6 +44,7 @@ public class BitmapUtils {
 	public static Bitmap decodeSampledBitmapFromResource(String pathName,
                                                          int reqWidth, int reqHeight)
 	{
+		LogPrinter.i("BitmapUtils", "path=" + pathName + "。。。。。。。。。。。。");
 		if (pathName == null)
 			return null;
 		try {

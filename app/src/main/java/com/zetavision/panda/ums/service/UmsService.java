@@ -14,6 +14,7 @@ import com.zetavision.panda.ums.model.FormInfo;
 import com.zetavision.panda.ums.model.FormInfoDetail;
 import com.zetavision.panda.ums.model.FormItem;
 import com.zetavision.panda.ums.model.Result;
+import com.zetavision.panda.ums.model.SopMap;
 import com.zetavision.panda.ums.utils.Constant;
 import com.zetavision.panda.ums.utils.IntentUtils;
 import com.zetavision.panda.ums.utils.LogPrinter;
@@ -36,6 +37,7 @@ import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -115,7 +117,7 @@ public class UmsService extends Service {
                             super.onError(e);
                             ToastUtils.show(e.getMessage());
                         }
-                    }, photoPaths);
+                    }, photoPaths, formInfoDetail.form.getFormCode());
                 } else upload(formInfoDetail);
             }
         }
@@ -192,6 +194,21 @@ public class UmsService extends Service {
                         ToastUtils.show(R.string.error_formaction);
                     } else {
                         formInfoDetail.isUpload = FormInfo.DONE;
+
+                        String where;
+                        if (FormInfo.ACTION_TYPE_M.equals(formInfoDetail.actionType)) {
+                            where = "flowCode = '" + formInfoDetail.form.maintFlowCode +"'";
+                        } else {
+                            where = "flowCode = '" + formInfoDetail.form.inspectFlowCode + "'";
+                        }
+                        SopMap sopMap = DataSupport.where(where).findFirst(SopMap.class);
+                        if (sopMap != null) {
+                            --sopMap.useCount;
+                            if (sopMap.useCount == 0) {
+                                sopMap.delete();
+                            } else sopMap.updateAll(where);
+                        }
+
                         formInfoDetail.delete();
                         if (uploadListener != null) {
                             uploadListener.onUpdate(uploadList);
@@ -251,12 +268,12 @@ public class UmsService extends Service {
     }
 
     // 下载单个表单
-    public void startDownload(String formId) {
+    public void startDownload(final String formId) {
         final FormInfo info = getFormInfo(formId);
 
         //是否下载过
-        List<FormInfoDetail> formInfoDetails = DataSupport.where("formId='" + info.getFormId() + "'").find(FormInfoDetail.class);
-        if (formInfoDetails == null || formInfoDetails.isEmpty()) {
+        FormInfoDetail formInfoDetail = DataSupport.where("formId='" + info.getFormId() + "'").findFirst(FormInfoDetail.class, true);
+        if (formInfoDetail == null || formInfoDetail.formItemList == null || formInfoDetail.formItemList.isEmpty() || formInfoDetail.form == null) {
 
             //已经下载过的表单无需再下载
             if (info.getDownload_status() == FormInfo.DONE
@@ -280,22 +297,18 @@ public class UmsService extends Service {
 
                             List<FormInfoDetail> formInfoDetails = result.getList(FormInfoDetail.class);
                             if (formInfoDetails != null && !formInfoDetails.isEmpty()) {
-                                FormInfoDetail formInfoDetail = formInfoDetails.get(0);
+                                final FormInfoDetail formInfoDetail = formInfoDetails.get(0);
                                 formInfoDetail.formId = formInfoDetail.form.getFormId();
                                 formInfoDetail.equipmentCode = formInfoDetail.form.getEquipmentCode();
                                 formInfoDetail.inspectRouteCode = formInfoDetail.form.getInspectRouteCode();
                                 formInfoDetail.actionType = formInfoDetail.form.getActionType();
                                 formInfoDetail.utilitySystemId = formInfoDetail.form.getUtilitySystemId();
-                                formInfoDetail.form.setDownload_status(FormInfo.DONE);
-                                formInfoDetail.form.saveOrUpdate("(formId='" + formInfoDetail.form.getFormId() + "')");
+
                                 DataSupport.saveAll(formInfoDetail.formItemList);
                                 formInfoDetail.saveOrUpdate("(formId='" + formInfoDetail.formId + "')");
-                            }
+                                saveAndUpdateStatus(formInfoDetail, info, FormInfo.DONE, -1);
 
-                            // 保存完改变状态
-                            info.setDownload_status(FormInfo.DONE);     // 下载完成
-                            if (downloadListener != null) {
-                                downloadListener.onUpdate(downloadList);
+                                startDownloadSop(formInfoDetail);
                             }
                         }
 
@@ -315,7 +328,25 @@ public class UmsService extends Service {
                         }
                     });
         } else {
-            info.setDownload_status(FormInfo.DONE);
+            if (!TextUtils.isEmpty(formInfoDetail.form.sopUrl)) {
+                if (TextUtils.isEmpty(formInfoDetail.form.sopLocalPath)) {
+                    startDownloadSop(formId);
+                }
+            } else {
+                info.setDownload_status(FormInfo.DONE);
+                if (downloadListener != null) {
+                    downloadListener.onUpdate(downloadList);
+                }
+            }
+        }
+    }
+
+    private void saveAndUpdateStatus(FormInfoDetail formInfoDetail, FormInfo info, int infoStatus, int sopStatus) {
+        if (infoStatus != -1) formInfoDetail.form.setDownload_status(infoStatus);
+        if (sopStatus != -1) formInfoDetail.form.sop_download_status = sopStatus;
+        if (formInfoDetail.form.saveOrUpdate("(formId='" + formInfoDetail.form.getFormId() + "')")) {
+            if (infoStatus != -1) info.setDownload_status(infoStatus);     // 下载完成
+            if (sopStatus != -1) info.sop_download_status = sopStatus;
             if (downloadListener != null) {
                 downloadListener.onUpdate(downloadList);
             }
@@ -369,6 +400,7 @@ public class UmsService extends Service {
         Disposable disposable = disposableHashMap.get(formId);
         if (disposable != null) {
             disposable.dispose();
+            disposableHashMap.remove(formId);
 
             FormInfo formInfo = getFormInfo(formId);
             if (formInfo != null) {
@@ -385,6 +417,7 @@ public class UmsService extends Service {
         Disposable disposable = disposableHashMap.get(formId);
         if (disposable != null) {
             disposable.dispose();
+            disposableHashMap.remove(formId);
 
             FormInfoDetail formInfoDetail = getFormInfoDetail(formId);
             if (formInfoDetail != null) {
@@ -436,6 +469,103 @@ public class UmsService extends Service {
             }
         }
         return null;
+    }
+
+    public void startDownloadSop(final FormInfoDetail formInfoDetail) {
+        final FormInfo formInfo = getFormInfo(formInfoDetail.formId);
+        final String flowCode;
+        if (FormInfo.ACTION_TYPE_M.equals(formInfo.getActionType())) {
+            flowCode = formInfo.maintFlowCode;
+        } else {
+            flowCode = formInfo.inspectFlowCode;
+        }
+
+        String where = "flowCode = '" + flowCode +"'";
+        SopMap sopMap = DataSupport.where(where).findFirst(SopMap.class);
+
+        if (sopMap != null) {
+            formInfoDetail.form.sopLocalPath = sopMap.sopLocalPath;
+            sopMap.useCount ++;
+            sopMap.updateAll(where);
+
+            saveAndUpdateStatus(formInfoDetail, formInfo, -1, FormInfo.DONE);
+        } else {
+            Observable<ResponseBody> downLoadObserve = Client.getApi(UmsApi.class).downloadFile(formInfoDetail.form.sopUrl, formInfoDetail.form.sopFileName, "Y");
+            File saveFile = new File(UIUtils.getCachePath(), formInfoDetail.form.sopFileName);
+            try {
+                if (!saveFile.exists()) {
+                    saveFile.createNewFile();
+                }
+
+                //已经下载过的表单无需再下载
+                if (formInfo.sop_download_status == FormInfo.DONE
+                        || formInfo.sop_download_status == FormInfo.PROGRESS)
+                    return;
+                else formInfo.sop_download_status = FormInfo.PROGRESS;     // 开始下载
+
+                if (downloadListener != null)downloadListener.onUpdate(downloadList);
+                RxUtils.INSTANCE.download(downLoadObserve, saveFile, new RxUtils.ProgressListener() {
+
+                    @Override
+                    public void onStart(@NotNull Disposable d) {
+                        super.onStart(d);
+                        disposableHashMap.put(formInfo.sopUrl, d);
+                    }
+
+                    @Override
+                    public void onResult(@NotNull Result result) {
+                        // 保存完改变状态
+                        formInfoDetail.form.sopLocalPath = result.getReturnData();
+
+                        SopMap map = new SopMap();
+                        map.useCount = 1;
+                        map.sopLocalPath = result.getReturnData();
+                        map.flowCode = flowCode;
+                        map.actonCode = formInfoDetail.actionType;
+                        map.save();
+
+                        saveAndUpdateStatus(formInfoDetail, formInfo, -1, FormInfo.DONE);
+                    }
+
+                    @Override
+                    public void onUpdate(float progress) {
+                    }
+
+                    @Override
+                    public void onError(@NotNull Throwable e) {
+                        super.onError(e);
+                        formInfo.sop_download_status = FormInfo.FAIL;
+                        if (downloadListener != null) {
+                            downloadListener.onUpdate(downloadList);
+                        }
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void startDownloadSop(String formId) {
+        final FormInfoDetail formInfoDetail = DataSupport.where("(formId = '" + formId + "')").findFirst(FormInfoDetail.class, true);
+        startDownloadSop(formInfoDetail);
+    }
+
+    public void stopDownloadSop(String formId, String sopUrl) {
+        Disposable disposable = disposableHashMap.get(sopUrl);
+        if (disposable != null) {
+            disposable.dispose();
+            disposableHashMap.remove(formId);
+
+            FormInfo formInfo = getFormInfo(formId);
+            if (formInfo != null) {
+                if (formInfo.sop_download_status == FormInfo.PROGRESS) {
+                    formInfo.sop_download_status = FormInfo.WAIT;
+                }
+                if (downloadListener != null)
+                    downloadListener.onUpdate(downloadList);
+            }
+        }
     }
 
     public interface OnDownloadListener {

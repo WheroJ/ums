@@ -130,6 +130,7 @@ public class UploadFragment extends BaseFragment{
             }
 
             if (uploadList.isEmpty()) {
+                umsService.setUploadList(new ArrayList<FormInfoDetail>());
                 ToastUtils.show(R.string.no_data);
             } else {
                 umsService.setUploadList(uploadList);

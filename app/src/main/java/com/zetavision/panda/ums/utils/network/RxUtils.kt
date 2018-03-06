@@ -13,6 +13,8 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import okhttp3.ResponseBody
 import org.json.JSONObject
+import java.io.File
+import java.io.FileOutputStream
 import java.lang.ref.WeakReference
 
 
@@ -24,7 +26,7 @@ object RxUtils {
 
     var compositeDisposable = CompositeDisposable()
 
-    abstract class DialogListener(var context: AppCompatActivity? = null) : HttpListener {
+    abstract class DialogListener(open var context: AppCompatActivity? = null) : HttpListener {
 
         private var weakReference: WeakReference<Activity>? = null
         private var progressDlg: LoadingDialog? = null
@@ -57,6 +59,10 @@ object RxUtils {
         }
     }
 
+    abstract class ProgressListener(override var context: AppCompatActivity? = null): DialogListener(context) {
+        abstract fun onUpdate(progress: Float);
+    }
+
 
     interface HttpListener {
         fun onError(e: Throwable)
@@ -87,6 +93,53 @@ object RxUtils {
                             }
                             else -> httpListener?.onError(Throwable("error-" + result.returnCode + ":" + result.returnMessage))
                         }
+                    }
+
+                    override fun onError(e: Throwable) {
+                        httpListener?.onError(e)
+                    }
+
+                    override fun onComplete() {
+                        httpListener?.onComplete()
+                    }
+
+                    override fun onSubscribe(d: Disposable) {
+                        compositeDisposable.add(d)
+                        httpListener?.onStart(d)
+                    }
+                })
+    }
+
+    fun download(observable: Observable<ResponseBody>, saveFile: File
+                      , httpListener: ProgressListener? = null) {
+        //访问接口需要有用户登录信息才能访问
+        observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : Observer<ResponseBody> {
+                    override fun onNext(responseBody: ResponseBody) {
+                        val outputStream = FileOutputStream(saveFile)
+
+                        val inputStream = responseBody.byteStream()
+                        val contentSize = responseBody.contentLength()
+
+//                        if (contentSize >= 0) {
+                            val bytes = ByteArray(1024)
+                            var currentSaveSize = 0
+                            var progress = 0.0f
+                            while ((inputStream.read(bytes) != -1)) {
+                                currentSaveSize += bytes.size
+                                outputStream.write(bytes)
+                                outputStream.flush()
+                                progress = currentSaveSize * 1.0f / contentSize
+                                httpListener?.onUpdate(progress)
+                            }
+                            outputStream.close()
+                            val result = Result()
+                            result.returnData = saveFile.absolutePath
+                            httpListener?.onResult(result)
+//                        } else {
+//                            httpListener?.onError(Throwable(UIUtils.getContext().getString(R.string.data_exception)))
+//                        }
                     }
 
                     override fun onError(e: Throwable) {

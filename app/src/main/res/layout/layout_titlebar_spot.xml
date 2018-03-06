@@ -19,7 +19,7 @@
         <TextView
             style="@style/list_header_text"
             android:layout_weight="0.07"
-            android:text="@string/formdetail_sort"/>
+            android:text="@string/order"/>
         <TextView
             style="@style/list_header_text"
             android:layout_weight="0.1"

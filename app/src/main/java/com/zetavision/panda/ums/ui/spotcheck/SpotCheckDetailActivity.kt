@@ -278,8 +278,24 @@ class SpotCheckDetailActivity: BaseActivity() {
             }
 
             val btnMaintStatus = findViewById<Button>(R.id.activitySpotCheckDetail_btnMaintStatus)
+            val btnSeeSop = findViewById<Button>(R.id.activitySpotCheckDetail_btnSeeSop)
             val tvMaintStatus = findViewById<TextView>(R.id.activitySpotCheckDetail_tvMaintStatus)
             val tvMaintStatusStr = findViewById<TextView>(R.id.activitySpotCheckDetail_tvMaintStatusStr)
+
+            btnSeeSop.setOnClickListener {
+                val where = if (FormInfo.ACTION_TYPE_M == formInfoDetail.actionType) {
+                    "flowCode = '" + formInfoDetail.form.maintFlowCode + "'"
+                } else {
+                    "flowCode = '" + formInfoDetail.form.inspectFlowCode + "'"
+                }
+                val sopMap = DataSupport.where(where).findFirst(SopMap::class.java)
+                if (sopMap != null) {
+                    OpenFileUtils.Companion.getInstance().openFile(sopMap.sopLocalPath);
+                } else {
+                    ToastUtils.show(R.string.no_local_data)
+                }
+            }
+
             when (formInfoDetail.form.status) {
 //                "表单状态：已结束"
                 Constant.FORM_STATUS_CLOSED -> tvMaintStatusStr.text = getString(R.string.formstatus).plus(getString(R.string.formstatus_end))

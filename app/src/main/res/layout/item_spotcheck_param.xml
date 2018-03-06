@@ -27,7 +27,7 @@
             android:id="@+id/itemUpKeepParam_order"
             style="@style/list_header_text"
             android:layout_weight="0.07"
-            android:text="@string/formdetail_sort"/>
+            android:text="@string/order"/>
 
         <TextView
             android:id="@+id/itemUpKeepParam_deviceName"

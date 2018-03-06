@@ -18,7 +18,7 @@
             android:id="@+id/itemUpKeepParam_order"
             style="@style/list_header_text"
             android:layout_weight="0.1"
-            tools:text="@string/formdetail_sort"/>
+            tools:text="@string/order"/>
         <TextView
             android:id="@+id/itemUpKeepParam_code"
             style="@style/list_header_text"

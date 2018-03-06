@@ -50,12 +50,17 @@ public interface UmsApi {
 
     @POST("/ums/control/uploadFile.mobile")
     Observable<ResponseBody> uploadFile(@Query("functionType") String functionType
-            , @Query("fileCategory") String fileCategory, @Body() RequestBody fileBody);
+            , @Query("fileCategory") String fileCategory, @Query("formCode") String inspectFormCode, @Body() RequestBody fileBody);
 
     @POST("/ums/control/uploadFileBatch.mobile")
     Observable<ResponseBody> uploadFileBatch(@Query("functionType") String functionType
-            , @Query("fileCategory") String fileCategory, @Body() RequestBody fileBody);
+            , @Query("fileCategory") String fileCategory, @Query("formCode") String inspectFormCode, @Body() RequestBody fileBody);
 
     @GET("/ums/control/setUserLocale.mobile")
     Observable<ResponseBody> setUserLocale(@Query("USERLOCALE") String userLocale);
+
+    @GET("/ums/control/downloadFile.mobile")
+    Observable<ResponseBody> downloadFile(@Query("fileUrl") String fileUrl
+            , @Query("fileName") String fileName
+            , @Query("isWithRootPath") String isWithRootPath);
 }

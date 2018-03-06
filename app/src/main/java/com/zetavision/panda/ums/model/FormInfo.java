@@ -21,6 +21,7 @@ public class FormInfo extends DataSupport implements Comparable{
     public static final int FAIL = 4;
 
     private int download_status = WAIT; //默认等待下载
+    public int sop_download_status = WAIT;
 
     public static final String ACTION_TYPE_M = "M";
     public static final String ACTION_TYPE_P = "P";
@@ -73,6 +74,9 @@ public class FormInfo extends DataSupport implements Comparable{
     private String planDate;
     private String actionType;
     public String actionTypeDescription;
+    public String sopFileName;
+    public String sopUrl;
+    public String sopLocalPath;
 
     // 保养表单
     private String equipmentCode;
@@ -83,12 +87,18 @@ public class FormInfo extends DataSupport implements Comparable{
     private String maintParamTypeCode;
     private String maintParamTypeDescription;
 
+    /**
+     * 保养周期流程code
+     */
+    public String maintFlowCode;
+
     // 点检表单
     private String inspectRouteCode;
     private String inspectRouteDescription;
     public String inspectPeriodCode;
     public String inspectPeriodDescription;
     public String inspectPeriodName;
+    public String inspectFlowCode;
 
     @Override
     public boolean equals(Object obj) {

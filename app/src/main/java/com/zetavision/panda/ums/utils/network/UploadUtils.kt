@@ -46,11 +46,9 @@ object UploadUtils {
         }
     }
 
-    private fun uploadImge(fileList: ArrayList<File?>, listener: RxUtils.HttpListener) {
+    private fun uploadImge(fileList: ArrayList<File?>, formCode: String, listener: RxUtils.HttpListener) {
         //构建body
         val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
-//        builder.addFormDataPart("name", "image.png")
-//        MediaType.parse("image/*")
         fileList.indices
                 .filter { fileList[it] != null }
                 .forEach {
@@ -58,14 +56,12 @@ object UploadUtils {
                         , RequestBody.create(MediaType.parse(getMimeType(fileList[it]!!)), fileList[it]!!))
                 }
         RxUtils.acquireString(Client.getApi(UmsApi::class.java)
-                .uploadFile("inspect", "form", builder.build()), listener)
+                .uploadFile("inspect", "form", formCode, builder.build()), listener)
     }
 
-    private fun uploadImges(fileList: ArrayList<File?>, listener: RxUtils.HttpListener) {
+    private fun uploadImges(fileList: ArrayList<File?>, formCode: String, listener: RxUtils.HttpListener) {
         //构建body
         val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
-//        builder.addFormDataPart("name", "image.png")
-//        MediaType.parse("image/*")
         fileList.indices
                 .filter { fileList[it] != null }
                 .forEach {
@@ -73,14 +69,14 @@ object UploadUtils {
                         , RequestBody.create(MediaType.parse(getMimeType(fileList[it]!!)), fileList[it]!!))
                 }
         RxUtils.acquireString(Client.getApi(UmsApi::class.java)
-                .uploadFileBatch("inspect", "form", builder.build()), listener)
+                .uploadFileBatch("inspect", "form", formCode, builder.build()), listener)
     }
 
     /**
      * 上传图片到服务器
      * @param listener
      */
-    fun upload(listener: RxUtils.HttpListener, photoPath: List<String>) {
+    fun upload(listener: RxUtils.HttpListener, photoPath: List<String>, formCode: String) {
         LogPrinter.i("UploadUtils", photoPath.size.toString() + "")
         Observable.just(photoPath)
                 .subscribeOn(Schedulers.io())
@@ -95,7 +91,7 @@ object UploadUtils {
                                 if (it.size > 1) it[1] else it[0]
                             }
                             .filterNot { TextUtils.isEmpty(it) }
-                            .mapTo(bitmapList) { BitmapUtils.decodeSampledBitmapFromResource(it, reqWidth, reqHeight) }
+                            .mapNotNullTo(bitmapList) {BitmapUtils.decodeSampledBitmapFromResource(it, reqWidth, reqHeight)}
 
                     return@map bitmapList
                 }
@@ -122,7 +118,7 @@ object UploadUtils {
                     return@map fileList
                 }
                 .subscribe {
-                    uploadImges(it, listener)
+                    uploadImges(it, formCode, listener)
                 }
     }
 

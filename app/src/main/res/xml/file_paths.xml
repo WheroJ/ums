@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <paths>
+        <!--name 为给指定路劲定制的别名-->
+        <external-path path="com.zetavision.panda.ums/cache" name="extcache"/>
+        <cache-path path="" name="cachedir"/>
+        <files-path path="" name="filesdir"/>
+    </paths>
+</resources>

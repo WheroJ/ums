@@ -17,7 +17,6 @@ import com.zetavision.panda.ums.utils.UIUtils
 import com.zetavision.panda.ums.widget.AddView
 
 
-
 /**
  * Created by wheroj on 2018/1/31 17:08.
  * @describe
@@ -57,7 +56,7 @@ class SpotCheckDetailAdapter(data: List<FormItem>, var status: String, val conte
             watcher = object: TextWatcherImpl() {
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     if ((!TextUtils.isEmpty(item.result) && item.result != s.toString())
-                            || (item.result == null && s != null)) {
+                            || (TextUtils.isEmpty(item.result) && !TextUtils.isEmpty(s))) {
                         when (status) {
                             Constant.FORM_STATUS_INPROGRESS ->
                                 //强制拍照检测
@@ -66,7 +65,9 @@ class SpotCheckDetailAdapter(data: List<FormItem>, var status: String, val conte
                                         if (listener != null) {
                                             listener?.takePicture(data.indexOf(item))
                                             UIUtils.closeKeyboard(context)
-                                            etInput?.clearFocus()
+                                            val currentFocus = context.currentFocus
+                                            currentFocus?.clearFocus()
+//                                            etInput?.clearFocus()
                                         }
                                     }
                                 }

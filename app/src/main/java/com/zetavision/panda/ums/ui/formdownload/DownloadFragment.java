@@ -1,5 +1,6 @@
 package com.zetavision.panda.ums.ui.formdownload;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
@@ -17,7 +18,9 @@ import com.zetavision.panda.ums.fragments.base.BaseFragment;
 import com.zetavision.panda.ums.model.ActionInfo;
 import com.zetavision.panda.ums.model.FormInfo;
 import com.zetavision.panda.ums.model.Result;
+import com.zetavision.panda.ums.model.Shift;
 import com.zetavision.panda.ums.model.SystemInfo;
+import com.zetavision.panda.ums.model.Weather;
 import com.zetavision.panda.ums.service.UmsService;
 import com.zetavision.panda.ums.utils.IntentUtils;
 import com.zetavision.panda.ums.utils.LoadingDialog;
@@ -78,9 +81,16 @@ public class DownloadFragment extends BaseFragment {
         }
     }
 
+    @OnClick(R.id.pauseAll)
+    void pauseAll() {
+        if (umsService != null) {
+            umsService.stopDownloadAll();
+        }
+    }
+
     @Override
     protected void init() {
-        getHeader().setTitle("表单下载");
+        getHeader().setTitle(getString(R.string.form_download));
 
         systemSpinnerAdapter = new SystemSpinnerAdapter(getContext());
         actionSpinnerAdapter = new ActionSpinnerAdapter(getContext());
@@ -104,6 +114,7 @@ public class DownloadFragment extends BaseFragment {
             if (!downloadList.isEmpty()) {
                 umsService.setDownloadList(downloadList);
             } else {
+                umsService.setDownloadList(new ArrayList<FormInfo>());
                 ToastUtils.show(R.string.no_local_data);
             }
         } else {
@@ -129,6 +140,7 @@ public class DownloadFragment extends BaseFragment {
                                         if (indexOf != -1) {
                                             formInfo.setStatus(downloadList.get(indexOf).getStatus());
                                             formInfo.setDownload_status(FormInfo.DONE);
+                                            formInfo.sopLocalPath = downloadList.get(indexOf).sopLocalPath;
                                             sortFormInfo.add(formInfo);
                                         } else {
                                             sortFormInfo.add(unDownCount, formInfo);
@@ -136,6 +148,7 @@ public class DownloadFragment extends BaseFragment {
                                         }
                                     }
                                 } else {
+                                    umsService.setDownloadList(new ArrayList<FormInfo>());
                                     ToastUtils.show(R.string.no_data);
                                 }
                                 umsService.setDownloadList(sortFormInfo);
@@ -155,8 +168,8 @@ public class DownloadFragment extends BaseFragment {
     private  List<FormInfo> loadLocalFormInfos(SystemInfo systemInfo, ActionInfo actionInfo) {
         if (systemInfo != null && actionInfo != null && umsService != null) {
             String where = "(utilitySystemId='" + systemInfo.getUtilitySystemId() + "' and actionType='" + actionInfo.getActionType() + "') ";
-            List<FormInfo> formInfos = DataSupport.where(where).find(FormInfo.class);
-            return formInfos;
+            List<FormInfo> formInfoList = DataSupport.where(where).find(FormInfo.class);
+            return formInfoList;
         }
         return null;
     }
@@ -216,6 +229,7 @@ public class DownloadFragment extends BaseFragment {
             final LoadingDialog dialog = new LoadingDialog();
             dialog.show(getFragmentManager(), null);
 
+            getWeatherAndShift();
             Observable<Result> queryUtilitySystem = Client.getApi(UmsApi.class).queryUtilitySystem().map(new Function<ResponseBody, Result>() {
                 @Override
                 public Result apply(ResponseBody responseBody) throws Exception {
@@ -284,6 +298,52 @@ public class DownloadFragment extends BaseFragment {
         }
     }
 
+    private void getWeatherAndShift() {
+        Observable.zip(Client.getApi(UmsApi.class).queryWeather(), Client.getApi(UmsApi.class).queryShift(), new BiFunction<ResponseBody, ResponseBody, HashMap<String, Result>>() {
+            @Override
+            public HashMap<String, Result> apply(ResponseBody responseBody, ResponseBody responseBody2) throws Exception {
+                HashMap<String, Result> map = new HashMap<>();
+
+                JSONObject resultObject = new JSONObject(responseBody.string());
+                Result resultWeather = new Result();
+                resultWeather.setReturnCode(resultObject.optString("returnCode"));
+                resultWeather.setReturnMessage(resultObject.optString("returnMessage"));
+                resultWeather.setReturnData(resultObject.optString("returnData"));
+                map.put("weather", resultWeather);
+
+                resultObject = new JSONObject(responseBody2.string());
+                Result resultShift = new Result();
+                resultShift.setReturnCode(resultObject.optString("returnCode"));
+                resultShift.setReturnMessage(resultObject.optString("returnMessage"));
+                resultShift.setReturnData(resultObject.optString("returnData"));
+                map.put("shift", resultShift);
+
+                return map;
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<HashMap<String, Result>>() {
+                    @Override
+                    public void accept(HashMap<String, Result> map) throws Exception {
+                        Result weather = map.get("weather");
+                        List<Weather> weatherList = weather.getList(Weather.class);
+                        if (weatherList != null) {
+                            for (int i = 0; i < weatherList.size(); i++) {
+                                weatherList.get(i).saveOrUpdate("weather='" + weatherList.get(i).weather + "'");
+                            }
+                        }
+
+                        Result shift = map.get("shift");
+                        List<Shift> shiftList = shift.getList(Shift.class);
+                        if (shiftList != null) {
+                            for (int i = 0; i < shiftList.size(); i++) {
+                                shiftList.get(i).saveOrUpdate("shift='" + shiftList.get(i).shift + "'");
+                            }
+                        }
+                    }
+                });
+    }
+
     public UmsService umsService;
     // service连接
     public ServiceConnection connection = new ServiceConnection() {
@@ -292,6 +352,7 @@ public class DownloadFragment extends BaseFragment {
             UmsService.MyBinder binder = (UmsService.MyBinder) service;
             umsService = binder.getService();
             umsService.setDownloadListener(new UmsService.OnDownloadListener() {
+                @SuppressLint("StringFormatInvalid")
                 @Override
                 public void onUpdate(List<FormInfo> list) {
                     if (list != null) {
@@ -307,7 +368,7 @@ public class DownloadFragment extends BaseFragment {
                             if (count == size) downLoadAll = false;
                             double ratio = count * 100.0 / list.size();
                             progressBar.setProgress((int) (ratio / 100));
-                            progressText.setText(getString(R.string.have_finish) + ratio + "%");
+                            progressText.setText(getString(R.string.have_finish, ratio + "%"));
                         }
                     }
                 }

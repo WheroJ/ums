@@ -15,10 +15,7 @@ import com.zetavision.panda.ums.adapter.CommonSpinnerAdapter
 import com.zetavision.panda.ums.adapter.UpKeepDetailAdapter
 import com.zetavision.panda.ums.base.BaseActivity
 import com.zetavision.panda.ums.model.*
-import com.zetavision.panda.ums.utils.Constant
-import com.zetavision.panda.ums.utils.NetUtils
-import com.zetavision.panda.ums.utils.TimeUtils
-import com.zetavision.panda.ums.utils.ToastUtils
+import com.zetavision.panda.ums.utils.*
 import com.zetavision.panda.ums.utils.network.Client
 import com.zetavision.panda.ums.utils.network.RxUtils
 import com.zetavision.panda.ums.utils.network.UmsApi
@@ -215,7 +212,7 @@ class UpKeepDetailActivity: BaseActivity() {
     @SuppressLint("WrongViewCast")
     private fun initView(formInfoDetail: FormInfoDetail?) {
 
-        if (formInfoDetail != null) {
+        if (formInfoDetail?.formItemList != null) {
             if (upKeepDetailAdapter == null) {
                 upKeepDetailAdapter = UpKeepDetailAdapter(formInfoDetail.formItemList, formInfoDetail.form.status)
                 recyclerView?.adapter = upKeepDetailAdapter
@@ -255,8 +252,23 @@ class UpKeepDetailActivity: BaseActivity() {
             }
 
             val btnMaintStatus = findViewById<Button>(R.id.activityUpKeepDetail_btnMaintStatus)
+            val btnSeeSop = findViewById<Button>(R.id.activityUpKeepDetail_btnSeeSop)
             val tvMaintStatus = findViewById<TextView>(R.id.activityUpKeepDetail_tvMaintStatus)
             val tvMaintStatusStr = findViewById<TextView>(R.id.activityUpKeepDetail_tvMaintStatusStr)
+
+            btnSeeSop.setOnClickListener {
+                val where = if (FormInfo.ACTION_TYPE_M == formInfoDetail.actionType) {
+                    "flowCode = '" + formInfoDetail.form.maintFlowCode + "'"
+                } else {
+                    "flowCode = '" + formInfoDetail.form.inspectFlowCode + "'"
+                }
+                val sopMap = DataSupport.where(where).findFirst(SopMap::class.java)
+                if (sopMap != null) {
+                    OpenFileUtils.Companion.getInstance().openFile(sopMap.sopLocalPath);
+                } else {
+                    ToastUtils.show(R.string.no_local_data)
+                }
+            }
             when (formInfoDetail.form.status) {
                 Constant.FORM_STATUS_CLOSED -> tvMaintStatusStr.text = "表单状态：已结束"
                 Constant.FORM_STATUS_PLANNED -> {
@@ -402,64 +414,6 @@ class UpKeepDetailActivity: BaseActivity() {
                 ToastUtils.show(R.string.save_fail)
                 false
             }
-        }
-        return false
-    }
-
-    private fun checkData(formInfoDetail: FormInfoDetail?, checkDetail: Boolean): Boolean {
-        if (formInfoDetail != null) {
-            for (i in formInfoDetail.formItemList.indices) {
-                val formItem = formInfoDetail.formItemList[i]
-                if ("N" == formItem.valueType) {
-                    try {
-                        if (TextUtils.isEmpty(formItem.result)) {
-                            if (!checkDetail) {
-                                val findFirst = DataSupport.where("formItemId='${formItem.formItemId}'").findFirst(FormItem::class.java)
-                                if (findFirst != null) formItem.result = findFirst.presetValue
-                            }
-                        } else {
-                            formItem.result.toFloat()
-                        }
-                    } catch (e: NumberFormatException) {
-                        e.printStackTrace()
-                        ToastUtils.show("序号" + (i + 1) + "的取值必须是数字")
-                        return false
-                    } catch (e: NullPointerException) {
-                        e.printStackTrace()
-                        ToastUtils.show("序号" + (i + 1) + "的取值不能为空")
-                        return false
-                    }
-                }
-
-                if (checkDetail && TextUtils.isEmpty(formItem.presetValue)) {
-                    ToastUtils.show("序号" + (i + 1) + "保养数据未录入，请录入数据！")
-                    return false
-                }
-
-                if (!TextUtils.isEmpty(formItem.remarks)) {
-                    if (formItem.remarks.length > Constant.MAX_LEN) {
-                        ToastUtils.show("序号" + (i + 1) + "的备注超过200的长度限制")
-                        return false
-                    }
-                }
-
-                if (checkDetail) {
-                    //TODO 方便测试，暂时屏蔽
-//                    if ("Y" == formItem.photoMust) {
-//                        if (formItem.photoPaths == null || formItem.photoPaths.isEmpty()) {
-//                            ToastUtils.show("序号" + (i + 1) + "的必须进行现场拍照才能保存")
-//                            return false
-//                        }
-//                    }
-                }
-            }
-            if (!TextUtils.isEmpty(formInfoDetail.form.fillinRemarks)) {
-                if (formInfoDetail.form.fillinRemarks.length > Constant.MAX_LEN) {
-                    ToastUtils.show("备注超过200的长度限制")
-                    return false
-                }
-            }
-            return true
         }
         return false
     }

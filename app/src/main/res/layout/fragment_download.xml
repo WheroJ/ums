@@ -126,7 +126,7 @@
         <TextView
             style="@style/list_header_text"
             android:text="@string/description"
-            android:layout_weight="0.2" />
+            android:layout_weight="0.1" />
         <TextView
             style="@style/list_header_text"
             android:text="@string/form_status"
@@ -135,6 +135,10 @@
             style="@style/list_header_text"
             android:text="@string/operation"
             android:layout_weight="0.15" />
+        <TextView
+            style="@style/list_header_text"
+            android:text="@string/sop_opreate"
+            android:layout_weight="0.1" />
     </LinearLayout>
     <View
         android:background="@color/light"

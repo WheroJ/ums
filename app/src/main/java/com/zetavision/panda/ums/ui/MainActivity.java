@@ -43,6 +43,8 @@ public class MainActivity extends BaseActivity {
     TextView tvUploadCount;
 
     private int current = R.id.download;
+    private int preCheckId = current;
+
 
     @Override
     public int getContentLayoutId() {
@@ -70,13 +72,40 @@ public class MainActivity extends BaseActivity {
 //            }
 //        }
 
-//        File file = new File(UIUtils.getCachePath(), "picture.jpg");
+//        File file = new File(UIUtils.getCachePath(), "photo_1518060307109.png");
+//        File file4 = new File(UIUtils.getCachePath(), "photo_1518060427235.png");
+//        File file5 = new File(UIUtils.getCachePath(), "photo_1518060937237.png");
+//        File file6 = new File(UIUtils.getCachePath(), "photo_1518061946096.png");
+//        File file3 = new File(UIUtils.getCachePath(), "photo_1518062099503.png");
+//        File file12 = new File(UIUtils.getCachePath(), "photo_15180603071092.png");
+//        File file13 = new File(UIUtils.getCachePath(), "photo_15180604272352.png");
+//        File file14 = new File(UIUtils.getCachePath(), "photo_15180609372372.png");
+//        File file15 = new File(UIUtils.getCachePath(), "photo_15180619460962.png");
+//        File file16 = new File(UIUtils.getCachePath(), "photo_15180620995032.png");
+////        File file7 = new File(UIUtils.getCachePath(), "photo_1518062505236.png");
+////        File file8 = new File(UIUtils.getCachePath(), "photo_1518069128199.png");
+////        File file10 = new File(UIUtils.getCachePath(), "photo_1518070151948.png");
 //        File file2 = new File(UIUtils.getCachePath(), "upload.png");
-//        File file3 = new File(UIUtils.getCachePath(), "ums.jpg");
+////        File file9 = new File(UIUtils.getCachePath(), "ums.png");
+////        File file11 = new File(UIUtils.getCachePath(), "picture.png");
+//        System.out.println("地址：" + file2.getAbsolutePath());
 //        ArrayList<String> list = new ArrayList<>();
 //        list.add(file.getAbsolutePath());
 //        list.add(file2.getAbsolutePath());
 //        list.add(file3.getAbsolutePath());
+//        list.add(file4.getAbsolutePath());
+//        list.add(file5.getAbsolutePath());
+//        list.add(file6.getAbsolutePath());
+////        list.add(file7.getAbsolutePath());
+////        list.add(file8.getAbsolutePath());
+////        list.add(file9.getAbsolutePath());
+////        list.add(file10.getAbsolutePath());
+////        list.add(file11.getAbsolutePath());
+//        list.add(file12.getAbsolutePath());
+//        list.add(file13.getAbsolutePath());
+//        list.add(file14.getAbsolutePath());
+//        list.add(file15.getAbsolutePath());
+//        list.add(file16.getAbsolutePath());
 //        UploadUtils.INSTANCE.upload(new UploadUtils.UploadListener() {
 //            @Override
 //            public void onResult(@NotNull Result result) {
@@ -89,7 +118,7 @@ public class MainActivity extends BaseActivity {
 //                super.onError(e);
 //                LogPrinter.i("UploadFile", "失敗。。。。" + e.getMessage());
 //            }
-//        }, list);
+//        }, list, "4C1-CA-ADH01-180227-PM-002");
     }
 
     private void changeContent() {
@@ -122,8 +151,8 @@ public class MainActivity extends BaseActivity {
     // 用户拒绝授权回调
     @OnPermissionDenied(Manifest.permission.CAMERA)
     void showDeniedForCamera() {
-        ToastUtils.show("拒绝开起权限");
-//        Toast.makeText(this, R.string.permission_camera_denied, Toast.LENGTH_SHORT).show();
+        ToastUtils.show(getString(R.string.refuse_permission));
+        onChange((LinearLayout) findViewById(preCheckId));
     }
 
     // 用户勾选了“不再提醒”时调用
@@ -143,6 +172,7 @@ public class MainActivity extends BaseActivity {
         if (view.getId() != this.current) {
             LinearLayout preView = findViewById(this.current);
             preView.setBackground(null);
+            preCheckId = current;
             this.current = view.getId();
             view.setBackgroundColor(getResources().getColor(R.color.main_color));
             changeContent();
@@ -184,22 +214,6 @@ public class MainActivity extends BaseActivity {
         }
         EventBus.getDefault().post(Constant.EVENT_REFRESH_LANGUAGE);
     }
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-//        switch (requestCode) {
-//            case 0:
-//                if (grantResults.length > 0
-//                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    // Toast.makeText(MainActivity.this,"申请相机权限成功", Toast.LENGTH_LONG).show();
-//                } else {
-//                    // Toast.makeText(this,"申请相机权限失败",Toast.LENGTH_LONG).show();
-//                }
-//                break;
-//            default:
-//                break;
-//        }
-//    }
 
     private long backPressTimeRecord = 0l;
     @Override

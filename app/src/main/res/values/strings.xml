@@ -33,7 +33,7 @@
     <string name="rt_exit">再按一次退出程序</string>
     <string name="too_lower">低于下限值</string>
     <string name="too_upper">超过上限值</string>
-    <string name="have_finish">已完成</string>
+    <string name="have_finish">已完成 %1$s%</string>
     <string name="remark">备注</string>
     <string name="device_name_notnull">设备名称不能为空</string>
     
@@ -58,7 +58,6 @@
     <string name="spotcheck_fill">点检表单%1$s填写</string>
     <string name="maint_fill">保养表单%1$s填写</string>
     <string name="common_savedata">保存数据</string>
-    <string name="formdetail_sort">序号</string>
     <string name="formdetail_num">保养编号</string>
     <string name="formdetail_lower">下限</string>
     <string name="formdetail_upper">上限</string>
@@ -104,4 +103,10 @@
     <string name="data_exception">数据异常</string>
     <string name="device_description">设备描述</string>
     <string name="order">序号</string>
+    <string name="refuse_permission">拒绝开起权限</string>
+    <string name="inspect_route2">点检周期：</string>
+    <string name="see_sop">查看sop文件</string>
+    <string name="notice_download_form">请先下载表单数据</string>
+    <string name="sop_opreate">SOP操作</string>
+    <string name="install_word">请先安装office</string>
 </resources>

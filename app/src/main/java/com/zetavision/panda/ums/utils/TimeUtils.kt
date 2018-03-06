@@ -14,7 +14,7 @@ object TimeUtils {
         val currentSecond = System.currentTimeMillis() / 1000 - time
         val minute = currentSecond/60%60
         var second = currentSecond%60
-        val hour = minute/60
+        val hour = currentSecond/60/60
 
         return if (hour == 0L) {
             if (minute == 0L) {

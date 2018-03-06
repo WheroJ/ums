@@ -40,12 +40,13 @@ public class Constant {
         switch (NET_TYPE) {
             case 1:
                 API_BASE_URL = "http://192.168.0.200:8088/";
+                API_BASE_URL = "http://192.168.0.210:8088/";
                 break;
             case 2:
                 API_BASE_URL = "http://7.177.122.179:8088/";
                 break;
             case 3:
-                API_BASE_URL = "http://www.juyuejk.com/";
+                API_BASE_URL = "http://192.168.0.104:8082/";
                 break;
         }
     }

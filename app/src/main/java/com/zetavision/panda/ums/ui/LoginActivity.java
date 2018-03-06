@@ -110,12 +110,6 @@ public class LoginActivity extends BaseActivity {
                 }
             }
         });
-
-        if (!Constant.RE_LOGIN.equals(getIntent().getStringExtra(Constant.RE_LOGIN))) {
-            if (!NetUtils.INSTANCE.isNetConnect(this)) {
-                offLogin = true;
-            }
-        }
     }
 
     private void setLanguage(String lang) {
@@ -159,5 +153,15 @@ public class LoginActivity extends BaseActivity {
     public void onBackPressed() {
         super.onBackPressed();
         IntentUtils.INSTANCE.goExit(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!Constant.RE_LOGIN.equals(getIntent().getStringExtra(Constant.RE_LOGIN))) {
+            if (!NetUtils.INSTANCE.isNetConnect(this)) {
+                offLogin = true;
+            } else offLogin = false;
+        }
     }
 }

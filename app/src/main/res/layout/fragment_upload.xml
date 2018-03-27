@@ -106,7 +106,9 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="30dp">
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/dp_10"
+        android:paddingTop="@dimen/dp_10">
         <TextView
             android:id="@+id/form_sort"
             style="@style/list_header_text"
@@ -161,7 +163,7 @@
             android:layout_height="50dp">
             <TextView
                 android:id="@+id/total"
-                android:text="@string/total_download_progress"
+                android:text="@string/total_upload_progress"
                 android:textColor="@color/text_light_blue"
                 android:gravity="center_vertical"
                 android:layout_marginStart="16dp"
@@ -174,7 +176,7 @@
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:max="1"
+                android:max="100"
                 android:progress="0"
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
@@ -211,7 +213,7 @@
                     android:layout_width="34dp"
                     android:layout_height="34dp" />
                 <TextView
-                    android:text="全部上传"
+                    android:text="@string/all_upload"
                     android:textColor="@color/white"
                     android:gravity="center"
                     android:layout_width="wrap_content"
@@ -236,7 +238,7 @@
                     android:layout_width="34dp"
                     android:layout_height="34dp" />
                 <TextView
-                    android:text="全部暂停"
+                    android:text="@string/all_stop"
                     android:textColor="@color/white"
                     android:gravity="center"
                     android:layout_width="wrap_content"

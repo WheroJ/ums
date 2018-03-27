@@ -1,8 +1,10 @@
 package com.zetavision.panda.ums.model;
 
+import android.text.TextUtils;
+
 import org.litepal.crud.DataSupport;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by wheroj on 2018/1/31 17:01.
@@ -49,9 +51,9 @@ public class FormItem extends DataSupport{
     public String inspectResult;//",
 
     public String hadTakePhoto;
-    public List<String> photoUrls;
+    public ArrayList<String> photoUrls;
 
-    public List<String> photoPaths;
+    public ArrayList<String> photoPaths;
 
     @Override
     public boolean equals(Object obj) {
@@ -63,5 +65,23 @@ public class FormItem extends DataSupport{
             } else return super.equals(obj);
         }
         return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        StringBuilder builder = new StringBuilder();
+        if (!TextUtils.isEmpty(result)) {
+            builder.append(result.hashCode());
+        }
+        if (!TextUtils.isEmpty(remarks)) {
+            builder.append(remarks.hashCode());
+        }
+        if (photoPaths != null) {
+            builder.append(photoPaths.hashCode());
+        }
+        if (photoUrls != null) {
+            builder.append(photoUrls.hashCode());
+        }
+        return builder.toString().hashCode();
     }
 }

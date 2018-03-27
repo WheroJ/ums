@@ -140,7 +140,7 @@ public class UIUtils {
         } else {
             dirFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + mContext.getPackageName() + File.separator + "cache");
         }
-        dirFile = UIUtils.getContext().getCacheDir();
+//        dirFile = UIUtils.getContext().getCacheDir();
         if (!dirFile.exists()) {
             dirFile.mkdirs();
         }
@@ -158,6 +158,16 @@ public class UIUtils {
             dirFile.mkdirs();
         }
         return dirFile.getAbsolutePath();
+    }
+
+    /**
+     * 获取 sdcard中的DCIM文件夹
+     *
+     * @return
+     */
+    public static String getExtraDCIMDir() {
+        File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        return file.getAbsolutePath();
     }
 
     /**

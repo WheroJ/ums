@@ -78,6 +78,13 @@ public class UploadFragment extends BaseFragment{
         }
     }
 
+    @OnClick(R.id.pauseAll)
+    void pauseAll() {
+        if (umsService != null) {
+            umsService.stopUploadAll();
+        }
+    }
+
     @Override
     protected void init() {
         getHeader().setTitle(getString(R.string.form_upload));
@@ -253,7 +260,7 @@ public class UploadFragment extends BaseFragment{
                     if (list != null) {
                         uploadAdapter.notifyDataSetChanged(list);
                         if (getActivity() instanceof MainActivity) {
-                            ((MainActivity) getActivity()).updateUnUploadCount();
+                            ((MainActivity) getActivity()).updateCount();
                         }
                         if (uploadAll) {
                             int count = 0, size = list.size();
@@ -265,8 +272,8 @@ public class UploadFragment extends BaseFragment{
 
                             if (count == list.size()) uploadAll = false;
                             double ratio = count * 100.0 / list.size();
-                            progressBar.setProgress((int) (ratio / 100));
-                            progressText.setText(getString(R.string.have_finish) + ratio + "%");
+                            progressBar.setProgress((int) ratio);
+                            progressText.setText(getString(R.string.have_finish, ratio + "%"));
                         }
                     }
                 }

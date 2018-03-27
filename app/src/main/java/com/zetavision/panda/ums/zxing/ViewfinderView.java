@@ -1,8 +1,4 @@
 package com.zetavision.panda.ums.zxing;
-import com.google.zxing.ResultPoint;
-import com.zetavision.panda.ums.R;
-import com.zetavision.panda.ums.zxing.camera.CameraManager;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
@@ -11,9 +7,11 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
+
+import com.google.zxing.ResultPoint;
+import com.zetavision.panda.ums.R;
+import com.zetavision.panda.ums.zxing.camera.CameraManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,10 +42,10 @@ public class ViewfinderView extends View {
         // Initialize these once for performance rather than calling them every time in onDraw().
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         Resources resources = getResources();
-        maskColor = resources.getColor(R.color.viewfinder_mask, null);
-        resultColor = resources.getColor(R.color.result_view, null);
-        laserColor = resources.getColor(R.color.viewfinder_laser, null);
-        resultPointColor = resources.getColor(R.color.possible_result_points, null);
+        maskColor = resources.getColor(R.color.viewfinder_mask);
+        resultColor = resources.getColor(R.color.result_view);
+        laserColor = resources.getColor(R.color.viewfinder_laser);
+        resultPointColor = resources.getColor(R.color.possible_result_points);
         scannerAlpha = 0;
         possibleResultPoints = new ArrayList<>(5);
         lastPossibleResultPoints = null;

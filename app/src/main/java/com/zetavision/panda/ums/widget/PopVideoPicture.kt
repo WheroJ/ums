@@ -12,7 +12,7 @@ import com.zetavision.panda.ums.utils.UIUtils
  * Created by wheroj on 2018/2/6 10:56.
  * @describe
  */
-abstract class PopVideoPicture(context: Context): PopupWindow() {
+class PopVideoPicture(context: Context): PopupWindow() {
 
     private var tvCancel: TextView
     private var tvTakePicture: TextView
@@ -28,11 +28,11 @@ abstract class PopVideoPicture(context: Context): PopupWindow() {
         }
 
         tvTakePicture.setOnClickListener {
-            onTakePicture()
+            mListener?.onTakePicture()
         }
 
         tvTakeVideo.setOnClickListener {
-            onTakeVideo()
+            mListener?.onTakeVideo()
         }
         initView()
     }
@@ -45,6 +45,13 @@ abstract class PopVideoPicture(context: Context): PopupWindow() {
         this.isOutsideTouchable = false
     }
 
-    abstract fun onTakePicture()
-    abstract fun onTakeVideo()
+    interface OnCameraShowListener {
+        fun onTakePicture()
+        fun onTakeVideo()
+    }
+
+    private var mListener: OnCameraShowListener? = null
+    fun setOnCameraShowListener(listener: OnCameraShowListener) {
+        mListener = listener
+    }
 }

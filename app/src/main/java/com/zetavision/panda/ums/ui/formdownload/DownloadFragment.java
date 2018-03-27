@@ -106,6 +106,9 @@ public class DownloadFragment extends BaseFragment {
 
     @OnClick(R.id.search)
     void onSearch() {
+        progressBar.setProgress(0);
+        progressText.setText(getString(R.string.have_finish, 0.0 + "%"));
+
         final SystemInfo systemInfo = (SystemInfo) systemSpinner.getSelectedItem();
         final ActionInfo actionInfo = (ActionInfo) actionSpinner.getSelectedItem();
 
@@ -118,50 +121,54 @@ public class DownloadFragment extends BaseFragment {
                 ToastUtils.show(R.string.no_local_data);
             }
         } else {
-            RxUtils.INSTANCE.acquireString(
-                    Client.getApi(UmsApi.class)
-                            .queryPlannedForm(systemInfo.getUtilitySystemId(), actionInfo.getActionType())
-                    , new RxUtils.DialogListener() {
-                        @Override
-                        public void onResult(@NotNull Result result) {
-                            if (umsService != null) {
-                                // 设置下载列表
-                                List<FormInfo> formInfos = result.getList(FormInfo.class);
+            if (systemInfo != null && actionInfo != null) {
+                RxUtils.INSTANCE.acquireString(
+                        Client.getApi(UmsApi.class)
+                                .queryPlannedForm(systemInfo.getUtilitySystemId(), actionInfo.getActionType())
+                        , new RxUtils.DialogListener() {
+                            @Override
+                            public void onResult(@NotNull Result result) {
+                                if (umsService != null) {
+                                    // 设置下载列表
+                                    List<FormInfo> formInfos = result.getList(FormInfo.class);
 
-                                List<FormInfo> downloadList = loadLocalFormInfos(systemInfo, actionInfo);
+                                    List<FormInfo> downloadList = loadLocalFormInfos(systemInfo, actionInfo);
 
-                                ArrayList<FormInfo> sortFormInfo = new ArrayList<>();
+                                    ArrayList<FormInfo> sortFormInfo = new ArrayList<>();
 
-                                int unDownCount = 0;
-                                if (formInfos != null && !formInfos.isEmpty()) {
-                                    for (int i = 0; i < formInfos.size(); i++) {
-                                        FormInfo formInfo = formInfos.get(i);
-                                        int indexOf = downloadList.indexOf(formInfo);
-                                        if (indexOf != -1) {
-                                            formInfo.setStatus(downloadList.get(indexOf).getStatus());
-                                            formInfo.setDownload_status(FormInfo.DONE);
-                                            formInfo.sopLocalPath = downloadList.get(indexOf).sopLocalPath;
-                                            sortFormInfo.add(formInfo);
-                                        } else {
-                                            sortFormInfo.add(unDownCount, formInfo);
-                                            unDownCount++;
+                                    int unDownCount = 0;
+                                    if (formInfos != null && !formInfos.isEmpty()) {
+                                        for (int i = 0; i < formInfos.size(); i++) {
+                                            FormInfo formInfo = formInfos.get(i);
+                                            int indexOf = downloadList.indexOf(formInfo);
+                                            if (indexOf != -1) {
+                                                formInfo.setStatus(downloadList.get(indexOf).getStatus());
+                                                formInfo.setDownload_status(FormInfo.DONE);
+                                                formInfo.sopLocalPath = downloadList.get(indexOf).sopLocalPath;
+                                                sortFormInfo.add(formInfo);
+                                            } else {
+                                                sortFormInfo.add(unDownCount, formInfo);
+                                                unDownCount++;
+                                            }
                                         }
+                                    } else {
+                                        umsService.setDownloadList(new ArrayList<FormInfo>());
+                                        ToastUtils.show(R.string.no_data);
                                     }
-                                } else {
-                                    umsService.setDownloadList(new ArrayList<FormInfo>());
-                                    ToastUtils.show(R.string.no_data);
+                                    umsService.setDownloadList(sortFormInfo);
                                 }
-                                umsService.setDownloadList(sortFormInfo);
                             }
-                        }
 
-                        @Override
-                        public void onError(@NotNull Throwable e) {
-                            super.onError(e);
-                            ToastUtils.show(e.getMessage());
-                            loadLocalFormInfos(systemInfo, actionInfo);
-                        }
-                    });
+                            @Override
+                            public void onError(@NotNull Throwable e) {
+                                super.onError(e);
+                                ToastUtils.show(e.getMessage());
+                                loadLocalFormInfos(systemInfo, actionInfo);
+                            }
+                        });
+            } else {
+                ToastUtils.show(R.string.choose_systype_action);
+            }
         }
     }
 
@@ -367,7 +374,7 @@ public class DownloadFragment extends BaseFragment {
 
                             if (count == size) downLoadAll = false;
                             double ratio = count * 100.0 / list.size();
-                            progressBar.setProgress((int) (ratio / 100));
+                            progressBar.setProgress((int)ratio);
                             progressText.setText(getString(R.string.have_finish, ratio + "%"));
                         }
                     }

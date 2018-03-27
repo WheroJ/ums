@@ -1,6 +1,7 @@
 package com.zetavision.panda.ums.base;
 
 import android.app.Fragment;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -13,7 +14,11 @@ import android.widget.LinearLayout;
 
 import com.zetavision.panda.ums.R;
 import com.zetavision.panda.ums.fragments.base.BaseFragment;
+import com.zetavision.panda.ums.model.FormInfo;
+import com.zetavision.panda.ums.model.FormInfoDetail;
+import com.zetavision.panda.ums.model.FormItem;
 import com.zetavision.panda.ums.model.Result;
+import com.zetavision.panda.ums.model.SopMap;
 import com.zetavision.panda.ums.model.User;
 import com.zetavision.panda.ums.ui.LoginActivity;
 import com.zetavision.panda.ums.utils.ActivityCollector;
@@ -32,6 +37,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
+import org.litepal.crud.DataSupport;
 
 import java.util.Locale;
 
@@ -48,6 +54,7 @@ abstract public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);//竖屏
 
         mContext = this;
 
@@ -111,7 +118,13 @@ abstract public class BaseActivity extends AppCompatActivity {
         }
     }
 
-    protected void onRightTextClick(){}
+    protected void onRightTextClick(){
+        DataSupport.deleteAll(FormInfoDetail.class);
+        DataSupport.deleteAll(FormInfo.class);
+        DataSupport.deleteAll(FormItem.class);
+        DataSupport.deleteAll(SopMap.class);
+    }
+
     /**
      * 默认实现结束当前页
      */

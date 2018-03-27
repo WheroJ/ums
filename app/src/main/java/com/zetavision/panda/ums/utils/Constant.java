@@ -21,6 +21,17 @@ public class Constant {
     public static final String LANG_ENGLISH = "en";
 
     /**
+     * 更新已下载表单数量
+     */
+    public static final String UPDATE_DOWN_COUNT = "UPDATE_DOWN_COUNT";
+
+    /**
+     * 更新等待上传表单数量
+     */
+    public static final String UPDATE_WAIT_UPLOAD_COUNT = "UPDATE_WAIT_UPLOAD_COUNT";
+    public static final String LOADING_CONTENT_KEY = "content";
+
+    /**
      * 1: 内网   2：外网   3:外网第二台服务器
      */
     public static int NET_TYPE = 1;
@@ -39,14 +50,13 @@ public class Constant {
     public static void setBaseUrlByType() {
         switch (NET_TYPE) {
             case 1:
-                API_BASE_URL = "http://192.168.0.200:8088/";
-//                API_BASE_URL = "http://192.168.0.210:8088/";
+                API_BASE_URL = "http://192.168.0.105:8088/";
                 break;
             case 2:
                 API_BASE_URL = "http://7.177.122.179:8088/";
                 break;
             case 3:
-                API_BASE_URL = "http://192.168.0.104:8082/";
+                API_BASE_URL = "http://192.168.0.101:8082/";
                 break;
         }
     }
@@ -78,13 +88,14 @@ public class Constant {
     public static final String FORM_STATUS_COMPLETED = "COMPLETED";
     public static final String FORM_STATUS_CLOSED = "CLOSED";
 
-    public static final String RELOGINACTION = "com.cmcc.pp.ui.LoginActivity";
-    public static final String REGETTOKEN = "com.cmcc.pp.ui.LoginActivity.reGetToken";
+    public static final String RELOGINACTION = "com.zetavision.panda.ums.ui.LoginActivity";
+    public static final String REGETTOKEN = "com.zetavision.panda.ums.ui.LoginActivity.reGetToken";
     public static final String SYSTEM_DIALOG_REASON_KEY = "reason";
     public static final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
     public static final String SYSTEM_DIALOG_REASON_LOCK = "lock";
     public static final String IS_RUN_BACK = "isBackRun";
     public static final String WAIT_UPLOAD_CRASH_LOG = "WAIT_UPLOAD_CRASH_LOG";
+    public static final String ACTION_UPLOAD_LOG = "com.zetavision.panda.ums.uploadImageAndVideo.log";
 
     @NotNull
     public static final String RE_LOGIN = "re_login";

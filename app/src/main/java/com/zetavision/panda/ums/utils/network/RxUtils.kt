@@ -62,7 +62,18 @@ object RxUtils {
     abstract class ProgressListener(override var context: AppCompatActivity? = null): DialogListener(context) {
         abstract fun onUpdate(progress: Float);
     }
-
+//
+//    /**
+//     * 请求是否取消
+//     */
+//    private var isCancel = false
+//
+//    /**
+//     * 取消请求
+//     */
+//    fun cancelRequest() {
+//        isCancel = true
+//    }
 
     interface HttpListener {
         fun onError(e: Throwable)
@@ -122,24 +133,20 @@ object RxUtils {
                         val inputStream = responseBody.byteStream()
                         val contentSize = responseBody.contentLength()
 
-//                        if (contentSize >= 0) {
-                            val bytes = ByteArray(1024)
-                            var currentSaveSize = 0
-                            var progress = 0.0f
-                            while ((inputStream.read(bytes) != -1)) {
-                                currentSaveSize += bytes.size
-                                outputStream.write(bytes)
-                                outputStream.flush()
-                                progress = currentSaveSize * 1.0f / contentSize
-                                httpListener?.onUpdate(progress)
-                            }
-                            outputStream.close()
-                            val result = Result()
-                            result.returnData = saveFile.absolutePath
-                            httpListener?.onResult(result)
-//                        } else {
-//                            httpListener?.onError(Throwable(UIUtils.getContext().getString(R.string.data_exception)))
-//                        }
+                        val bytes = ByteArray(1024)
+                        var currentSaveSize = 0
+                        var progress: Float
+                        while ((inputStream.read(bytes) != -1)) {
+                            currentSaveSize += bytes.size
+                            outputStream.write(bytes)
+                            outputStream.flush()
+                            progress = currentSaveSize * 1.0f / contentSize
+                            httpListener?.onUpdate(progress)
+                        }
+                        outputStream.close()
+                        val result = Result()
+                        result.returnData = saveFile.absolutePath
+                        httpListener?.onResult(result)
                     }
 
                     override fun onError(e: Throwable) {

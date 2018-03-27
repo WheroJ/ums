@@ -1,19 +1,23 @@
 package com.zetavision.panda.ums.ui.spotcheck;
 
-import android.graphics.Bitmap;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 
-import com.google.zxing.Result;
+import com.seuic.scanner.DecodeInfo;
 import com.zetavision.panda.ums.R;
-import com.zetavision.panda.ums.fragments.base.CaptureFragment;
+import com.zetavision.panda.ums.fragments.base.BaseFragment;
 import com.zetavision.panda.ums.utils.IntentUtils;
 import com.zetavision.panda.ums.utils.ToastUtils;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 
-public class SpotCheckFragment extends CaptureFragment {
+public class SpotCheckFragment extends BaseFragment {
 
     @BindView(R.id.switchInput) public View switchInput;
     @BindView(R.id.inputLayout) public View inputLayout;
@@ -24,15 +28,15 @@ public class SpotCheckFragment extends CaptureFragment {
      */
     private boolean dealDecode = true;
 
-    @Override
-    public void handleDecode(Result rawResult, Bitmap barcode, float scaleFactor) {
-        super.handleDecode(rawResult, barcode, scaleFactor);
-        if (dealDecode) {
-            // 处理扫描结果
-            if (!rawResult.getText().equals(""))
-                IntentUtils.INSTANCE.goSpotCheck(getContext(), rawResult.getText());
-        }
-    }
+//    @Override
+//    public void handleDecode(Result rawResult, Bitmap barcode, float scaleFactor) {
+//        super.handleDecode(rawResult, barcode, scaleFactor);
+//        if (dealDecode) {
+//            // 处理扫描结果
+//            if (!rawResult.getText().equals(""))
+//                IntentUtils.INSTANCE.goSpotCheck(getContext(), rawResult.getText());
+//        }
+//    }
 
     @OnClick({R.id.switchInput, R.id.switchScan})
     public void onSwitch(View view) {
@@ -65,5 +69,31 @@ public class SpotCheckFragment extends CaptureFragment {
     @Override
     protected void init() {
         getHeader().setTitle(getString(R.string.spotcheck_scan));
+
+        // 程序打开的时候调用服务，只用调用一次即可，不需要在每个activity中都调用
+        IntentUtils.INSTANCE.startScanService(getActivity());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        EventBus.getDefault().register(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onReceiverCode(DecodeInfo info) {
+        if (dealDecode) {
+            System.out.println("barCode="+info.barcode);
+            // 处理扫描结果
+            if (!TextUtils.isEmpty(info.barcode))
+                IntentUtils.INSTANCE.goSpotCheck(getContext(), info.barcode);
+            else ToastUtils.show(R.string.error_code);
+        }
     }
 }

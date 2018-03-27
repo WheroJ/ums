@@ -42,12 +42,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
@@ -59,6 +62,8 @@ public class UmsService extends Service {
 
     private List<FormInfo> downloadList;   // 当前下载列表
     private List<FormInfoDetail> uploadList;   // 当前上传列表
+    private HashMap<String, UploadUtils> uploadUtilsMap;
+    private List<String> downloadFormIds;
     private OnDownloadListener downloadListener; // 下载监听
     private OnUploadListener uploadListener; // 上传监听
 
@@ -85,7 +90,7 @@ public class UmsService extends Service {
         this.uploadListener = UploadListener;
     }
 
-    public void startUpload(String formId) {
+    public void startUpload(final String formId) {
         final FormInfoDetail formInfoDetail = getFormInfoDetail(formId);
 
         if (formInfoDetail != null && Constant.FORM_STATUS_COMPLETED.equals(formInfoDetail.form.getStatus())) {
@@ -93,6 +98,7 @@ public class UmsService extends Service {
                     || formInfoDetail.isUpload == FormInfo.PROGRESS)
                 return;
             else formInfoDetail.isUpload = FormInfo.PROGRESS;
+            if (uploadListener != null) uploadListener.onUpdate(uploadList);
 
             if (formInfoDetail.formItemList != null) {
                 ArrayList<String> photoPaths = new ArrayList<>();
@@ -104,17 +110,27 @@ public class UmsService extends Service {
                 }
 
                 if (!photoPaths.isEmpty()) {
-                    UploadUtils.INSTANCE.upload(new UploadUtils.UploadListener() {
+                    if (uploadUtilsMap == null) {
+                        uploadUtilsMap = new HashMap<>();
+                    }
+                    final UploadUtils uploadUtils = new UploadUtils();
+                    uploadUtilsMap.put(formId, uploadUtils);
+                    uploadUtils.startUpload();
+                    uploadUtils.uploadImageAndVideo(new UploadUtils.UploadListener() {
                         @Override
                         public void onResult(@NotNull Result result) {
                             super.onResult(result);
-                            parseUrlMap(result, formInfoDetail);
-                            upload(formInfoDetail);
+                            uploadUtilsMap.remove(formId);
+                            if (formInfoDetail.isUpload == FormInfo.PROGRESS) {
+                                parseUrlMap(result, formInfoDetail);
+                                upload(formInfoDetail);
+                            }
                         }
 
                         @Override
                         public void onError(@NotNull Throwable e) {
                             super.onError(e);
+                            uploadUtilsMap.remove(formId);
                             ToastUtils.show(e.getMessage());
                         }
                     }, photoPaths, formInfoDetail.form.getFormCode());
@@ -125,7 +141,7 @@ public class UmsService extends Service {
 
     private void upload(final FormInfoDetail formInfoDetail) {
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
         JSONArray forms = new JSONArray();
         try {
             JSONObject formDetail = new JSONObject();
@@ -154,8 +170,23 @@ public class UmsService extends Service {
                     formItem.put("formItemId", item.formItemId);
                     formItem.put("result", item.result);
                     formItem.put("remarks", item.remarks == null?"":item.remarks);
-                    if (FormInfo.ACTION_TYPE_P.equals(formInfoDetail.actionType)) {
-                        formItem.put("photoUrls", item.photoUrls);
+                    if (FormInfo.ACTION_TYPE_P.equals(formInfoDetail.actionType)
+                            && item.photoUrls != null
+                            && !item.photoUrls.isEmpty()) {
+                        JSONArray photoUrls = new JSONArray();
+                        JSONArray videoUrls = new JSONArray();
+                        for (int n = 0; n < item.photoUrls.size(); n++) {
+                            String url = item.photoUrls.get(n);
+                            int lastIndexOf = url.lastIndexOf(".");
+                            if ("JPG".equalsIgnoreCase(url.substring(lastIndexOf + 1))
+                                    || "PNG".equalsIgnoreCase(url.substring(lastIndexOf + 1))) {
+                                photoUrls.put(url);
+                            } else {
+                                videoUrls.put(url);
+                            }
+                        }
+                        formItem.put("photoUrls", photoUrls);
+                        formItem.put("videoUrls", videoUrls);
                     }
                     formItemList.put(formItem);
                 }
@@ -169,49 +200,52 @@ public class UmsService extends Service {
         }
 
 
-        if (uploadListener != null) uploadListener.onUpdate(uploadList);
-        Observable<ResponseBody> observable = Client.getApi(UmsApi.class).uploadForm(forms.toString());
+        if (uploadListener != null) uploadListener.onUpdate(uploadList);Observable<ResponseBody> observable = Client.getApi(UmsApi.class).uploadForm(forms.toString());
         RxUtils.INSTANCE.acquireString(observable, new RxUtils.DialogListener(){
             @Override
             public void onResult(@NotNull Result result) {
                 try {
-                    JSONObject jsonObject = new JSONObject(result.getReturnData());
-                    JSONArray duplicatedFormIds = jsonObject.optJSONArray("duplicatedFormIds");
-                    JSONArray wrongTypeFormIdss = jsonObject.optJSONArray("wrongTypeFormIdss");
-                    if (duplicatedFormIds != null
-                            && duplicatedFormIds.length() > 0) {
-                        formInfoDetail.isUpload = FormInfo.FAIL;
-                        formInfoDetail.delete();
-                        if (uploadListener != null) {
-                            uploadListener.onUpdate(uploadList);
-                        }
-                        ToastUtils.show(R.string.error_uploaded);
-                    } else if (wrongTypeFormIdss != null && wrongTypeFormIdss.length() > 0) {
-                        formInfoDetail.isUpload = FormInfo.WAIT;
-                        if (uploadListener != null) {
-                            uploadListener.onUpdate(uploadList);
-                        }
-                        ToastUtils.show(R.string.error_formaction);
-                    } else {
-                        formInfoDetail.isUpload = FormInfo.DONE;
-
-                        String where;
-                        if (FormInfo.ACTION_TYPE_M.equals(formInfoDetail.actionType)) {
-                            where = "flowCode = '" + formInfoDetail.form.maintFlowCode +"'";
+                    disposableHashMap.remove(formInfoDetail.formId);
+                    if (formInfoDetail.isUpload == FormInfo.PROGRESS) {
+                        JSONObject jsonObject = new JSONObject(result.getReturnData());
+                        JSONArray duplicatedFormIds = jsonObject.optJSONArray("duplicatedFormIds");
+                        JSONArray wrongTypeFormIdss = jsonObject.optJSONArray("wrongTypeFormIdss");
+                        if (duplicatedFormIds != null
+                                && duplicatedFormIds.length() > 0) {
+                            formInfoDetail.isUpload = FormInfo.FAIL;
+                            formInfoDetail.delete();
+                            if (uploadListener != null) {
+                                uploadListener.onUpdate(uploadList);
+                            }
+                            ToastUtils.show(R.string.error_uploaded);
+                        } else if (wrongTypeFormIdss != null && wrongTypeFormIdss.length() > 0) {
+                            formInfoDetail.isUpload = FormInfo.WAIT;
+                            if (uploadListener != null) {
+                                uploadListener.onUpdate(uploadList);
+                            }
+                            ToastUtils.show(R.string.error_formaction);
                         } else {
-                            where = "flowCode = '" + formInfoDetail.form.inspectFlowCode + "'";
-                        }
-                        SopMap sopMap = DataSupport.where(where).findFirst(SopMap.class);
-                        if (sopMap != null) {
-                            --sopMap.useCount;
-                            if (sopMap.useCount == 0) {
-                                sopMap.delete();
-                            } else sopMap.updateAll(where);
-                        }
+                            formInfoDetail.isUpload = FormInfo.DONE;
 
-                        formInfoDetail.delete();
-                        if (uploadListener != null) {
-                            uploadListener.onUpdate(uploadList);
+                            String where;
+                            if (FormInfo.ACTION_TYPE_M.equals(formInfoDetail.actionType)) {
+                                where = "flowCode = '" + formInfoDetail.form.maintFlowCode + "'";
+                            } else {
+                                where = "flowCode = '" + formInfoDetail.form.inspectFlowCode + "'";
+                            }
+                            SopMap sopMap = DataSupport.where(where).findFirst(SopMap.class);
+                            if (sopMap != null) {
+                                --sopMap.useCount;
+                                if (sopMap.useCount == 0) {
+                                    sopMap.delete();
+                                } else sopMap.updateAll(where);
+                            }
+
+                            formInfoDetail.delete();
+                            if (uploadListener != null) {
+                                uploadListener.onUpdate(uploadList);
+                            }
+                            EventBus.getDefault().post(Constant.UPDATE_WAIT_UPLOAD_COUNT);
                         }
                     }
                 } catch (JSONException e) {
@@ -223,9 +257,10 @@ public class UmsService extends Service {
             @Override
             public void onError(@NotNull Throwable e) {
                 super.onError(e);
+                disposableHashMap.remove(formInfoDetail.formId);
                 formInfoDetail.isUpload = FormInfo.FAIL;     // 下载失败
-                if (downloadListener != null) {
-                    downloadListener.onUpdate(downloadList);
+                if (uploadListener != null) {
+                    uploadListener.onUpdate(uploadList);
                 }
             }
 
@@ -241,11 +276,14 @@ public class UmsService extends Service {
         try {
             JSONObject jsonObject = new JSONObject(result.getReturnData());
             JSONObject urlMap = jsonObject.optJSONObject("urlMap");
+            ArrayList<Integer> changeIndexList = new ArrayList<>();
             for (int i = 0; i < formInfoDetail.formItemList.size(); i++) {
                 FormItem formItem = formInfoDetail.formItemList.get(i);
                 if (formItem.photoPaths != null) {
-                    for (int j = 0; j < formItem.photoPaths.size(); j++) {
-                        String path = formItem.photoPaths.get(j);
+                    ArrayList<String> copyPaths = new ArrayList<>();
+                    copyPaths.addAll(formItem.photoPaths);
+                    for (int j = 0; j < copyPaths.size(); j++) {
+                        String path = copyPaths.get(j);
                         if (!TextUtils.isEmpty(path)) {
                             int indexOf = path.lastIndexOf(File.separator);
                             if (indexOf != -1) {
@@ -255,6 +293,9 @@ public class UmsService extends Service {
                                     if (formItem.photoUrls == null)
                                         formItem.photoUrls = new ArrayList<>();
                                     formItem.photoUrls.add(url);
+                                    formItem.photoPaths.remove(path);
+                                    if (!changeIndexList.contains(i))
+                                        changeIndexList.add(i);
                                 }
                             }
                         }
@@ -262,6 +303,10 @@ public class UmsService extends Service {
                 }
             }
 
+            for (int index: changeIndexList) {
+                FormItem formItem = formInfoDetail.formItemList.get(index);
+                formItem.saveOrUpdate("formItemId= '" + formItem.formItemId + "'");
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -272,7 +317,7 @@ public class UmsService extends Service {
         final FormInfo info = getFormInfo(formId);
 
         //是否下载过
-        FormInfoDetail formInfoDetail = DataSupport.where("formId='" + info.getFormId() + "'").findFirst(FormInfoDetail.class, true);
+        FormInfoDetail formInfoDetail = DataSupport.where("formId='" + info.getFormId() + "' and actionType='" + info.getActionType() + "'").findFirst(FormInfoDetail.class, true);
         if (formInfoDetail == null || formInfoDetail.formItemList == null || formInfoDetail.formItemList.isEmpty() || formInfoDetail.form == null) {
 
             //已经下载过的表单无需再下载
@@ -294,7 +339,7 @@ public class UmsService extends Service {
             RxUtils.INSTANCE.acquireString(observable, new RxUtils.DialogListener() {
                         @Override
                         public void onResult(@NotNull Result result) {
-
+                            downloadFormIds.remove(formId);
                             List<FormInfoDetail> formInfoDetails = result.getList(FormInfoDetail.class);
                             if (formInfoDetails != null && !formInfoDetails.isEmpty()) {
                                 final FormInfoDetail formInfoDetail = formInfoDetails.get(0);
@@ -304,9 +349,8 @@ public class UmsService extends Service {
                                 formInfoDetail.actionType = formInfoDetail.form.getActionType();
                                 formInfoDetail.utilitySystemId = formInfoDetail.form.getUtilitySystemId();
 
-                                DataSupport.saveAll(formInfoDetail.formItemList);
-                                formInfoDetail.saveOrUpdate("(formId='" + formInfoDetail.formId + "')");
-                                saveAndUpdateStatus(formInfoDetail, info, FormInfo.DONE, -1);
+                                saveAndUpdateStatus(formInfoDetail, info, true, FormInfo.DONE, -1);
+                                EventBus.getDefault().post(Constant.UPDATE_DOWN_COUNT);
 
                                 startDownloadSop(formInfoDetail);
                             }
@@ -315,6 +359,7 @@ public class UmsService extends Service {
                         @Override
                         public void onError(@NotNull Throwable e) {
                             super.onError(e);
+                            downloadFormIds.remove(formId);
                             info.setDownload_status(FormInfo.FAIL);     // 下载失败
                             if (downloadListener != null) {
                                 downloadListener.onUpdate(downloadList);
@@ -324,6 +369,9 @@ public class UmsService extends Service {
                         @Override
                         public void onStart(@NotNull Disposable d) {
                             super.onStart(d);
+                            if (downloadFormIds == null)
+                                downloadFormIds = new ArrayList<>();
+                            downloadFormIds.add(formId);
                             disposableHashMap.put(info.getFormId(), d);
                         }
                     });
@@ -341,16 +389,34 @@ public class UmsService extends Service {
         }
     }
 
-    private void saveAndUpdateStatus(FormInfoDetail formInfoDetail, FormInfo info, int infoStatus, int sopStatus) {
-        if (infoStatus != -1) formInfoDetail.form.setDownload_status(infoStatus);
-        if (sopStatus != -1) formInfoDetail.form.sop_download_status = sopStatus;
-        if (formInfoDetail.form.saveOrUpdate("(formId='" + formInfoDetail.form.getFormId() + "')")) {
-            if (infoStatus != -1) info.setDownload_status(infoStatus);     // 下载完成
-            if (sopStatus != -1) info.sop_download_status = sopStatus;
-            if (downloadListener != null) {
-                downloadListener.onUpdate(downloadList);
+    private void saveAndUpdateStatus(final FormInfoDetail formInfoDetail, final FormInfo info, final boolean saveItems, final int infoStatus, final int sopStatus) {
+        Observable.create(new ObservableOnSubscribe<List<FormInfo>>() {
+            @Override
+            public void subscribe(ObservableEmitter<List<FormInfo>> emitter) throws Exception {
+                if (infoStatus != -1) formInfoDetail.form.setDownload_status(infoStatus);
+                if (sopStatus != -1) formInfoDetail.form.sop_download_status = sopStatus;
+                if (formInfoDetail.form.saveOrUpdate("(formId='" + formInfoDetail.form.getFormId() + "')")
+                        && formInfoDetail.saveOrUpdate("(formId='" + formInfoDetail.formId + "')")) {
+                    if (saveItems) {
+                        for (FormItem formItem : formInfoDetail.formItemList) {
+                            formItem.saveOrUpdate("formItemId= '" + formItem.formItemId + "'");
+                        }
+                    }
+                    if (infoStatus != -1) info.setDownload_status(infoStatus);     // 下载完成
+                    if (sopStatus != -1) info.sop_download_status = sopStatus;
+                }
+                emitter.onNext(downloadList);
             }
-        }
+        }).subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Consumer<List<FormInfo>>() {
+            @Override
+            public void accept(List<FormInfo> formInfos) throws Exception {
+                if (downloadListener != null) {
+                    downloadListener.onUpdate(formInfos);
+                }
+            }
+        });
     }
 
     /**
@@ -394,7 +460,7 @@ public class UmsService extends Service {
 
     /**
      * 停止下载单个表单
-     * @param formId
+     * @param formId 表单id
      */
     public void stopDownload(String formId) {
         Disposable disposable = disposableHashMap.get(formId);
@@ -418,23 +484,27 @@ public class UmsService extends Service {
         if (disposable != null) {
             disposable.dispose();
             disposableHashMap.remove(formId);
+        }
 
-            FormInfoDetail formInfoDetail = getFormInfoDetail(formId);
-            if (formInfoDetail != null) {
-                if (formInfoDetail.form.getDownload_status() == FormInfo.PROGRESS) {
-                    formInfoDetail.form.setDownload_status(FormInfo.WAIT);
-                }
-                if (downloadListener != null)
-                    uploadListener.onUpdate(uploadList);
+        FormInfoDetail formInfoDetail = getFormInfoDetail(formId);
+        if (formInfoDetail != null) {
+            if (formInfoDetail.isUpload == FormInfo.PROGRESS) {
+                formInfoDetail.isUpload = FormInfo.WAIT;
             }
+            if (downloadListener != null)
+                uploadListener.onUpdate(uploadList);
+        }
+        if (uploadUtilsMap != null) {
+            UploadUtils uploadUtils = uploadUtilsMap.get(formId);
+            uploadUtils.stopUpload();
         }
     }
 
     public void stopUploadAll() {
-        Iterator<String> iterator = disposableHashMap.keySet().iterator();
-        while (iterator.hasNext()) {
-            String formId = iterator.next();
-            stopUpload(formId);
+        if (uploadUtilsMap != null) {
+            for (String formId : uploadUtilsMap.keySet()) {
+                stopUpload(formId);
+            }
         }
     }
 
@@ -442,10 +512,10 @@ public class UmsService extends Service {
      * 停止下载所有表单
      */
     public void stopDownloadAll() {
-        Iterator<String> iterator = disposableHashMap.keySet().iterator();
-        while (iterator.hasNext()) {
-            String formId = iterator.next();
-            stopDownload(formId);
+        if (downloadFormIds != null) {
+            for (String formId : downloadFormIds) {
+                stopDownload(formId);
+            }
         }
     }
 
@@ -472,76 +542,84 @@ public class UmsService extends Service {
     }
 
     public void startDownloadSop(final FormInfoDetail formInfoDetail) {
+
+        if (formInfoDetail == null) return;
         final FormInfo formInfo = getFormInfo(formInfoDetail.formId);
-        final String flowCode;
-        if (FormInfo.ACTION_TYPE_M.equals(formInfo.getActionType())) {
-            flowCode = formInfo.maintFlowCode;
+        if (formInfoDetail.form.getDownload_status() == FormInfo.DONE
+                && TextUtils.isEmpty(formInfoDetail.form.sopUrl)) {
+            saveAndUpdateStatus(formInfoDetail, formInfo, false, -1, -1);
         } else {
-            flowCode = formInfo.inspectFlowCode;
-        }
 
-        String where = "flowCode = '" + flowCode +"'";
-        SopMap sopMap = DataSupport.where(where).findFirst(SopMap.class);
+            final String flowCode;
+            if (FormInfo.ACTION_TYPE_M.equals(formInfo.getActionType())) {
+                flowCode = formInfo.maintFlowCode;
+            } else {
+                flowCode = formInfo.inspectFlowCode;
+            }
 
-        if (sopMap != null) {
-            formInfoDetail.form.sopLocalPath = sopMap.sopLocalPath;
-            sopMap.useCount ++;
-            sopMap.updateAll(where);
+            String where = "flowCode = '" + flowCode + "'";
+            SopMap sopMap = DataSupport.where(where).findFirst(SopMap.class);
 
-            saveAndUpdateStatus(formInfoDetail, formInfo, -1, FormInfo.DONE);
-        } else {
-            Observable<ResponseBody> downLoadObserve = Client.getApi(UmsApi.class).downloadFile(formInfoDetail.form.sopUrl, formInfoDetail.form.sopFileName, "Y");
-            File saveFile = new File(UIUtils.getCachePath(), formInfoDetail.form.sopFileName);
-            try {
-                if (!saveFile.exists()) {
-                    saveFile.createNewFile();
-                }
+            if (sopMap != null) {
+                formInfoDetail.form.sopLocalPath = sopMap.sopLocalPath;
+                sopMap.useCount++;
+                sopMap.updateAll(where);
 
-                //已经下载过的表单无需再下载
-                if (formInfo.sop_download_status == FormInfo.DONE
-                        || formInfo.sop_download_status == FormInfo.PROGRESS)
-                    return;
-                else formInfo.sop_download_status = FormInfo.PROGRESS;     // 开始下载
-
-                if (downloadListener != null)downloadListener.onUpdate(downloadList);
-                RxUtils.INSTANCE.download(downLoadObserve, saveFile, new RxUtils.ProgressListener() {
-
-                    @Override
-                    public void onStart(@NotNull Disposable d) {
-                        super.onStart(d);
-                        disposableHashMap.put(formInfo.sopUrl, d);
+                saveAndUpdateStatus(formInfoDetail, formInfo, false, -1, FormInfo.DONE);
+            } else {
+                Observable<ResponseBody> downLoadObserve = Client.getApi(UmsApi.class).downloadFile(formInfoDetail.form.sopUrl, formInfoDetail.form.sopFileName, "Y");
+                File saveFile = new File(UIUtils.getCachePath(), formInfoDetail.form.sopFileName);
+                try {
+                    if (!saveFile.exists()) {
+                        saveFile.createNewFile();
                     }
 
-                    @Override
-                    public void onResult(@NotNull Result result) {
-                        // 保存完改变状态
-                        formInfoDetail.form.sopLocalPath = result.getReturnData();
+                    //已经下载过的表单无需再下载
+                    if (formInfo.sop_download_status == FormInfo.DONE
+                            || formInfo.sop_download_status == FormInfo.PROGRESS)
+                        return;
+                    else formInfo.sop_download_status = FormInfo.PROGRESS;     // 开始下载
 
-                        SopMap map = new SopMap();
-                        map.useCount = 1;
-                        map.sopLocalPath = result.getReturnData();
-                        map.flowCode = flowCode;
-                        map.actonCode = formInfoDetail.actionType;
-                        map.save();
+                    if (downloadListener != null) downloadListener.onUpdate(downloadList);
+                    RxUtils.INSTANCE.download(downLoadObserve, saveFile, new RxUtils.ProgressListener() {
 
-                        saveAndUpdateStatus(formInfoDetail, formInfo, -1, FormInfo.DONE);
-                    }
-
-                    @Override
-                    public void onUpdate(float progress) {
-                    }
-
-                    @Override
-                    public void onError(@NotNull Throwable e) {
-                        super.onError(e);
-                        formInfo.sop_download_status = FormInfo.FAIL;
-                        if (downloadListener != null) {
-                            downloadListener.onUpdate(downloadList);
+                        @Override
+                        public void onStart(@NotNull Disposable d) {
+                            super.onStart(d);
+                            disposableHashMap.put(formInfo.sopUrl, d);
                         }
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
+
+                        @Override
+                        public void onResult(@NotNull Result result) {
+                            // 保存完改变状态
+                            formInfoDetail.form.sopLocalPath = result.getReturnData();
+
+                            SopMap map = new SopMap();
+                            map.useCount = 1;
+                            map.sopLocalPath = result.getReturnData();
+                            map.flowCode = flowCode;
+                            map.actonCode = formInfoDetail.actionType;
+                            map.save();
+
+                            saveAndUpdateStatus(formInfoDetail, formInfo, false, -1, FormInfo.DONE);
+                        }
+
+                        @Override
+                        public void onUpdate(float progress) {
+                        }
+
+                        @Override
+                        public void onError(@NotNull Throwable e) {
+                            super.onError(e);
+                            formInfo.sop_download_status = FormInfo.FAIL;
+                            if (downloadListener != null) {
+                                downloadListener.onUpdate(downloadList);
+                            }
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

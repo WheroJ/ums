@@ -8,4 +8,15 @@
         <item name="android:windowBackground">@color/transparent</item><!--背景透明-->
         <item name="android:backgroundDimEnabled">false</item><!--模糊-->
     </style>
+
+    <style name="text1">
+        <item name="android:color">@color/white</item>
+        <item name="android:textSize">@dimen/sp_16</item>
+    </style>
+
+    <style name="text2">
+        <item name="android:textColor">@color/primary_light</item>
+        <item name="android:textSize">@dimen/sp_24</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

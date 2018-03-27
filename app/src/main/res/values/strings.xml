@@ -17,6 +17,7 @@
     <string name="form_status">表单状态</string>
     <string name="operation">操作</string>
     <string name="total_download_progress">总下载进度</string>
+    <string name="total_upload_progress">总上传进度</string>
     <string name="input_device_name">输入设备名称</string>
     <string name="ok">确定</string>
     <string name="switch_to_scan">切换成扫码</string>
@@ -33,7 +34,7 @@
     <string name="rt_exit">再按一次退出程序</string>
     <string name="too_lower">低于下限值</string>
     <string name="too_upper">超过上限值</string>
-    <string name="have_finish">已完成 %1$s%</string>
+    <string name="have_finish">已完成 %1$s</string>
     <string name="remark">备注</string>
     <string name="device_name_notnull">设备名称不能为空</string>
     
@@ -53,6 +54,7 @@
     <string name="common_finish">完成</string>
     <string name="common_fail">失败</string>
     <string name="common_pause">暂停</string>
+    <string name="common_stop">停止</string>
     <string name="common_download">下载</string>
     <string name="common_upload">上传</string>
     <string name="spotcheck_fill">点检表单%1$s填写</string>
@@ -63,7 +65,7 @@
     <string name="formdetail_upper">上限</string>
     <string name="formdetail_unit">单位</string>
     <string name="formdetail_input">输入值</string>
-    <string name="common_takepicture">拍照</string>
+    <!--<string name="common_takepicture">拍照</string>-->
     <string name="spotcheck_photomust">请先进行点检拍照后再输入</string>
     <string name="take_video">拍视频</string>
     <string name="take_picture">拍照</string>
@@ -88,6 +90,7 @@
     <string name="spotcheck_finish">点检完成</string>
     <string name="spotcheck_item">点检项目</string>
     <string name="spotcheck_start">点检开始</string>
+    <string name="maint_start">保养开始</string>
     <string name="formstatus">表单状态：</string>
     <string name="formstatus_ing">已进行</string>
     <string name="formstatus_planed">已计划</string>
@@ -109,4 +112,26 @@
     <string name="notice_download_form">请先下载表单数据</string>
     <string name="sop_opreate">SOP操作</string>
     <string name="install_word">请先安装office</string>
+    <string name="photo_detail">照片详情</string>
+    <string name="error_code">错误的条形码</string>
+    <string name="all_upload">全部上传</string>
+    <string name="all_stop">全部停止</string>
+    <string name="all_download">全部下载</string>
+    <string name="maint_project">保养项目</string>
+    <string name="maint_finish">保养完成</string>
+    <string name="empty_notice">的点检数据未录入!</string>
+    <string name="last_remark">时间、地点、现场情况详细描述或者异常说明</string>
+    <string name="second">秒</string>
+    <string name="minute">分</string>
+    <string name="hour">时</string>
+    <string name="save_video_fail">视频保存失败</string>
+    <string name="saving_video">正在保存视频，请稍后</string>
+    <string name="choose_systype_action">请先选择系统名称和动作类型</string>
+    <string name="giveup_save">放弃保存</string>
+    <string name="sure_save">确认已保存</string>
+    <string name="sure">确定</string>
+    <string name="del_img_notice">确认要删除这一条数据吗？</string>
+    <string name="info_downloaded">已下载%1$s张表单</string>
+    <string name="info_waitupload">有%1$s条待上传数据</string>
+    <string name="info_inprogress">有%1$s张进行中的表单</string>
 </resources>

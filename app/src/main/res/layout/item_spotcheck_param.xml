@@ -81,13 +81,13 @@
                     android:padding="8dp"
                     android:scaleType="fitCenter"
                     android:src="@mipmap/dropdown" />
-
             </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/itemUpKeepParam_rlInput"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:visibility="visible">
                 <LinearLayout
                     android:id="@+id/linearlayout"
                     android:layout_width="match_parent"
@@ -205,7 +205,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/light"
+        android:background="@color/gray_e"
         android:layout_marginStart="@dimen/dp_10"
         android:layout_marginEnd="@dimen/dp_10"
         android:layout_alignParentBottom="true"/>

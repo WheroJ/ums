@@ -95,6 +95,7 @@ public class FormInfo extends DataSupport implements Comparable{
     // 点检表单
     private String inspectRouteCode;
     private String inspectRouteDescription;
+    public String inspectRouteName;
     public String inspectPeriodCode;
     public String inspectPeriodDescription;
     public String inspectPeriodName;
@@ -302,5 +303,31 @@ public class FormInfo extends DataSupport implements Comparable{
             }
         }
         return 0;
+    }
+
+    @Override
+    public int hashCode() {
+        StringBuilder buffer = new StringBuilder();
+        if (!TextUtils.isEmpty(weather)) {
+            buffer.append(weather.hashCode());
+        }
+        if (!TextUtils.isEmpty(shift)) {
+            buffer.append(shift.hashCode());
+        }
+        buffer.append(startTime);
+        if (!TextUtils.isEmpty(startUser)) {
+            buffer.append(startUser.hashCode());
+        }
+        buffer.append(completeTime);
+        if (!TextUtils.isEmpty(completeUser)) {
+            buffer.append(completeUser.hashCode());
+        }
+        if (!TextUtils.isEmpty(fillinRemarks)) {
+            buffer.append(fillinRemarks.hashCode());
+        }
+        if (!TextUtils.isEmpty(status)) {
+            buffer.append(status.hashCode());
+        }
+        return buffer.toString().hashCode();
     }
 }

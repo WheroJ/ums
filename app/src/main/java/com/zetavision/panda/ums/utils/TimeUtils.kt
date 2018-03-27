@@ -1,6 +1,7 @@
 package com.zetavision.panda.ums.utils
 
 import android.text.TextUtils
+import com.zetavision.panda.ums.R
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -16,19 +17,29 @@ object TimeUtils {
         var second = currentSecond%60
         val hour = currentSecond/60/60
 
-        return if (hour == 0L) {
+        return " ".plus(if (hour == 0L) {
             if (minute == 0L) {
                 if (second == 0L) {
-                    "0".plus("秒")
+                    "0".plus(UIUtils.getContext().getString(R.string.second))
                 } else {
-                    second.toString().plus("秒")
+                    second.toString().plus(UIUtils.getContext().getString(R.string.second))
                 }
             } else {
-                minute.toString().plus("分").plus(second).plus("秒")
+                val preferences = UserPreferences()
+                if (preferences.language == Locale.CHINESE.language) {//中文
+                    minute.toString().plus(UIUtils.getContext().getString(R.string.minute)).plus(second).plus(UIUtils.getContext().getString(R.string.second))
+                } else {//英文
+                    "0".plus(":").plus(minute).plus(":").plus(second)
+                }
             }
         } else {
-            hour.toString().plus("时").plus(minute).plus("分").plus(second).plus("秒")
-        }
+            val preferences = UserPreferences()
+            if (preferences.language == Locale.CHINESE.language) {//中文
+                hour.toString().plus(UIUtils.getContext().getString(R.string.hour)).plus(minute).plus(UIUtils.getContext().getString(R.string.minute)).plus(second).plus(UIUtils.getContext().getString(R.string.second))
+            } else {//英文
+                hour.toString().plus(":").plus(minute).plus(":").plus(second)
+            }
+        })
     }
 
     /**

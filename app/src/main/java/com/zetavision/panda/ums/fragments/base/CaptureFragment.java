@@ -1,6 +1,5 @@
 package com.zetavision.panda.ums.fragments.base;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,7 +21,6 @@ import android.view.SurfaceView;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
@@ -201,7 +199,7 @@ public abstract class CaptureFragment extends BaseFragment implements SurfaceHol
         if (points != null && points.length > 0) {
             Canvas canvas = new Canvas(barcode);
             Paint paint = new Paint();
-            paint.setColor(getResources().getColor(R.color.result_points, null));
+            paint.setColor(getResources().getColor(R.color.result_points));
             if (points.length == 2) {
                 paint.setStrokeWidth(4.0f);
                 drawLine(canvas, paint, points[0], points[1], scaleFactor);

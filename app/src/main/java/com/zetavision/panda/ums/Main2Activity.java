@@ -158,7 +158,6 @@ public class Main2Activity extends Activity {
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                    int height) {
-            // TODO Auto-generated method stub
 
         }
 
@@ -185,12 +184,12 @@ public class Main2Activity extends Activity {
                 e.printStackTrace();
             }
 
-//            try {
-//                mCamera.setPreviewDisplay(holder);
-//                mCamera.startPreview();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            try {
+                mCamera.setPreviewDisplay(holder);
+                mCamera.startPreview();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
     }

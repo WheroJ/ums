@@ -136,7 +136,7 @@ public class DownloadAdapter extends BaseAdapter {
                     progressBar.setVisibility(View.VISIBLE);
                     pauseBtn.setVisibility(View.VISIBLE);
                     doneImg.setVisibility(View.GONE);
-                    textInfo.setText(R.string.common_pause);
+                    textInfo.setText(R.string.common_stop);
                     break;
                 default:
                     downloadBtn.setVisibility(View.VISIBLE);
@@ -145,6 +145,7 @@ public class DownloadAdapter extends BaseAdapter {
                     doneImg.setVisibility(View.GONE);
                     textInfo.setText(R.string.common_download);
             }
+//            progressBar.setVisibility(View.VISIBLE);
 
             if (data.getDownload_status() == FormInfo.DONE) {
                 if (!TextUtils.isEmpty(data.sopLocalPath)) {

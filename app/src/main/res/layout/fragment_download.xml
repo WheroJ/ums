@@ -106,11 +106,13 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="30dp">
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/dp_10"
+        android:paddingBottom="@dimen/dp_10">
         <TextView
             style="@style/list_header_text"
             android:layout_weight="0.1"
-            android:text="序号"/>
+            android:text="@string/order"/>
         <TextView
             style="@style/list_header_text"
             android:text="@string/form_number"
@@ -179,7 +181,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
-                android:max="1"
+                android:max="100"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/progressText"
                 app:layout_constraintStart_toEndOf="@id/total"
@@ -213,7 +215,7 @@
                     android:layout_width="34dp"
                     android:layout_height="34dp" />
                 <TextView
-                    android:text="全部下载"
+                    android:text="@string/all_download"
                     android:textColor="@color/white"
                     android:gravity="center"
                     android:layout_width="wrap_content"
@@ -238,7 +240,7 @@
                     android:layout_width="34dp"
                     android:layout_height="34dp" />
                 <TextView
-                    android:text="全部暂停"
+                    android:text="@string/all_stop"
                     android:textColor="@color/white"
                     android:gravity="center"
                     android:layout_width="wrap_content"

@@ -49,9 +49,9 @@
             <ImageView
                 android:id="@+id/pauseBtn"
                 android:layout_gravity="center"
-                android:src="@mipmap/pause_circle"
-                android:layout_width="30dp"
-                android:layout_height="30dp" />
+                android:src="@mipmap/stop"
+                android:layout_width="15dp"
+                android:layout_height="15dp" />
             <ImageView
                 android:id="@+id/doneImg"
                 android:layout_gravity="center"
@@ -67,38 +67,44 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <FrameLayout
+    <LinearLayout
         style="@style/list_item_text"
         android:layout_weight="0.1">
-        <ImageView
-            android:id="@+id/sop_downloadBtn"
-            android:src="@mipmap/down_circle"
-            android:layout_width="30dp"
-            android:layout_gravity="center"
-            android:layout_height="30dp" />
-        <ProgressBar
-            android:id="@+id/sop_progressBar"
-            android:layout_width="38dp"
-            android:layout_height="38dp" />
-        <ImageView
-            android:id="@+id/sop_pauseBtn"
-            android:layout_gravity="center"
-            android:src="@mipmap/pause_circle"
-            android:layout_width="30dp"
-            android:layout_height="30dp" />
-        <ImageView
-            android:id="@+id/sop_doneImg"
-            android:layout_gravity="center"
-            android:src="@mipmap/done_circle"
-            android:layout_width="30dp"
-            android:layout_height="30dp" />
-        <TextView
-            android:id="@+id/sop_textInfo"
-            android:layout_marginStart="16dp"
-            android:layout_gravity="center_vertical"
+        <FrameLayout
             android:layout_width="wrap_content"
-            android:lines="1"
             android:layout_height="wrap_content"
-            tools:text="hahahha"/>
-    </FrameLayout>
+            android:layout_gravity="center">
+            <ImageView
+                android:id="@+id/sop_downloadBtn"
+                android:src="@mipmap/down_circle"
+                android:layout_width="30dp"
+                android:layout_gravity="center"
+                android:layout_height="30dp" />
+            <ProgressBar
+                android:id="@+id/sop_progressBar"
+                android:layout_width="38dp"
+                android:layout_height="38dp" />
+            <ImageView
+                android:id="@+id/sop_pauseBtn"
+                android:layout_gravity="center"
+                android:src="@mipmap/stop"
+                android:layout_width="15dp"
+                android:layout_height="15dp" />
+            <ImageView
+                android:id="@+id/sop_doneImg"
+                android:layout_gravity="center"
+                android:src="@mipmap/done_circle"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+            <TextView
+                android:id="@+id/sop_textInfo"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:lines="1"
+                android:layout_height="wrap_content"
+                tools:text="hahahha"
+                android:visibility="gone"/>
+        </FrameLayout>
+    </LinearLayout>
+
 </LinearLayout>

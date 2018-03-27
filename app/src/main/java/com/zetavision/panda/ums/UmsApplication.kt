@@ -1,15 +1,18 @@
 package com.zetavision.panda.ums
 
 import android.content.Context
+import com.zero.smallvideorecord.JianXiCamera
 import com.zetavision.panda.ums.utils.Constant
 import com.zetavision.panda.ums.utils.CrashHandler
 import com.zetavision.panda.ums.utils.UIUtils
 import com.zetavision.panda.ums.utils.UserPreferences
 import org.litepal.LitePalApplication
+import java.io.File
 import java.util.*
 
 /**
  * Created by wheroj on 2018/1/30.
+ *
  */
 class UmsApplication : LitePalApplication() {
 
@@ -23,6 +26,7 @@ class UmsApplication : LitePalApplication() {
         if(!Constant.DEBUG) CrashHandler.getInstance().init(application)
 
         changeAppLanguage()
+        initSmallVideo()
     }
 
     fun changeAppLanguage() {
@@ -34,5 +38,13 @@ class UmsApplication : LitePalApplication() {
         val conf = res.configuration
         conf.locale = myLocale
         res.updateConfiguration(conf, dm)
+    }
+
+    private fun initSmallVideo() {
+        // 设置拍摄视频缓存路径
+        val videoCache = File(UIUtils.getCachePath())
+        JianXiCamera.setVideoCachePath(videoCache.absolutePath.plus("/zero/"))
+        // 初始化拍摄SDK，必须
+        JianXiCamera.initialize(true, null)
     }
 }

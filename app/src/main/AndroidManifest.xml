@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.zetavision.panda.ums">
+    package="com.zetavision.panda.ums"
+    android:installLocation="internalOnly">
+    <!--android:installlocation="internalOnly"-->
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -13,6 +15,11 @@
     <uses-feature android:name="android.hardware.camera" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
+    <!--<uses-library android:name="android.scanner.library"/>-->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
 
     <application
@@ -24,6 +31,9 @@
         android:supportsRtl="true"
         android:name=".UmsApplication"
         android:theme="@style/AppTheme">
+
+        <uses-library android:name="android.scanner.library" />
+
         <activity android:name=".ui.LoginActivity" android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -48,7 +58,7 @@
             android:name=".Main2Activity"
             android:screenOrientation="landscape"
             android:label="@string/app_name"
-            android:exported="false"/>
+            android:exported="true"/>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -59,6 +69,25 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <activity android:name=".ui.ImageViewerActivity"
+            android:configChanges="orientation|screenSize"/>
+
+        <service android:name=".service.ScannerService"/>
+
+        <receiver android:name=".service.BackGroundReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.zetavision.panda.ums.uploadImageAndVideo.log" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

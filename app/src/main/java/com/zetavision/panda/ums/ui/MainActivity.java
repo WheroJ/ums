@@ -2,7 +2,12 @@ package com.zetavision.panda.ums.ui;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.TextAppearanceSpan;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -19,12 +24,15 @@ import com.zetavision.panda.ums.ui.upkeep.UpKeepFragment;
 import com.zetavision.panda.ums.utils.Common;
 import com.zetavision.panda.ums.utils.Constant;
 import com.zetavision.panda.ums.utils.IntentUtils;
+import com.zetavision.panda.ums.utils.SPUtil;
 import com.zetavision.panda.ums.utils.ToastUtils;
+import com.zetavision.panda.ums.utils.UIUtils;
 import com.zetavision.panda.ums.utils.UserPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 import org.litepal.crud.DataSupport;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -42,9 +50,16 @@ public class MainActivity extends BaseActivity {
     @BindView(R.id.activityMain_tvUploadCount)
     TextView tvUploadCount;
 
+    @BindView(R.id.activityMain_tvDownloaded)
+    TextView tvDownloaded;
+    @BindView(R.id.activityMain_tvInProgress)
+    TextView tvInProgress;
+    @BindView(R.id.activityMain_tvWaitUpload)
+    TextView tvWaitUpload;
+
     private int current = R.id.download;
     private int preCheckId = current;
-
+    private final int TYPE_DOWN = 1, TYPE_UPLOAD = 2, TYPE_INPROGRESS = 3;
 
     @Override
     public int getContentLayoutId() {
@@ -54,71 +69,43 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void init() {
         changeContent();
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {//应用没有该权限
-//                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {//是否应该继续显示对话框
-//                    //之前请求过拒绝了   返回true
-//                    //如果用户在过去拒绝了权限请求，并在权限请求系统对话框中选择了 Don't ask again 选项，此方法将返回 false。如果设备规范禁止应用具有该权限，此方法也会返回 false
-//                    new AlertDialog.Builder(this).setTitle("申请权限").setMessage("拍照需要申请相机权限，是否允许?").setPositiveButton("取消", null).setNegativeButton("确定", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            //点击确定的时候再次进行权限的申请
-//                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, 0);
-//                        }
-//                    }).show();
-//                } else {
-//                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 0);
-//                }
-//            }
-//        }
 
-//        File file = new File(UIUtils.getCachePath(), "photo_1518060307109.png");
-//        File file4 = new File(UIUtils.getCachePath(), "photo_1518060427235.png");
-//        File file5 = new File(UIUtils.getCachePath(), "photo_1518060937237.png");
-//        File file6 = new File(UIUtils.getCachePath(), "photo_1518061946096.png");
-//        File file3 = new File(UIUtils.getCachePath(), "photo_1518062099503.png");
-//        File file12 = new File(UIUtils.getCachePath(), "photo_15180603071092.png");
-//        File file13 = new File(UIUtils.getCachePath(), "photo_15180604272352.png");
-//        File file14 = new File(UIUtils.getCachePath(), "photo_15180609372372.png");
-//        File file15 = new File(UIUtils.getCachePath(), "photo_15180619460962.png");
-//        File file16 = new File(UIUtils.getCachePath(), "photo_15180620995032.png");
-////        File file7 = new File(UIUtils.getCachePath(), "photo_1518062505236.png");
-////        File file8 = new File(UIUtils.getCachePath(), "photo_1518069128199.png");
-////        File file10 = new File(UIUtils.getCachePath(), "photo_1518070151948.png");
-//        File file2 = new File(UIUtils.getCachePath(), "upload.png");
-////        File file9 = new File(UIUtils.getCachePath(), "ums.png");
-////        File file11 = new File(UIUtils.getCachePath(), "picture.png");
-//        System.out.println("地址：" + file2.getAbsolutePath());
-//        ArrayList<String> list = new ArrayList<>();
-//        list.add(file.getAbsolutePath());
-//        list.add(file2.getAbsolutePath());
-//        list.add(file3.getAbsolutePath());
-//        list.add(file4.getAbsolutePath());
-//        list.add(file5.getAbsolutePath());
-//        list.add(file6.getAbsolutePath());
-////        list.add(file7.getAbsolutePath());
-////        list.add(file8.getAbsolutePath());
-////        list.add(file9.getAbsolutePath());
-////        list.add(file10.getAbsolutePath());
-////        list.add(file11.getAbsolutePath());
-//        list.add(file12.getAbsolutePath());
-//        list.add(file13.getAbsolutePath());
-//        list.add(file14.getAbsolutePath());
-//        list.add(file15.getAbsolutePath());
-//        list.add(file16.getAbsolutePath());
-//        UploadUtils.INSTANCE.upload(new UploadUtils.UploadListener() {
-//            @Override
-//            public void onResult(@NotNull Result result) {
-//                super.onResult(result);
-//                LogPrinter.i("UploadFile", "成功。。。。。");
-//            }
-//
-//            @Override
-//            public void onError(@NotNull Throwable e) {
-//                super.onError(e);
-//                LogPrinter.i("UploadFile", "失敗。。。。" + e.getMessage());
-//            }
-//        }, list, "4C1-CA-ADH01-180227-PM-002");
+        uploadCrashLog();
+    }
+
+    private void uploadCrashLog() {
+        ArrayList<String> crashFiles = SPUtil.getObject(Constant.WAIT_UPLOAD_CRASH_LOG, new ArrayList<String>());
+        if (!crashFiles.isEmpty()) {
+            Intent intent = new Intent();
+            intent.setAction(Constant.ACTION_UPLOAD_LOG);
+            sendBroadcast(intent);
+        }
+    }
+
+    private SpannableString getSpannableString(int type, int count) {
+        SpannableString content = null;
+        int firstEnd = 0;
+        switch (type) {
+            case TYPE_DOWN:
+                content = new SpannableString(getString(R.string.info_downloaded, String.valueOf(count)));
+                firstEnd = 3;
+                break;
+            case TYPE_INPROGRESS:
+                content = new SpannableString(getString(R.string.info_inprogress, String.valueOf(count)));
+                firstEnd = 1;
+                break;
+            case TYPE_UPLOAD:
+                content = new SpannableString(getString(R.string.info_waitupload, String.valueOf(count)));
+                firstEnd = 1;
+                break;
+        }
+        if (content != null) {
+            int length = String.valueOf(count).length();
+            content.setSpan(new TextAppearanceSpan(this, R.style.text1), 0, firstEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            content.setSpan(new TextAppearanceSpan(this, R.style.text2), firstEnd, firstEnd + length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            content.setSpan(new AbsoluteSizeSpan(UIUtils.dip2px(16)), firstEnd + length, content.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        return content;
     }
 
     private void changeContent() {
@@ -215,7 +202,7 @@ public class MainActivity extends BaseActivity {
         EventBus.getDefault().post(Constant.EVENT_REFRESH_LANGUAGE);
     }
 
-    private long backPressTimeRecord = 0l;
+    private long backPressTimeRecord = 0L;
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -234,9 +221,8 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        updateUnUploadCount();
+        updateCount();
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -244,16 +230,32 @@ public class MainActivity extends BaseActivity {
         MainActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
-    public void updateUnUploadCount() {
+    @Override
+    public void onMessageEvent(String str) {
+        super.onMessageEvent(str);
+        if (Constant.UPDATE_DOWN_COUNT.equals(str) || Constant.UPDATE_WAIT_UPLOAD_COUNT.equals(str)) {
+            updateCount();
+        }
+    }
+
+    public void updateCount() {
         List<FormInfoDetail> formInfoDetails = DataSupport.where("isUpload = ?", String.valueOf(FormInfo.WAIT))
                 .find(FormInfoDetail.class, true);
+//        List<FormInfoDetail> formInfoDetails = DataSupport.findAll(FormInfoDetail.class, true);
 
-        int count = 0;
+        int completeCount = 0, inProgressCount = 0;
         for (int i = 0; i < formInfoDetails.size(); i++) {
             if (formInfoDetails.get(i).form.getStatus().equals(Constant.FORM_STATUS_COMPLETED)) {
-                count ++;
+                completeCount ++;
+            } else if (formInfoDetails.get(i).form.getStatus().equals(Constant.FORM_STATUS_INPROGRESS)) {
+                inProgressCount ++;
             }
         }
-        tvUploadCount.setText(String.valueOf(count));
+        tvWaitUpload.setText(getSpannableString(TYPE_UPLOAD, completeCount), TextView.BufferType.SPANNABLE);
+        tvInProgress.setText(getSpannableString(TYPE_INPROGRESS, inProgressCount));
+        tvUploadCount.setText(String.valueOf(completeCount),  TextView.BufferType.SPANNABLE);
+
+        int downloadedCount = DataSupport.count(FormInfoDetail.class);
+        tvDownloaded.setText(getSpannableString(TYPE_DOWN, downloadedCount), TextView.BufferType.SPANNABLE);
     }
 }

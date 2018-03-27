@@ -16,6 +16,7 @@ import com.zetavision.panda.ums.service.UmsService;
 import com.zetavision.panda.ums.ui.formdownload.DownloadFragment;
 import com.zetavision.panda.ums.ui.formup.UploadFragment;
 import com.zetavision.panda.ums.utils.Constant;
+import com.zetavision.panda.ums.utils.LogPrinter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,7 +64,7 @@ public class UploadAdapter extends BaseAdapter {
         ViewHolder holder;
         if (view == null) {
             holder = new ViewHolder();
-            view = View.inflate(mContext, R.layout.list_download_item, null);
+            view = View.inflate(mContext, R.layout.list_upload_item, null);
             ButterKnife.bind(holder, view);//用butterKnife绑定
             view.setTag(holder);
         } else {
@@ -128,7 +129,7 @@ public class UploadAdapter extends BaseAdapter {
                     progressBar.setVisibility(View.VISIBLE);
                     pauseBtn.setVisibility(View.VISIBLE);
                     doneImg.setVisibility(View.GONE);
-                    textInfo.setText(mContext.getString(R.string.common_pause));
+                    textInfo.setText(mContext.getString(R.string.common_stop));
                     break;
                 default:
                     downloadBtn.setVisibility(View.VISIBLE);
@@ -156,7 +157,11 @@ public class UploadAdapter extends BaseAdapter {
         }
 
         @OnClick(R.id.pauseBtn) void pause() {
-            System.out.println("pause");
+            LogPrinter.i("UploadAdapter", "pause");
+            UmsService umsService = ((UploadFragment) fragment).umsService;
+            if (umsService != null) {
+                umsService.stopUpload(data.getFormId());
+            }
         }
     }
 }

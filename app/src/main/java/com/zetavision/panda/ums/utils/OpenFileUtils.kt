@@ -106,7 +106,7 @@ class OpenFileUtils {
             intent = generateHtmlFileIntent(filePath)
         } else if (end == "ppt") {
             intent = generateCommonIntent(filePath, DATA_TYPE_PPT)
-        } else if (end == "xls") {
+        } else if (end == "xls" || end == "xlsx") {
             intent = generateCommonIntent(filePath, DATA_TYPE_EXCEL)
         } else if (end == "doc" || end == "docx") {
             intent = generateCommonIntent(filePath, DATA_TYPE_WORD)
@@ -189,21 +189,5 @@ class OpenFileUtils {
         val list = packageManager.queryIntentActivities(intent,
                 PackageManager.MATCH_ALL)
         return list.size > 0
-    }
-
-    fun getWordFileIntent(param: String): Intent? {
-        var intent: Intent? = null
-        try {
-            intent = Intent("android.intent.action.VIEW")
-            intent.addCategory("android.intent.category.DEFAULT")
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            val uri = Uri.fromFile(File(param))
-            intent.setDataAndType(uri, "application/msword")
-        } catch (e: Exception) {
-            // TODO Auto-generated catch block
-            e.printStackTrace()
-        }
-
-        return intent
     }
 }

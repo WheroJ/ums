@@ -7,37 +7,36 @@
         android:layout_marginTop="20dp"
         android:background="@color/white"
         android:orientation="horizontal"
-        android:paddingStart="@dimen/dp_10"
-        android:paddingEnd="@dimen/dp_10"
+        android:padding="@dimen/dp_10"
         android:layout_width="match_parent"
-        android:layout_height="30dp">
+        android:layout_height="wrap_content">
         <TextView
             style="@style/list_header_text"
             android:layout_weight="0.1"
-            android:text="序号"/>
+            android:text="@string/order"/>
         <TextView
             style="@style/list_header_text"
             android:layout_weight="0.2"
-            android:text="保养项目"/>
+            android:text="@string/maint_project"/>
         <TextView
             style="@style/list_header_text"
             android:layout_weight="0.1"
-            android:text="下限"/>
+            android:text="@string/formdetail_lower"/>
         <TextView
             style="@style/list_header_text"
             android:layout_weight="0.1"
-            android:text="上限"/>
+            android:text="@string/formdetail_upper"/>
         <TextView
             style="@style/list_header_text"
             android:layout_weight="0.1"
-            android:text="单位"/>
+            android:text="@string/formdetail_unit"/>
         <TextView
             style="@style/list_header_text"
             android:layout_weight="0.25"
-            android:text="输入值"/>
+            android:text="@string/formdetail_input"/>
         <TextView
             style="@style/list_header_text"
             android:layout_weight="0.2"
-            android:text="备注"/>
+            android:text="@string/remark"/>
     </LinearLayout>
 </merge>

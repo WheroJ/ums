@@ -28,6 +28,9 @@ abstract class PopTakePicture(context: Context): PopupWindow() {
         setBackgroundDrawable(UIUtils.getContext().resources.getDrawable(R.drawable.transparent))
         this.isTouchable = true
         this.isOutsideTouchable = false
+        btnTake.setOnClickListener {
+            onTakePicture()
+        }
     }
 
     abstract fun onTakePicture()

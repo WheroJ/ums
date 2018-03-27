@@ -27,7 +27,7 @@ class SpotCheckListAdapter(data: List<FormInfo>, val actionType: String): BaseQu
     override fun convert(helper: BaseViewHolder?, item: FormInfo?) {
         if (helper != null) {
             helper.setText(R.id.itemSpotCheckParam_tvInspectRoute, item?.inspectRouteCode)
-                    .setText(R.id.itemSpotCheckParam_tvInspectRouteDesc, item?.inspectRouteDescription)
+                    .setText(R.id.itemSpotCheckParam_tvInspectRouteDesc, item?.inspectRouteName)
                     .setText(R.id.itemSpotCheckParam_tvInspectPeroidCode, item?.inspectPeriodCode)
                     .setText(R.id.itemSpotCheckParam_tvInspectPeroidCodeDesc, item?.inspectPeriodName)
                     .setText(R.id.itemSpotCheckParam_tvFormCode, item?.formCode )

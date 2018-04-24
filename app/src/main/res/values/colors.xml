@@ -4,7 +4,6 @@
     <color name="light">#f3f8fb</color>
     <color name="gray_b">#bbbbbb</color>
     <color name="gray_e">#eeeeee</color>
-    <!--#62a7ea-->
     <color name="text_light_blue">#7ba1df</color>
     <color name="text_blue">#1a68b3</color>
     <color name="primary_light">#62a7ea</color>
@@ -19,7 +18,6 @@
     <color name="result_points">#c099cc00</color> <!-- Android standard ICS color -->
     <color name="black">#000000</color>
     <color name="transparent">#00000000</color>
-    <!--#62a7ea-->
     <color name="main_color">#7ba1df</color>
     <color name="gray3">#333333</color>
     <color name="gray_f0">#f0f0f0</color>

@@ -32,7 +32,12 @@ public class Constant {
     public static final String LOADING_CONTENT_KEY = "content";
 
     /**
-     * 1: 内网   2：外网   3:外网第二台服务器
+     * 最大并发
+     */
+    public static final int MAX_CONCURRENT = 2;
+
+    /**
+     * 1: 内网   2：外网   3:测试服务器
      */
     public static int NET_TYPE = 1;
 
@@ -50,13 +55,13 @@ public class Constant {
     public static void setBaseUrlByType() {
         switch (NET_TYPE) {
             case 1:
-                API_BASE_URL = "http://192.168.0.105:8088/";
+                API_BASE_URL = "http://192.168.0.107:8088/";
                 break;
             case 2:
-                API_BASE_URL = "http://7.177.122.179:8088/";
+                API_BASE_URL = "http://10.80.30.210:8088/";
                 break;
             case 3:
-                API_BASE_URL = "http://192.168.0.101:8082/";
+                API_BASE_URL = "http://192.168.0.118:8082/";
                 break;
         }
     }
@@ -109,4 +114,18 @@ public class Constant {
     public static final String NET_CONNECT = "net_connect";
     public static final String NET_DISCONNECT = "net_disconnect";
 
+    /**
+     * 密码错误
+     */
+    public static final int PASS_ERROR = -2;
+
+    /**
+     * 用户不存在
+     */
+    public static final int USER_NOT_EXIST = -3;
+
+    /**
+     * 登出
+     */
+    public static final int USER_LOGOUT = -4;
 }

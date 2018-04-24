@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.zetavision.panda.ums"
     android:installLocation="internalOnly">
-    <!--android:installlocation="internalOnly"-->
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -38,10 +37,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-                <!--<action android:name="android.intent.action.VIEW" />-->
-                <!--<category android:name="android.intent.category.HOME" />-->
-                <!--<category android:name="android.intent.category.DEFAULT" />-->
-                <!--<category android:name="android.intent.category.MONKEY" />-->
             </intent-filter>
         </activity>
         <activity android:name=".ui.MainActivity" android:configChanges="orientation|screenSize" />
@@ -50,15 +45,20 @@
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan"/>
         <activity android:name=".ui.spotcheck.SpotCheckDetailActivity" android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan"/>
-        <activity android:name=".ui.spotcheck.SpotCheckListActivity" android:configChanges="orientation|screenSize" />
-        <activity android:name=".ui.upkeep.UpKeepListActivity" android:configChanges="orientation|screenSize" />
+        <activity android:name=".ui.SearchListActivity" android:configChanges="orientation|screenSize" />
+        <!--<activity android:name=".ui.upkeep.UpKeepListActivity" android:configChanges="orientation|screenSize" />-->
         <service android:name=".service.UmsService" />
 
         <activity
-            android:name=".Main2Activity"
+            android:name=".ui.VideoActivity"
             android:screenOrientation="landscape"
             android:label="@string/app_name"
-            android:exported="true"/>
+            android:exported="true">
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
+        </activity>
 
         <provider
             android:name="android.support.v4.content.FileProvider"

@@ -16,6 +16,7 @@ import com.zetavision.panda.ums.service.UmsService;
 import com.zetavision.panda.ums.ui.formdownload.DownloadFragment;
 import com.zetavision.panda.ums.ui.formup.UploadFragment;
 import com.zetavision.panda.ums.utils.Constant;
+import com.zetavision.panda.ums.utils.NetUtils;
 import com.zetavision.panda.ums.utils.ToastUtils;
 
 import java.util.ArrayList;
@@ -145,7 +146,6 @@ public class DownloadAdapter extends BaseAdapter {
                     doneImg.setVisibility(View.GONE);
                     textInfo.setText(R.string.common_download);
             }
-//            progressBar.setVisibility(View.VISIBLE);
 
             if (data.getDownload_status() == FormInfo.DONE) {
                 if (!TextUtils.isEmpty(data.sopLocalPath)) {
@@ -199,6 +199,10 @@ public class DownloadAdapter extends BaseAdapter {
         }
 
         @OnClick(R.id.downloadBtn) void download() {
+            if (!NetUtils.INSTANCE.isNetConnect(mContext)) {
+                ToastUtils.show(mContext.getString(R.string.connect_net2download));
+                return;
+            }
             if (fragment instanceof DownloadFragment) {
                 UmsService umsService = ((DownloadFragment) fragment).umsService;
                 if (umsService != null) {
@@ -227,6 +231,10 @@ public class DownloadAdapter extends BaseAdapter {
         }
 
         @OnClick(R.id.sop_downloadBtn) void downloadSop() {
+            if (!NetUtils.INSTANCE.isNetConnect(mContext)) {
+                ToastUtils.show(mContext.getString(R.string.connect_net2download));
+                return;
+            }
             if (fragment instanceof DownloadFragment) {
                 UmsService umsService = ((DownloadFragment) fragment).umsService;
                 if (umsService != null) {

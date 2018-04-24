@@ -4,10 +4,9 @@ import android.content.Context
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.View
-import android.widget.ImageView
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import com.zetavision.panda.ums.R
+import com.zetavision.panda.ums.adapter.CommonSpinnerAdapter
 import com.zetavision.panda.ums.utils.UIUtils
 import com.zetavision.panda.ums.utils.UserUtils
 
@@ -31,6 +30,8 @@ class ViewHeaderBar: RelativeLayout {
     private lateinit var mIvLogo: ImageView
     private lateinit var mIvLogout: ImageView
     private lateinit var mViewPick: PackUpLeftView
+    private lateinit var mSpinnerTitle: Spinner
+
     private fun initView() {
         View.inflate(context, R.layout.view_header, this)
 
@@ -40,12 +41,30 @@ class ViewHeaderBar: RelativeLayout {
         mIvLogo = findViewById(R.id.header_logo)
         mIvLogout = findViewById(R.id.header_logout)
         mViewPick = findViewById(R.id.header_pickup)
+        mSpinnerTitle = findViewById(R.id.header_spinnerTitle)
 
         setDefaultRight()
     }
 
+    fun setSpinner(data: ArrayList<String>, onItemSelectedListener: AdapterView.OnItemSelectedListener? = null) {
+        var adapter = CommonSpinnerAdapter(context)
+        adapter.notifyDataSetChanged(data)
+        mSpinnerTitle.visibility = View.VISIBLE
+        mSpinnerTitle.adapter = adapter
+        if (onItemSelectedListener != null)
+            mSpinnerTitle.onItemSelectedListener = onItemSelectedListener
+
+        mTvTitle.visibility = View.GONE
+    }
+
+    fun getSpinner(): Spinner {
+        return mSpinnerTitle
+    }
+
     fun setTitle(title: String) {
         mTvTitle.text = title
+        mTvTitle.visibility = View.VISIBLE
+        mSpinnerTitle.visibility = View.GONE
     }
 
     fun setLeftImage(resId: Int) {

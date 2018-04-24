@@ -2,8 +2,11 @@ package com.zetavision.panda.ums.ui.formup;
 
 import android.content.ComponentName;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -32,6 +35,7 @@ import com.zetavision.panda.ums.utils.network.UmsApi;
 import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +76,11 @@ public class UploadFragment extends BaseFragment{
 
     @OnClick(R.id.uploadAll)
     void uploadAll() {
+        if (!NetUtils.INSTANCE.isNetConnect(getContext())) {
+            ToastUtils.show(getContext().getString(R.string.connect_net2upload));
+            return;
+        }
+
         if (umsService != null) {
             uploadAll = true;
             umsService.startUploadAll();
@@ -95,7 +104,24 @@ public class UploadFragment extends BaseFragment{
         actionSpinner.setAdapter(actionSpinnerAdapter);
         uploadAdapter = new UploadAdapter(getContext(), this);
         listView.setAdapter(uploadAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                FormInfoDetail formInfoDetail = uploadAdapter.getData().get(position);
+                String actionType = formInfoDetail.actionType;
+                switch (actionType) {
+                    case FormInfo.ACTION_TYPE_M:
+                        IntentUtils.INSTANCE.goUpKeepDetail(getActivity(), formInfoDetail.formId);
+                        break;
+                    case FormInfo.ACTION_TYPE_P:
+                        IntentUtils.INSTANCE.goSpotCheckDetail(getActivity(), formInfoDetail.formId);
+                        break;
+                }
+            }
+        });
 
+        progressBar.setProgress(0);
+        progressText.setText(getString(R.string.have_finish, 0.0 + "%"));
         // 绑定service
         IntentUtils.INSTANCE.bindService(getActivity(), connection);
         getData();
@@ -104,51 +130,56 @@ public class UploadFragment extends BaseFragment{
 
     @OnClick(R.id.search)
     void onSearch() {
-        SystemInfo systemInfo = (SystemInfo) systemSpinner.getSelectedItem();
-        ActionInfo actionInfo = (ActionInfo) actionSpinner.getSelectedItem();
+        final SystemInfo systemInfo = (SystemInfo) systemSpinner.getSelectedItem();
+        final ActionInfo actionInfo = (ActionInfo) actionSpinner.getSelectedItem();
 
-        if (systemInfo != null && actionInfo != null) {
-            List<FormInfoDetail> formInfoDetails = DataSupport.findAll(FormInfoDetail.class, false);
+        final LoadingDialog loadingDialog = new LoadingDialog();
+        Bundle bundle = new Bundle();
+        bundle.putString(Constant.LOADING_CONTENT_KEY, getString(R.string.loading));
+        loadingDialog.setArguments(bundle);
+        loadingDialog.show(getFragmentManager(), null);
+        Observable.just(systemInfo != null && actionInfo != null)
+                .subscribeOn(Schedulers.io())
+                .map(new Function<Boolean, List<FormInfoDetail>>() {
+                    @Override
+                    public List<FormInfoDetail> apply(Boolean aBoolean) throws Exception {
+                        ArrayList<FormInfoDetail> uploadList = new ArrayList<>();
+                        if (aBoolean) {
+                            String sql;
+                            if (systemInfo.getUtilitySystemId() == -1 && TextUtils.isEmpty(actionInfo.getActionType())) {
+                                sql = "isUpload = " + FormInfo.WAIT;
+                            } else if (systemInfo.getUtilitySystemId() == -1) {
+                                sql = "isUpload = " + FormInfo.WAIT + " and actionType= '" + actionInfo.getActionType() + "'";
+                            } else if (TextUtils.isEmpty(actionInfo.getActionType())) {
+                                sql = "isUpload = " + FormInfo.WAIT + " and utilitySystemId = " + systemInfo.getUtilitySystemId();
+                            } else {
+                                sql = "isUpload = " + FormInfo.WAIT + " and actionType= '" + actionInfo.getActionType() + "' and utilitySystemId = " + systemInfo.getUtilitySystemId();
+                            }
 
-            ArrayList<FormInfoDetail> uploadList = new ArrayList<>();
-            for (int i = 0; i < formInfoDetails.size(); i++) {
-                FormInfoDetail formInfoDetail = formInfoDetails.get(i);
-                if (systemInfo.getUtilitySystemId() == -1 && TextUtils.isEmpty(actionInfo.getActionType())) {
-                    if (formInfoDetail.isUpload == FormInfo.WAIT) {
-                        findFormInfoDetail(uploadList, formInfoDetail.formId);
-                    }
-                } else if (systemInfo.getUtilitySystemId() == -1) {
-                    if (formInfoDetail.actionType.equals(actionInfo.getActionType())
-                            && formInfoDetail.isUpload == FormInfo.WAIT) {
-                        findFormInfoDetail(uploadList, formInfoDetail.formId);
-                    }
-                } else if (TextUtils.isEmpty(actionInfo.getActionType())) {
-                    if (formInfoDetail.utilitySystemId == systemInfo.getUtilitySystemId()
-                            && formInfoDetail.isUpload == FormInfo.WAIT) {
-                        findFormInfoDetail(uploadList, formInfoDetail.formId);
-                    }
-                } else {
-                    if (formInfoDetail.utilitySystemId == systemInfo.getUtilitySystemId()
-                            && formInfoDetail.actionType.equals(actionInfo.getActionType())
-                            && formInfoDetail.isUpload == FormInfo.WAIT) {
-                        findFormInfoDetail(uploadList, formInfoDetail.formId);
-                    }
-                }
-            }
+                            List<FormInfoDetail> formInfoDetails = DataSupport.where(sql).find(FormInfoDetail.class, true);
 
-            if (uploadList.isEmpty()) {
-                umsService.setUploadList(new ArrayList<FormInfoDetail>());
-                ToastUtils.show(R.string.no_data);
-            } else {
-                umsService.setUploadList(uploadList);
-            }
-        }
-    }
-
-    private void findFormInfoDetail(ArrayList<FormInfoDetail> uploadList, String formId) {
-        FormInfoDetail infoDetail = DataSupport.where("formId='" + formId + "'").findFirst(FormInfoDetail.class, true);
-        if (infoDetail.form.getStatus().equals(Constant.FORM_STATUS_COMPLETED))
-            uploadList.add(infoDetail);
+                            for (int i = 0; i < formInfoDetails.size(); i++) {
+                                FormInfoDetail formInfoDetail = formInfoDetails.get(i);
+                                if (formInfoDetail.form.getStatus().equals(Constant.FORM_STATUS_COMPLETED))
+                                    uploadList.add(formInfoDetail);
+                            }
+                        }
+                        return uploadList;
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<List<FormInfoDetail>>() {
+                    @Override
+                    public void accept(List<FormInfoDetail> uploadList) throws Exception {
+                        loadingDialog.dismiss();
+                        if (uploadList.isEmpty()) {
+                            umsService.setUploadList(new ArrayList<FormInfoDetail>());
+                            ToastUtils.show(R.string.no_data);
+                        } else {
+                            umsService.setUploadList(uploadList);
+                        }
+                    }
+                });
     }
 
     private void getData() {
@@ -270,10 +301,11 @@ public class UploadFragment extends BaseFragment{
                                 }
                             }
 
+                            DecimalFormat df = new DecimalFormat("#.00");
                             if (count == list.size()) uploadAll = false;
-                            double ratio = count * 100.0 / list.size();
+                            float ratio = count * 100.0F / list.size();
                             progressBar.setProgress((int) ratio);
-                            progressText.setText(getString(R.string.have_finish, ratio + "%"));
+                            progressText.setText(getString(R.string.have_finish, df.format(ratio) + "%"));
                         }
                     }
                 }

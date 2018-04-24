@@ -22,7 +22,7 @@ class BackGroundReceiver : BroadcastReceiver() {
             intent2.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             context.startActivity(intent2)
         } else if (intent.action == Constant.ACTION_UPLOAD_LOG) {
-            uploadCrashLog()
+//            uploadCrashLog()
         }
     }
 

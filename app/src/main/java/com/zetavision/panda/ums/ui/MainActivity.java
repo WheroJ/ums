@@ -3,12 +3,14 @@ package com.zetavision.panda.ums.ui;
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.TextAppearanceSpan;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -33,11 +35,18 @@ import org.greenrobot.eventbus.EventBus;
 import org.litepal.crud.DataSupport;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -122,6 +131,13 @@ public class MainActivity extends BaseActivity {
             case R.id.dianjian:
                 MainActivityPermissionsDispatcher.showSpotCheckFragmentWithPermissionCheck(this);
                 break;
+            case R.id.activityMain_tvInProgress:
+                ProgressFormFragment fragment = new ProgressFormFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("actionType", FormInfo.ACTION_TYPE_P);
+                fragment.setArguments(bundle);
+                replaceShow(fragment, R.id.content);
+                break;
         }
     }
 
@@ -155,10 +171,10 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    @OnClick({R.id.download, R.id.upload, R.id.baoyang, R.id.dianjian}) void onChange(LinearLayout view) {
+    @OnClick({R.id.download, R.id.upload, R.id.baoyang, R.id.dianjian, R.id.activityMain_tvInProgress}) void onChange(View view) {
         if (view.getId() != this.current) {
-            LinearLayout preView = findViewById(this.current);
-            preView.setBackground(null);
+            View currentView = findViewById(this.current);
+            currentView.setBackground(null);
             preCheckId = current;
             this.current = view.getId();
             view.setBackgroundColor(getResources().getColor(R.color.main_color));
@@ -239,23 +255,37 @@ public class MainActivity extends BaseActivity {
     }
 
     public void updateCount() {
-        List<FormInfoDetail> formInfoDetails = DataSupport.where("isUpload = ?", String.valueOf(FormInfo.WAIT))
-                .find(FormInfoDetail.class, true);
-//        List<FormInfoDetail> formInfoDetails = DataSupport.findAll(FormInfoDetail.class, true);
 
-        int completeCount = 0, inProgressCount = 0;
-        for (int i = 0; i < formInfoDetails.size(); i++) {
-            if (formInfoDetails.get(i).form.getStatus().equals(Constant.FORM_STATUS_COMPLETED)) {
-                completeCount ++;
-            } else if (formInfoDetails.get(i).form.getStatus().equals(Constant.FORM_STATUS_INPROGRESS)) {
-                inProgressCount ++;
+        Observable.create(new ObservableOnSubscribe<HashMap<String, Integer>>() {
+            @Override
+            public void subscribe(ObservableEmitter<HashMap<String, Integer>> emitter) throws Exception {
+                List<FormInfoDetail> formInfoDetails = DataSupport.where("isUpload = ?", String.valueOf(FormInfo.WAIT))
+                        .find(FormInfoDetail.class, false);
+                HashMap<String, Integer> hashMap = new HashMap<>();
+                int completeCount = 0, inProgressCount = 0, downloadedCount;
+
+                for (FormInfoDetail formInfoDetail : formInfoDetails) {
+                    completeCount += DataSupport.where("formId = ? and status='" + Constant.FORM_STATUS_COMPLETED + "'"
+                            , formInfoDetail.formId).count(FormInfo.class);
+                    inProgressCount += DataSupport.where("formId = ? and status='" + Constant.FORM_STATUS_INPROGRESS + "'"
+                            , formInfoDetail.formId).count(FormInfo.class);
+                }
+                downloadedCount = DataSupport.count(FormInfoDetail.class);
+                hashMap.put("downloadedCount", downloadedCount);
+                hashMap.put("completeCount", completeCount);
+                hashMap.put("inProgressCount", inProgressCount);
+                emitter.onNext(hashMap);
             }
-        }
-        tvWaitUpload.setText(getSpannableString(TYPE_UPLOAD, completeCount), TextView.BufferType.SPANNABLE);
-        tvInProgress.setText(getSpannableString(TYPE_INPROGRESS, inProgressCount));
-        tvUploadCount.setText(String.valueOf(completeCount),  TextView.BufferType.SPANNABLE);
-
-        int downloadedCount = DataSupport.count(FormInfoDetail.class);
-        tvDownloaded.setText(getSpannableString(TYPE_DOWN, downloadedCount), TextView.BufferType.SPANNABLE);
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<HashMap<String, Integer>>() {
+                    @Override
+                    public void accept(HashMap<String, Integer> hashMap) throws Exception {
+                        tvWaitUpload.setText(getSpannableString(TYPE_UPLOAD, hashMap.get("completeCount")), TextView.BufferType.SPANNABLE);
+                        tvInProgress.setText(getSpannableString(TYPE_INPROGRESS, hashMap.get("inProgressCount")));
+                        tvUploadCount.setText(String.valueOf(hashMap.get("completeCount")),  TextView.BufferType.SPANNABLE);
+                        tvDownloaded.setText(getSpannableString(TYPE_DOWN, hashMap.get("downloadedCount")), TextView.BufferType.SPANNABLE);
+                    }
+                });
     }
 }

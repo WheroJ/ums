@@ -5,6 +5,9 @@ import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.text.TextUtils;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -35,6 +38,7 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,6 +66,8 @@ public class DownloadFragment extends BaseFragment {
     TextView progressText;
     @BindView(R.id.progressBar)
     ProgressBar progressBar;
+    @BindView(R.id.fragmentDownload_etSearch)
+    EditText etSearch;
 
     private boolean downLoadAll = false;
     private SystemSpinnerAdapter systemSpinnerAdapter;
@@ -75,6 +81,10 @@ public class DownloadFragment extends BaseFragment {
 
     @OnClick(R.id.downloadAll)
     void downloadAll() {
+        if (!NetUtils.INSTANCE.isNetConnect(getContext())) {
+            ToastUtils.show(getContext().getString(R.string.connect_net2download));
+            return;
+        }
         if (umsService != null) {
             umsService.startDownloadAll();
             downLoadAll = true;
@@ -96,22 +106,39 @@ public class DownloadFragment extends BaseFragment {
         actionSpinnerAdapter = new ActionSpinnerAdapter(getContext());
         systemSpinner.setAdapter(systemSpinnerAdapter);
         actionSpinner.setAdapter(actionSpinnerAdapter);
+
+        AdapterView.OnItemSelectedListener searchSelectedListener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                onSelectedChange();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        };
+        systemSpinner.setOnItemSelectedListener(searchSelectedListener);
+        actionSpinner.setOnItemSelectedListener(searchSelectedListener);
+
         downLoadAdapter = new DownloadAdapter(getContext(), this);
         listView.setAdapter(downLoadAdapter);
 
+        progressBar.setProgress(0);
+        progressText.setText(getString(R.string.have_finish, 0.0 + "%"));
         // 绑定service
         IntentUtils.INSTANCE.bindService(getActivity(), connection);
         getData();
     }
 
-    @OnClick(R.id.search)
-    void onSearch() {
+    private void onSelectedChange() {
         progressBar.setProgress(0);
         progressText.setText(getString(R.string.have_finish, 0.0 + "%"));
 
         final SystemInfo systemInfo = (SystemInfo) systemSpinner.getSelectedItem();
         final ActionInfo actionInfo = (ActionInfo) actionSpinner.getSelectedItem();
 
+        //根据您系统id 和 动作分类搜索
         if (!NetUtils.INSTANCE.isNetConnect(getContext())) {
             List<FormInfo> downloadList = loadLocalFormInfos(systemInfo, actionInfo);
             if (!downloadList.isEmpty()) {
@@ -122,8 +149,7 @@ public class DownloadFragment extends BaseFragment {
             }
         } else {
             if (systemInfo != null && actionInfo != null) {
-                RxUtils.INSTANCE.acquireString(
-                        Client.getApi(UmsApi.class)
+                RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class)
                                 .queryPlannedForm(systemInfo.getUtilitySystemId(), actionInfo.getActionType())
                         , new RxUtils.DialogListener() {
                             @Override
@@ -170,6 +196,96 @@ public class DownloadFragment extends BaseFragment {
                 ToastUtils.show(R.string.choose_systype_action);
             }
         }
+    }
+
+    @OnClick(R.id.search)
+    void onSearch() {
+        String search = etSearch.getText().toString().trim();
+        if (!TextUtils.isEmpty(search)) {
+            //根据输入的设备代码搜索
+            List<FormInfo> formInfos = searchByCodeLocal(search);
+            if (formInfos.isEmpty()) {
+                searchByCodeNet(search);
+            }
+        } else {
+            ToastUtils.show(getString(R.string.search_not_empty));
+        }
+    }
+
+    /**
+     * 本地网络中搜索点检表单和保养表单
+     * @param search  搜索的关键字
+     * @return 返回搜索的结果
+     */
+    private void searchByCodeNet(String search) {
+        if (NetUtils.INSTANCE.isNetConnect(getContext())) {
+
+            final SystemInfo systemInfo = (SystemInfo) systemSpinner.getSelectedItem();
+            final ActionInfo actionInfo = (ActionInfo) actionSpinner.getSelectedItem();
+
+            RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class)
+                    .searchForm(systemInfo.getUtilitySystemId(), actionInfo.getActionType(), search), new RxUtils.DialogListener() {
+                @Override
+                public void onResult(@NotNull Result result) {
+                    List<FormInfo> formInfos = result.getList(FormInfo.class);
+                    if (formInfos != null && !formInfos.isEmpty()) {
+                        FormInfo formInfo = formInfos.get(0);
+                        setSpinner(formInfo);
+                        umsService.setDownloadList(formInfos);
+                    } else {
+                        umsService.setDownloadList(new ArrayList<FormInfo>());
+                        ToastUtils.show(R.string.no_data);
+                    }
+                }
+
+                @Override
+                public void onError(@NotNull Throwable e) {
+                    super.onError(e);
+                    umsService.setDownloadList(new ArrayList<FormInfo>());
+                    ToastUtils.show(R.string.no_data);
+                }
+            });
+        }
+    }
+
+    private void setSpinner(FormInfo formInfo) {
+        if (systemSpinnerAdapter != null) {
+            for (int i = 0; i < systemSpinnerAdapter.getCount(); i++) {
+                SystemInfo item = systemSpinnerAdapter.getItem(i);
+                if (item.getUtilitySystemId() == formInfo.utilitySystemId) {
+                    systemSpinner.setSelection(i);
+                    break;
+                }
+            }
+        }
+
+        if (actionSpinnerAdapter != null) {
+            for (int i = 0; i < actionSpinnerAdapter.getCount(); i++) {
+                ActionInfo item = actionSpinnerAdapter.getItem(i);
+                if (item.getActionType().equals(formInfo.getActionType())) {
+                    actionSpinner.setSelection(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * 本地搜索点检表单和保养表单
+     * @param search  搜索的关键字
+     * @return 返回搜索的结果
+     */
+    private List<FormInfo> searchByCodeLocal(String search) {
+        List<FormInfo> formInfos = DataSupport.where("equipmentCode='" + search + "'").find(FormInfo.class);
+        if (formInfos.isEmpty()) {
+            formInfos = DataSupport.where("inspectRouteCode='" + search + "'").find(FormInfo.class);
+        }
+        if (!formInfos.isEmpty()) {
+            FormInfo formInfo = formInfos.get(0);
+            setSpinner(formInfo);
+            umsService.setDownloadList(formInfos);
+        }
+        return formInfos;
     }
 
     private  List<FormInfo> loadLocalFormInfos(SystemInfo systemInfo, ActionInfo actionInfo) {
@@ -373,9 +489,10 @@ public class DownloadFragment extends BaseFragment {
                             }
 
                             if (count == size) downLoadAll = false;
-                            double ratio = count * 100.0 / list.size();
+                            DecimalFormat df = new DecimalFormat("#.00");
+                            float ratio = count * 100.0F / list.size();
                             progressBar.setProgress((int)ratio);
-                            progressText.setText(getString(R.string.have_finish, ratio + "%"));
+                            progressText.setText(getString(R.string.have_finish, df.format(ratio) + "%"));
                         }
                     }
                 }

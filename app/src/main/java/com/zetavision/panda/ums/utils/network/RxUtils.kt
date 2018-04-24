@@ -3,6 +3,7 @@ package com.zetavision.panda.ums.utils.network
 import android.app.Activity
 import android.support.v7.app.AppCompatActivity
 import com.zetavision.panda.ums.R
+import com.zetavision.panda.ums.exception.LoginStatusException
 import com.zetavision.panda.ums.model.Result
 import com.zetavision.panda.ums.utils.*
 import io.reactivex.Observable
@@ -102,7 +103,10 @@ object RxUtils {
                             "-99" -> {
                                 logout(httpListener)
                             }
-                            else -> httpListener?.onError(Throwable("error-" + result.returnCode + ":" + result.returnMessage))
+                            else -> {
+//                                httpListener?.onError(Throwable("error-" + result.returnCode + ":" + result.returnMessage))
+                                httpListener?.onError(LoginStatusException(result.returnCode, result.returnMessage))
+                            }
                         }
                     }
 

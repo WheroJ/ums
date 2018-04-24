@@ -63,4 +63,8 @@ public interface UmsApi {
     Observable<ResponseBody> downloadFile(@Query("fileUrl") String fileUrl
             , @Query("fileName") String fileName
             , @Query("isWithRootPath") String isWithRootPath);
+
+    @GET("/ums/control/queryPlannedForm.mobile?")
+    Observable<ResponseBody> searchForm(@Query("utilitySystemId") int utilitySystemId
+            , @Query("actionType") String actionType, @Query("searchCode") String searchCode);
 }

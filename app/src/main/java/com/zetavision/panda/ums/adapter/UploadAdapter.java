@@ -17,6 +17,8 @@ import com.zetavision.panda.ums.ui.formdownload.DownloadFragment;
 import com.zetavision.panda.ums.ui.formup.UploadFragment;
 import com.zetavision.panda.ums.utils.Constant;
 import com.zetavision.panda.ums.utils.LogPrinter;
+import com.zetavision.panda.ums.utils.NetUtils;
+import com.zetavision.panda.ums.utils.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +49,10 @@ public class UploadAdapter extends BaseAdapter {
         if (list == null)
             return 0;
         return list.size();
+    }
+
+    public List<FormInfoDetail> getData() {
+        return list;
     }
 
     @Override
@@ -143,6 +149,10 @@ public class UploadAdapter extends BaseAdapter {
         }
 
         @OnClick(R.id.downloadBtn) void download() {
+            if (!NetUtils.INSTANCE.isNetConnect(mContext)) {
+                ToastUtils.show(mContext.getString(R.string.connect_net2upload));
+                return;
+            }
             if (fragment instanceof DownloadFragment) {
                 UmsService umsService = ((DownloadFragment) fragment).umsService;
                 if (umsService != null) {

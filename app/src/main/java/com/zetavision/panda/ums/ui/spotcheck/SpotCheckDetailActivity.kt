@@ -16,9 +16,6 @@ import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.widget.*
-import com.zero.smallvideorecord.LocalMediaCompress
-import com.zero.smallvideorecord.model.AutoVBRMode
-import com.zero.smallvideorecord.model.LocalMediaConfig
 import com.zetavision.panda.ums.R
 import com.zetavision.panda.ums.adapter.CommonSpinnerAdapter
 import com.zetavision.panda.ums.adapter.SpotCheckDetailAdapter
@@ -423,8 +420,9 @@ class SpotCheckDetailActivity: BaseActivity() {
         popupWindow.setOnCameraShowListener(object : PopVideoPicture.OnCameraShowListener{
             override fun onTakeVideo() {
                 popupWindow.dismiss()
-                mVideoUri = IntentUtils.startRecorder(`this`, VEDIO_RESULT)
-                mPosition = position
+//                mVideoUri = IntentUtils.startRecorder(`this`, VIDEO_RESULT)
+//                mPosition = position
+                IntentUtils.startRecorder(`this`, position, VIDEO_RESULT)
                  // 录制
 //                val config = MediaRecorderConfig.Buidler()
 ////                        .doH264Compress(AutoVBRMode())
@@ -463,7 +461,7 @@ class SpotCheckDetailActivity: BaseActivity() {
     }
 
     private val CAMERA_RESULT = 100
-    private val VEDIO_RESULT = 101
+    private val VIDEO_RESULT = 101
     private var takePicturePopWindow: PopupWindow? = null
     fun showTakePictureDialog(position: Int) {
         takePicturePopWindow?.dismiss()
@@ -595,7 +593,6 @@ class SpotCheckDetailActivity: BaseActivity() {
         if (formInfoDetail != null) {
             var isSuccessSave: Boolean
             formInfoDetail.formItemList.forEach {
-                println("oldHash = " + hashCodeMap[it.formItemId] + ";  newHash = " + it.hashCode())
                 if (hashCodeMap[it.formItemId] != it.hashCode()) {
                     isSuccessSave = it.saveOrUpdate("(formItemId='${it.formItemId}')")
                     if (!isSuccessSave) return isSuccessSave
@@ -640,49 +637,95 @@ class SpotCheckDetailActivity: BaseActivity() {
                         mPosition = -1
                     }
                 }
-            } else if (requestCode == VEDIO_RESULT) {
-                if (mVideoUri != null) {
+            } else if (requestCode == VIDEO_RESULT) {
+                if (data != null) {
+                    val videoPath = data.getStringExtra("videoPath")
+                    val parentPosition = data.getIntExtra("parentPosition", -1)
+
                     val formItemList = formInfoDetail?.formItemList
                     if (formItemList != null) {
-                        if (mPosition != -1 && mPosition in formInfoDetail?.formItemList?.indices!!) {
-                            if (formItemList[mPosition].photoPaths == null)
-                                formItemList[mPosition].photoPaths = ArrayList()
+                        if (parentPosition != -1 && parentPosition in formInfoDetail?.formItemList?.indices!!) {
+                            if (formItemList[parentPosition].photoPaths == null)
+                                formItemList[parentPosition].photoPaths = ArrayList()
 
-                            val dialog = LoadingDialog()
-                            val bundle = Bundle()
-                            bundle.putString("content", getString(R.string.saving_video))
-                            dialog.arguments = bundle
-                            dialog.show(fragmentManager, null)
+                            formItemList[parentPosition].photoPaths.add(Constant.TAKE_VIDEO.plus(";").plus(videoPath))
+                            addFiles.add(File(videoPath))
+                            setAdapter()
 
-                            Observable.just(mVideoUri!!.path)
-                                    .map {
-                                        val config = LocalMediaConfig.Buidler()
-                                                .setVideoPath(it)
-                                                .captureThumbnailsTime(1)
-                                                .doH264Compress(AutoVBRMode())
-                                                .setFramerate(28)
-                                                .build()
-                                        LocalMediaCompress(config).startCompress()
-                                    }
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe {
-                                        dialog.dismiss()
-                                        if (it != null) {
-                                            FileUtils.deleteAll(mVideoUri!!.path)
-                                            formItemList[mPosition].photoPaths.add(Constant.TAKE_VIDEO.plus(";").plus(it.videoPath))
-                                            addFiles.add(File(it.videoPath))
-                                            setAdapter()
-
-                                            mVideoUri = null
-                                            mPosition = -1
-                                        } else {
-                                            ToastUtils.show(R.string.save_video_fail)
-                                        }
-                                    }
+//                            val dialog = LoadingDialog()
+//                            val bundle = Bundle()
+//                            bundle.putString("content", getString(R.string.saving_video))
+//                            dialog.arguments = bundle
+//                            dialog.show(fragmentManager, null)
+//
+//                            Observable.just(videoPath)
+//                                    .map {
+//                                        val config = LocalMediaConfig.Buidler()
+//                                                .setVideoPath(it)
+//                                                .captureThumbnailsTime(1)
+//                                                .doH264Compress(AutoVBRMode())
+//                                                .setFramerate(28)
+//                                                .build()
+//                                        LocalMediaCompress(config).startCompress()
+//                                    }
+//                                    .subscribeOn(Schedulers.io())
+//                                    .observeOn(AndroidSchedulers.mainThread())
+//                                    .subscribe {
+//                                        dialog.dismiss()
+//                                        if (it != null) {
+//                                            FileUtils.deleteAll(videoPath)
+//                                            formItemList[parentPosition].photoPaths.add(Constant.TAKE_VIDEO.plus(";").plus(it.videoPath))
+//                                            addFiles.add(File(it.videoPath))
+//                                            setAdapter()
+//                                        } else {
+//                                            ToastUtils.show(R.string.save_video_fail)
+//                                        }
+//                                    }
                         }
                     }
                 }
+//                if (mVideoUri != null) {
+//                    val formItemList = formInfoDetail?.formItemList
+//                    if (formItemList != null) {
+//                        if (mPosition != -1 && mPosition in formInfoDetail?.formItemList?.indices!!) {
+//                            if (formItemList[mPosition].photoPaths == null)
+//                                formItemList[mPosition].photoPaths = ArrayList()
+//
+//                            val dialog = LoadingDialog()
+//                            val bundle = Bundle()
+//                            bundle.putString("content", getString(R.string.saving_video))
+//                            dialog.arguments = bundle
+//                            dialog.show(fragmentManager, null)
+//
+//                            Observable.just(mVideoUri!!.path)
+//                                    .map {
+//                                        val config = LocalMediaConfig.Buidler()
+//                                                .setVideoPath(it)
+//                                                .captureThumbnailsTime(1)
+//                                                .doH264Compress(AutoVBRMode())
+//                                                .setFramerate(28)
+//                                                .build()
+//                                        LocalMediaCompress(config).startCompress()
+//                                    }
+//                                    .subscribeOn(Schedulers.io())
+//                                    .observeOn(AndroidSchedulers.mainThread())
+//                                    .subscribe {
+//                                        dialog.dismiss()
+//                                        if (it != null) {
+//                                            FileUtils.deleteAll(mVideoUri!!.path)
+//                                            formItemList[mPosition].photoPaths.add(Constant.TAKE_VIDEO.plus(";").plus(it.videoPath))
+//                                            addFiles.add(File(it.videoPath))
+//                                            setAdapter()
+//
+//                                            mVideoUri = null
+//                                            mPosition = -1
+//                                        } else {
+//                                            ToastUtils.show(R.string.save_video_fail)
+//                                        }
+//                                    }
+//                        }
+//                    }
+//                }
             }
         }
     }

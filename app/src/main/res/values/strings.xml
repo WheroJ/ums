@@ -134,4 +134,13 @@
     <string name="info_downloaded">已下载%1$s张表单</string>
     <string name="info_waitupload">有%1$s条待上传数据</string>
     <string name="info_inprogress">有%1$s张进行中的表单</string>
+    <string name="search_not_empty">搜索的内容不能为空</string>
+    <string name="search_content">设备代码/点检路线</string>
+    <string name="start_record">开始录制</string>
+    <string name="file_not_exist">文件路径不存在</string>
+    <string name="time_short">时间太短</string>
+    <string name="cancel_record">取消录制</string>
+    <string name="up_to_cancel">↑ 上滑取消</string>
+    <string name="connect_net2download">请连接网络后下载</string>
+    <string name="connect_net2upload">请连接网络后再上传</string>
 </resources>

@@ -144,4 +144,12 @@
     <string name="sure">SURE</string>
     <string name="sure_save">Confirm saved</string>
     <string name="del_img_notice">Are you sure you want to delete this data？</string>
+    <string name="search_not_empty">The content of the search cannot be empty.</string>
+    <string name="search_content">Device Code/Inspect Route</string>
+
+    <string name="start_record">Start Recording</string>
+    <string name="file_not_exist">File path does not exist.</string>
+    <string name="time_short">Time is too short.</string>
+    <string name="cancel_record">Cancel recording.</string>
+    <string name="up_to_cancel">↑ Slide to cancel</string>
 </resources>

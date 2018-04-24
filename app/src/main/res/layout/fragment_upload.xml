@@ -157,10 +157,13 @@
             android:layout_width="match_parent"
             android:layout_marginBottom="50dp"
             android:layout_height="1dp" />
-        <android.support.constraint.ConstraintLayout
+
+        <LinearLayout
             android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
-            android:layout_height="50dp">
+            android:layout_height="50dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
             <TextView
                 android:id="@+id/total"
                 android:text="@string/total_upload_progress"
@@ -168,50 +171,45 @@
                 android:gravity="center_vertical"
                 android:layout_marginStart="16dp"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                android:layout_height="match_parent" />
 
             <ProgressBar
                 android:id="@+id/progressBar"
                 style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:max="100"
-                android:progress="0"
-                android:layout_marginEnd="16dp"
-                android:layout_marginStart="16dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/progressText"
-                app:layout_constraintStart_toEndOf="@id/total"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_width="@dimen/dp_150"
+                android:layout_height="@dimen/dp_15"
+                android:layout_marginEnd="@dimen/dp_15"
+                android:layout_marginStart="@dimen/dp_15"
+                android:max="100"/>
 
             <TextView
                 android:id="@+id/progressText"
                 tools:text="已完成25%"
-                app:layout_constraintEnd_toStartOf="@id/uploadAll"
                 android:textColor="@color/text_light_blue"
-                android:layout_marginEnd="140dp"
                 android:gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="0dp"/>
+
             <LinearLayout
                 android:id="@+id/uploadAll"
                 android:orientation="horizontal"
-                app:layout_constraintEnd_toStartOf="@+id/pauseAll"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
                 android:background="@drawable/bg_btn_primary_light"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="@dimen/dp_15"
                 android:layout_width="wrap_content"
-                android:paddingEnd="20dp"
-                android:paddingStart="8dp"
-                android:layout_height="34dp">
+                android:paddingEnd="@dimen/dp_20"
+                android:paddingStart="@dimen/dp_10"
+                android:layout_height="@dimen/dp_35">
                 <ImageView
                     android:scaleType="fitCenter"
                     android:src="@mipmap/download"
                     android:padding="8dp"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp" />
+                    android:layout_width="@dimen/dp_35"
+                    android:layout_height="@dimen/dp_35" />
                 <TextView
                     android:text="@string/all_upload"
                     android:textColor="@color/white"
@@ -226,17 +224,17 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:background="@drawable/bg_btn_primary_light"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="@dimen/dp_15"
                 android:layout_width="wrap_content"
-                android:paddingEnd="20dp"
-                android:paddingStart="8dp"
-                android:layout_height="34dp">
+                android:paddingEnd="@dimen/dp_20"
+                android:paddingStart="@dimen/dp_10"
+                android:layout_height="@dimen/dp_35">
                 <ImageView
                     android:scaleType="fitCenter"
                     android:src="@mipmap/pause"
                     android:padding="8dp"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp" />
+                    android:layout_width="@dimen/dp_35"
+                    android:layout_height="@dimen/dp_35" />
                 <TextView
                     android:text="@string/all_stop"
                     android:textColor="@color/white"
@@ -244,6 +242,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent" />
             </LinearLayout>
-        </android.support.constraint.ConstraintLayout>
+        </LinearLayout>
     </RelativeLayout>
 </LinearLayout>

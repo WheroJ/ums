@@ -19,7 +19,6 @@ import com.zetavision.panda.ums.model.FormItem
 import com.zetavision.panda.ums.utils.Constant
 import com.zetavision.panda.ums.utils.IntentUtils
 import com.zetavision.panda.ums.utils.UIUtils
-import com.zetavision.panda.ums.widget.AddView
 
 
 /**
@@ -108,7 +107,8 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
         val spinner = helper?.getView<Spinner>(R.id.itemUpKeepParam_spinner)
         val etRemark = helper?.getView<EditText>(R.id.itemUpKeepParam_remark)
         val rvPictures = helper?.getView<RecyclerView>(R.id.itemSpotCheckParam_pictures)
-        val addView = helper?.getView<AddView>(R.id.itemUpKeepParam_addView)
+//        val addView = helper?.getView<AddView>(R.id.itemUpKeepParam_addView)
+        val addView = helper?.getView<ImageView>(R.id.itemUpKeepParam_addView)
 
         setImageAdapter(item, rvPictures)
 
@@ -301,7 +301,7 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
                 } else {
                     if (list.isNotEmpty()) {
                         spinner?.setSelection(0)
-                        checkBoolType(valueList, indexOf, rlChoose)
+                        checkBoolType(valueList, 0, rlChoose)
                     }
                 }
 
@@ -367,8 +367,12 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
     }
 
     private fun checkBoolType(list: List<String>, indexOf: Int, rlChoose: RelativeLayout?) {
-        if ("N".equals(list[indexOf], true)) {
-            rlChoose?.setBackgroundResource(R.drawable.radius_solid_red_5)
+        if (indexOf != -1) {
+            if ("N".equals(list[indexOf], true)) {
+                rlChoose?.setBackgroundResource(R.drawable.radius_solid_red_5)
+            } else {
+                rlChoose?.setBackgroundResource(R.drawable.bg_spinner)
+            }
         } else {
             rlChoose?.setBackgroundResource(R.drawable.bg_spinner)
         }

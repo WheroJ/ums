@@ -7,6 +7,7 @@ import android.widget.RadioGroup;
 
 import com.zetavision.panda.ums.R;
 import com.zetavision.panda.ums.base.BaseActivity;
+import com.zetavision.panda.ums.exception.LoginStatusException;
 import com.zetavision.panda.ums.model.Result;
 import com.zetavision.panda.ums.model.User;
 import com.zetavision.panda.ums.utils.AESTool;
@@ -24,10 +25,15 @@ import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Predicate;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 
 public class LoginActivity extends BaseActivity {
@@ -62,7 +68,15 @@ public class LoginActivity extends BaseActivity {
                 @Override
                 public void onError(@NotNull Throwable e) {
                     super.onError(e);
-                    ToastUtils.show(e.getMessage());
+                    LoginStatusException loginStatusException = (LoginStatusException) e;
+                    int code = loginStatusException.getIntCode();
+                    if (code == Constant.PASS_ERROR) {
+                        ToastUtils.show(R.string.pass_error);
+                    } else if (code == Constant.USER_NOT_EXIST) {
+                        ToastUtils.show(R.string.no_user);
+                    } else {
+                        ToastUtils.show(e.getMessage());
+                    }
                 }
             });
         } else {
@@ -155,13 +169,39 @@ public class LoginActivity extends BaseActivity {
         IntentUtils.INSTANCE.goExit(this);
     }
 
+    private CompositeDisposable disposable;
     @Override
     protected void onResume() {
         super.onResume();
         if (!Constant.RE_LOGIN.equals(getIntent().getStringExtra(Constant.RE_LOGIN))) {
             if (!NetUtils.INSTANCE.isNetConnect(this)) {
                 offLogin = true;
+                disposable = new CompositeDisposable();
+                disposable.add(Observable.interval(1, 1, TimeUnit.SECONDS)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(Schedulers.io())
+                .filter(new Predicate<Long>() {
+                    @Override
+                    public boolean test(Long aLong) throws Exception {
+                        System.out.println("没结束");
+                        return NetUtils.INSTANCE.isNetConnect(getThis());
+                    }
+                }).subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long aLong) throws Exception {
+                        offLogin = false;
+                        disposable.dispose();
+                    }
+                }));
             } else offLogin = false;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (disposable != null) {
+            disposable.dispose();
         }
     }
 }

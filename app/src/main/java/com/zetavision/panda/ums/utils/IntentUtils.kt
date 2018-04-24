@@ -14,21 +14,14 @@ import com.zetavision.panda.ums.base.BaseActivity
 import com.zetavision.panda.ums.model.FormInfo
 import com.zetavision.panda.ums.service.ScannerService
 import com.zetavision.panda.ums.service.UmsService
-import com.zetavision.panda.ums.ui.ImageViewerActivity
-import com.zetavision.panda.ums.ui.LoginActivity
-import com.zetavision.panda.ums.ui.MainActivity
+import com.zetavision.panda.ums.ui.*
 import com.zetavision.panda.ums.ui.spotcheck.SpotCheckDetailActivity
-import com.zetavision.panda.ums.ui.spotcheck.SpotCheckListActivity
 import com.zetavision.panda.ums.ui.upkeep.UpKeepDetailActivity
-import com.zetavision.panda.ums.ui.upkeep.UpKeepListActivity
 import com.zetavision.panda.ums.zxing.Intents
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-
-
-
 
 /**
  * Created by wheroj on 2018/1/30.
@@ -37,7 +30,7 @@ import java.util.*
 object IntentUtils {
 
     fun goUpKeep(context: Context, deviceName: String) {
-        val intent = Intent(context, UpKeepListActivity::class.java)
+        val intent = Intent(context, SearchListActivity::class.java)
         intent.putExtra("deviceName", deviceName)
         intent.putExtra("actionType", FormInfo.ACTION_TYPE_M)
         intent.putExtra("firstView", true)
@@ -73,7 +66,7 @@ object IntentUtils {
     }
 
     fun goSpotCheck(context: Context, deviceName: String) {
-        val intent = Intent(context, SpotCheckListActivity::class.java)
+        val intent = Intent(context, SearchListActivity::class.java)
         intent.putExtra("deviceName", deviceName)
         intent.putExtra("actionType", FormInfo.ACTION_TYPE_P)
         intent.putExtra("firstView", true)
@@ -134,7 +127,7 @@ object IntentUtils {
 
         if (logout) {
             UserUtils.clearLogin()
-            var userPreferences = UserPreferences()
+            val userPreferences = UserPreferences()
             userPreferences.clearCookie()
         }
     }
@@ -196,7 +189,7 @@ object IntentUtils {
     }
 
     fun goImageViewer(context: Context, photoPath: String?) {
-        var intent = Intent(context, ImageViewerActivity::class.java)
+        val intent = Intent(context, ImageViewerActivity::class.java)
         intent.putExtra("photoPath", photoPath)
         context.startActivity(intent)
     }
@@ -206,7 +199,7 @@ object IntentUtils {
         try {
             val fileUri = Uri.fromFile(createMediaFile()) // create a file to save the video
             intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri)  // set the image file name
-            intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1) // set the video image quality to high
+//            intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1) // set the video image quality to high
 
             intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 10L)// 以秒为单位
             intent.putExtra(MediaStore.EXTRA_SIZE_LIMIT, 1024 * 1024 * 30L)// 以字节为单位 必须为Long类型
@@ -219,6 +212,12 @@ object IntentUtils {
             e.printStackTrace()
         }
         return null
+    }
+
+    fun startRecorder(context: Activity, parentPosition: Int, requestCode: Int) {
+        val intent = Intent(context, VideoActivity::class.java)
+        intent.putExtra("parentPosition", parentPosition)
+        context.startActivityForResult(intent, requestCode)
     }
 
     /**
@@ -255,7 +254,7 @@ object IntentUtils {
      * 开起扫描服务
      */
     fun startScanService(context: Context) {
-        var intent = Intent(context, ScannerService::class.java)
+        val intent = Intent(context, ScannerService::class.java)
         context.startService(intent)
     }
 
@@ -263,7 +262,7 @@ object IntentUtils {
      * 停止扫描服务
      */
     fun stopScanService(context: Context) {
-        var intent = Intent(context, Intents.Scan::class.java)
+        val intent = Intent(context, Intents.Scan::class.java)
         context.stopService(intent)
     }
 }

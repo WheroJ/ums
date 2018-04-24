@@ -8,11 +8,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.zetavision.panda.ums.R;
+import com.zetavision.panda.ums.exception.LoginStatusException;
 import com.zetavision.panda.ums.fragments.base.BaseFragment;
 import com.zetavision.panda.ums.model.FormInfo;
 import com.zetavision.panda.ums.model.FormInfoDetail;
@@ -21,6 +23,7 @@ import com.zetavision.panda.ums.model.Result;
 import com.zetavision.panda.ums.model.SopMap;
 import com.zetavision.panda.ums.model.User;
 import com.zetavision.panda.ums.ui.LoginActivity;
+import com.zetavision.panda.ums.ui.VideoActivity;
 import com.zetavision.panda.ums.utils.ActivityCollector;
 import com.zetavision.panda.ums.utils.Constant;
 import com.zetavision.panda.ums.utils.IntentUtils;
@@ -54,7 +57,6 @@ abstract public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);//竖屏
 
         mContext = this;
 
@@ -100,7 +102,16 @@ abstract public class BaseActivity extends AppCompatActivity {
                             @Override
                             public void onError(@NotNull Throwable e) {
                                 super.onError(e);
-                                ToastUtils.show(e.getMessage());
+                                if (e instanceof LoginStatusException) {
+                                    LoginStatusException loginStatusException = (LoginStatusException) e;
+                                    int code = loginStatusException.getIntCode();
+                                    System.out.println("code=" + code);
+                                    if (code == Constant.USER_LOGOUT) {
+                                        IntentUtils.INSTANCE.goLogout(getThis());
+                                    } else ToastUtils.show(e.getMessage());
+                                } else {
+                                    ToastUtils.show(e.getMessage());
+                                }
                             }
                         });
                     } else {
@@ -138,6 +149,7 @@ abstract public class BaseActivity extends AppCompatActivity {
      * 初始化之前调用，默认空实现
      */
     public void beforeInit() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);//竖屏
         changeAppLanguage();
     }
 
@@ -206,7 +218,7 @@ abstract public class BaseActivity extends AppCompatActivity {
         Configuration conf = res.getConfiguration();
         conf.locale = myLocale;
         res.updateConfiguration(conf, dm);
-        if (!(this instanceof LoginActivity)) {
+        if (!(this instanceof LoginActivity) && !(this instanceof VideoActivity)) {
             if (preferences.getLanguage().equals(Locale.CHINESE.getLanguage())) {//中文
                 RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class).setUserLocale(Constant.LANG_CHINA), null);
             } else {//英文
@@ -263,5 +275,11 @@ abstract public class BaseActivity extends AppCompatActivity {
         }
         mContext = null;
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        System.out.println("KeyEvent Action :" + event.getAction());
+        return super.onKeyDown(keyCode, event);
     }
 }

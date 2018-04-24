@@ -121,29 +121,31 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp_20"
-            android:gravity="center_horizontal"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/activityMain_tvDownloaded"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingStart="@dimen/dp_20"
                 android:paddingTop="@dimen/dp_10"
                 android:paddingBottom="@dimen/dp_10"
                 tools:text="已下载5张表单"
                 android:textColor="@color/white"/>
             <TextView
                 android:id="@+id/activityMain_tvWaitUpload"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingStart="@dimen/dp_20"
                 android:paddingTop="@dimen/dp_10"
                 android:paddingBottom="@dimen/dp_10"
                 tools:text="有5条待上传数据"
                 android:textColor="@color/white"/>
             <TextView
                 android:id="@+id/activityMain_tvInProgress"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingStart="@dimen/dp_20"
                 android:paddingTop="@dimen/dp_10"
                 android:paddingBottom="@dimen/dp_10"
                 tools:text="有5张进行中的表单"

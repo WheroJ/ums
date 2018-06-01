@@ -20,7 +20,8 @@
     <string name="total_upload_progress">总上传进度</string>
     <string name="input_device_name">输入设备名称</string>
     <string name="ok">确定</string>
-    <string name="switch_to_scan">切换成扫码</string>
+    <string name="switch_to_scan">扫描头扫码</string>
+    <string name="switch_to_camera">摄像头扫码</string>
     <string name="device_name">设备名称</string>
     <string name="device_code">设备代码</string>
     <string name="maintain_cycle">保养周期</string>
@@ -113,7 +114,7 @@
     <string name="sop_opreate">SOP操作</string>
     <string name="install_word">请先安装office</string>
     <string name="photo_detail">照片详情</string>
-    <string name="error_code">错误的条形码</string>
+    <string name="error_code">错误的二维码</string>
     <string name="all_upload">全部上传</string>
     <string name="all_stop">全部停止</string>
     <string name="all_download">全部下载</string>

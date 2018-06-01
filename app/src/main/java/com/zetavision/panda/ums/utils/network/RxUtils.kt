@@ -61,7 +61,7 @@ object RxUtils {
     }
 
     abstract class ProgressListener(override var context: AppCompatActivity? = null): DialogListener(context) {
-        abstract fun onUpdate(progress: Float);
+        abstract fun onUpdate(progress: Float)
     }
 //
 //    /**

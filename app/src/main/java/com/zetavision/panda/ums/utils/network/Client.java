@@ -21,6 +21,7 @@ public class Client {
 
 //    http://www.juyuejk.com/uniqueComservice2/base.do?method=uploadPic&type=userphoto
     private static final String BASE_URL = Constant.API_BASE_URL;
+//    private static final String BASE_URL = "http://www.baidu.com";
 
     public static <T> T getApi(final Class<T> service) {
 

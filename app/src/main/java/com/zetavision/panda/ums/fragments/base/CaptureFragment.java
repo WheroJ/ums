@@ -101,7 +101,12 @@ public abstract class CaptureFragment extends BaseFragment implements SurfaceHol
         }
     }
 
-    private void initCamera(SurfaceHolder surfaceHolder) {
+    protected  void closeCamera() {
+        if (cameraManager != null && cameraManager.isOpen())
+            cameraManager.closeDriver();
+    }
+
+    protected void initCamera(SurfaceHolder surfaceHolder) {
         if (surfaceHolder == null) {
             throw new IllegalStateException("No SurfaceHolder provided");
         }

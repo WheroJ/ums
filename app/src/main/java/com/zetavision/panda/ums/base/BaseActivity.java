@@ -16,11 +16,7 @@ import android.widget.LinearLayout;
 import com.zetavision.panda.ums.R;
 import com.zetavision.panda.ums.exception.LoginStatusException;
 import com.zetavision.panda.ums.fragments.base.BaseFragment;
-import com.zetavision.panda.ums.model.FormInfo;
-import com.zetavision.panda.ums.model.FormInfoDetail;
-import com.zetavision.panda.ums.model.FormItem;
 import com.zetavision.panda.ums.model.Result;
-import com.zetavision.panda.ums.model.SopMap;
 import com.zetavision.panda.ums.model.User;
 import com.zetavision.panda.ums.ui.LoginActivity;
 import com.zetavision.panda.ums.ui.VideoActivity;
@@ -40,7 +36,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
-import org.litepal.crud.DataSupport;
 
 import java.util.Locale;
 
@@ -130,10 +125,10 @@ abstract public class BaseActivity extends AppCompatActivity {
     }
 
     protected void onRightTextClick(){
-        DataSupport.deleteAll(FormInfoDetail.class);
-        DataSupport.deleteAll(FormInfo.class);
-        DataSupport.deleteAll(FormItem.class);
-        DataSupport.deleteAll(SopMap.class);
+//        DataSupport.deleteAll(FormInfoDetail.class);
+//        DataSupport.deleteAll(FormInfo.class);
+//        DataSupport.deleteAll(FormItem.class);
+//        DataSupport.deleteAll(SopMap.class);
     }
 
     /**
@@ -279,7 +274,6 @@ abstract public class BaseActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        System.out.println("KeyEvent Action :" + event.getAction());
         return super.onKeyDown(keyCode, event);
     }
 }

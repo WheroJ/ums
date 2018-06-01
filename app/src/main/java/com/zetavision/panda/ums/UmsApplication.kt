@@ -8,6 +8,8 @@ import com.zetavision.panda.ums.utils.UserPreferences
 import org.litepal.LitePalApplication
 import java.util.*
 
+
+
 /**
  * Created by wheroj on 2018/1/30.
  *
@@ -24,7 +26,6 @@ class UmsApplication : LitePalApplication() {
         if(!Constant.DEBUG) CrashHandler.getInstance().init(application)
 
         changeAppLanguage()
-//        initSmallVideo()
     }
 
     fun changeAppLanguage() {

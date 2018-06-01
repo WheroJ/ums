@@ -21,8 +21,6 @@ import com.zetavision.panda.ums.model.FormInfo;
 import com.zetavision.panda.ums.model.FormInfoDetail;
 import com.zetavision.panda.ums.ui.formdownload.DownloadFragment;
 import com.zetavision.panda.ums.ui.formup.UploadFragment;
-import com.zetavision.panda.ums.ui.spotcheck.SpotCheckFragment;
-import com.zetavision.panda.ums.ui.upkeep.UpKeepFragment;
 import com.zetavision.panda.ums.utils.Common;
 import com.zetavision.panda.ums.utils.Constant;
 import com.zetavision.panda.ums.utils.IntentUtils;
@@ -143,12 +141,16 @@ public class MainActivity extends BaseActivity {
 
     @NeedsPermission(Manifest.permission.CAMERA)
     void showMaintFragment() {
-        replaceShow(new UpKeepFragment(), R.id.content);
+        SearchFragment fragment = new SearchFragment();
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("isSpot", false);
+        fragment.setArguments(bundle);
+        replaceShow(fragment, R.id.content);
     }
 
     @NeedsPermission(Manifest.permission.CAMERA)
     void showSpotCheckFragment() {
-        replaceShow(new SpotCheckFragment(), R.id.content);
+        replaceShow(new SearchFragment(), R.id.content);
     }
 
     // 用户拒绝授权回调

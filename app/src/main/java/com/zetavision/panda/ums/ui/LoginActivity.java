@@ -68,12 +68,16 @@ public class LoginActivity extends BaseActivity {
                 @Override
                 public void onError(@NotNull Throwable e) {
                     super.onError(e);
-                    LoginStatusException loginStatusException = (LoginStatusException) e;
-                    int code = loginStatusException.getIntCode();
-                    if (code == Constant.PASS_ERROR) {
-                        ToastUtils.show(R.string.pass_error);
-                    } else if (code == Constant.USER_NOT_EXIST) {
-                        ToastUtils.show(R.string.no_user);
+                    if (e instanceof LoginStatusException) {
+                        LoginStatusException loginStatusException = (LoginStatusException) e;
+                        int code = loginStatusException.getIntCode();
+                        if (code == Constant.PASS_ERROR) {
+                            ToastUtils.show(R.string.pass_error);
+                        } else if (code == Constant.USER_NOT_EXIST) {
+                            ToastUtils.show(R.string.no_user);
+                        } else {
+                            ToastUtils.show(e.getMessage());
+                        }
                     } else {
                         ToastUtils.show(e.getMessage());
                     }

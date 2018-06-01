@@ -32,6 +32,10 @@ class UploadUtils {
     private val TAG: String = "UploadUtils"
     private var isStopUpload = false
 
+    fun getIsStopUpload(): Boolean {
+        return isStopUpload
+    }
+
     /**
      * 停止上传
      */

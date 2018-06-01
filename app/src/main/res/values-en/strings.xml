@@ -20,7 +20,8 @@
     <string name="total_upload_progress">Total progress</string>
     <string name="input_device_name">Input device name</string>
     <string name="ok">OK</string>
-    <string name="switch_to_scan">Switch to scan</string>
+    <string name="switch_to_scan">Scanning head</string>
+    <string name="switch_to_camera">Camera scanning</string>
     <string name="check_line">Check line</string>
     <string name="device_name">Device name</string>
     <string name="maintain_cycle">Maintain cycle</string>
@@ -122,7 +123,7 @@
     <string name="refuse_permission">Refuse open permission</string>
     <string name="inspect_route2">Inspect period：</string>
     <string name="install_word">Please install office</string>
-    <string name="error_code">Wrong barcode</string>
+    <string name="error_code">Wrong QR code</string>
     <string name="all_upload">ALL UPLOAD</string>
     <string name="all_stop">ALL STOP</string>
     <string name="all_download">ALL DOWNLOAD</string>

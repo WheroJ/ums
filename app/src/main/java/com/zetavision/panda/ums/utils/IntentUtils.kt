@@ -7,11 +7,13 @@ import android.app.Activity
 import android.content.Context
 import android.content.Context.BIND_AUTO_CREATE
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.net.Uri
 import android.provider.MediaStore
 import com.zetavision.panda.ums.base.BaseActivity
 import com.zetavision.panda.ums.model.FormInfo
+import com.zetavision.panda.ums.service.ScanReceiver
 import com.zetavision.panda.ums.service.ScannerService
 import com.zetavision.panda.ums.service.UmsService
 import com.zetavision.panda.ums.ui.*
@@ -264,5 +266,19 @@ object IntentUtils {
     fun stopScanService(context: Context) {
         val intent = Intent(context, Intents.Scan::class.java)
         context.stopService(intent)
+    }
+
+    fun registerScanReceiver(receiver: ScanReceiver, context: Context) {
+        val actionFilter = IntentFilter()
+        actionFilter.addAction("com.android.server.scannerservice.broadcast")
+        context.registerReceiver(receiver, actionFilter)
+    }
+
+    /**
+     * 取消接收扫描头的
+     */
+    fun unRegisterScanReceiver(receiver: ScanReceiver?, context: Context) {
+        if (receiver != null)
+            context.unregisterReceiver(receiver)
     }
 }

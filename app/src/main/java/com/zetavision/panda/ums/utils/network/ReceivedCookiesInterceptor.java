@@ -47,27 +47,25 @@ public class ReceivedCookiesInterceptor implements Interceptor {
             }
 
             List<String> headers = originalResponse.headers("set-cookie");
-            if (!headers.isEmpty()) {
-                Observable.fromIterable(headers)
-                        .map(new Function<String, String>() {
-                            @Override
-                            public String apply(String s) throws Exception {
-                                String[] cookieArray = s.split(";");
-                                return cookieArray[0];
+            Observable.fromIterable(headers)
+                    .map(new Function<String, String>() {
+                        @Override
+                        public String apply(String s) throws Exception {
+                            String[] cookieArray = s.split(";");
+                            return cookieArray[0];
+                        }
+                    })
+                    .subscribe(new Consumer<String>() {
+                        @Override
+                        public void accept(String cookie) throws Exception {
+                            String jsessionid = "JSESSIONID";
+                            if (cookie.contains(jsessionid) && !cookieList.isEmpty()) {
+                                cookieList.set(0, cookie);
+                            } else {
+                                cookieList.add(cookie);
                             }
-                        })
-                        .subscribe(new Consumer<String>() {
-                            @Override
-                            public void accept(String cookie) throws Exception {
-                                String jsessionid = "JSESSIONID";
-                                if (cookie.contains(jsessionid) && !cookieList.isEmpty()) {
-                                    cookieList.set(0, cookie);
-                                } else {
-                                    cookieList.add(cookie);
-                                }
-                            }
-                        });
-            }
+                        }
+                    });
 
             for (String temp : cookieList) {
                 cookieBuffer.append(temp).append(";");

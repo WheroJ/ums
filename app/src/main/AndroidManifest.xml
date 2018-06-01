@@ -39,7 +39,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.MainActivity" android:configChanges="orientation|screenSize" />
+        <activity android:name=".ui.MainActivity" android:configChanges="orientation|screenSize" >
+            <!--<intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>-->
+        </activity>
         <activity android:name=".ui.CheckListActivity" android:configChanges="orientation|screenSize" />
         <activity android:name=".ui.upkeep.UpKeepDetailActivity" android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan"/>
@@ -88,6 +93,14 @@
                 <action android:name="com.zetavision.panda.ums.uploadImageAndVideo.log" />
             </intent-filter>
         </receiver>
+
+<!--
+        <receiver android:name=".service.ScanReceiver">
+            <intent-filter>
+                <action android:name="com.android.server.scannerservice.broadcast"/>
+            </intent-filter>
+        </receiver>
+-->
 
     </application>
 

@@ -206,6 +206,10 @@ public class DownloadFragment extends BaseFragment {
             List<FormInfo> formInfos = searchByCodeLocal(search);
             if (formInfos.isEmpty()) {
                 searchByCodeNet(search);
+            } else {
+                FormInfo formInfo = formInfos.get(0);
+                setSpinner(formInfo);
+                umsService.setDownloadList(formInfos);
             }
         } else {
             ToastUtils.show(getString(R.string.search_not_empty));

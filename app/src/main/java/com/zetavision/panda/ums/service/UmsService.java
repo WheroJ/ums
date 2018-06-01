@@ -57,6 +57,8 @@ import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 
 public class UmsService extends Service {
@@ -135,7 +137,13 @@ public class UmsService extends Service {
                             super.onError(e);
                             disposableHashMap.remove(formId);
                             uploadUtilsMap.remove(formId);
-                            ToastUtils.show(e.getMessage());
+                            formInfoDetail.isUpload = FormInfo.FAIL;     // 下载失败
+                            if (uploadListener != null) {
+                                uploadListener.onUpdate(uploadList);
+                            }
+                            if (uploadUtils.getIsStopUpload()) {
+                                ToastUtils.show(e.getMessage());
+                            }
                         }
 
                         @Override
@@ -230,7 +238,18 @@ public class UmsService extends Service {
         }
 
 
-        if (uploadListener != null) uploadListener.onUpdate(uploadList);Observable<ResponseBody> observable = Client.getApi(UmsApi.class).uploadForm(forms.toString());
+        if (uploadListener != null)
+            uploadListener.onUpdate(uploadList);
+
+        RequestBody requestBody = null;
+        try {
+            JSONObject formsJson = new JSONObject();
+            formsJson.put("forms", forms);
+            requestBody = RequestBody.create(MediaType.parse("application/json"), formsJson.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Observable<ResponseBody> observable = Client.getApi(UmsApi.class).uploadForm(requestBody);
         RxUtils.INSTANCE.acquireString(observable, new RxUtils.DialogListener(){
             @Override
             public void onResult(@NotNull Result result) {
@@ -817,12 +836,8 @@ public class UmsService extends Service {
                 if (setSopDownStatus2Progress(formInfo)) return;
                 File saveFile = new File(UIUtils.getCachePath(), formInfoDetail.form.sopFileName);
                 try {
-                    if (saveFile.isDirectory()) {
-                        saveFile.mkdirs();
-                    } else if (saveFile.isFile()) {
-                        if (!saveFile.exists()) {
-                            saveFile.createNewFile();
-                        }
+                    if (!saveFile.exists()) {
+                        saveFile.createNewFile();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -874,6 +889,7 @@ public class UmsService extends Service {
                             }
                         });
                     } else {
+                        stopDownloadSop(formInfo.getFormId(), formInfo.sopUrl);
                         ToastUtils.show(getString(R.string.data_exception));
                     }
                 }
@@ -907,15 +923,15 @@ public class UmsService extends Service {
         if (disposable != null) {
             disposable.dispose();
             disposableHashMap.remove(formId);
+        }
 
-            FormInfo formInfo = getFormInfo(formId);
-            if (formInfo != null) {
-                if (formInfo.sop_download_status == FormInfo.PROGRESS) {
-                    formInfo.sop_download_status = FormInfo.WAIT;
-                }
-                if (downloadListener != null)
-                    downloadListener.onUpdate(downloadList);
+        FormInfo formInfo = getFormInfo(formId);
+        if (formInfo != null) {
+            if (formInfo.sop_download_status == FormInfo.PROGRESS) {
+                formInfo.sop_download_status = FormInfo.WAIT;
             }
+            if (downloadListener != null)
+                downloadListener.onUpdate(downloadList);
         }
     }
 

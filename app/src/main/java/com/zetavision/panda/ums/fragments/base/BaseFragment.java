@@ -11,7 +11,11 @@ import android.widget.LinearLayout;
 
 import com.zetavision.panda.ums.R;
 import com.zetavision.panda.ums.exception.LoginStatusException;
+import com.zetavision.panda.ums.model.FormInfo;
+import com.zetavision.panda.ums.model.FormInfoDetail;
+import com.zetavision.panda.ums.model.FormItem;
 import com.zetavision.panda.ums.model.Result;
+import com.zetavision.panda.ums.model.SopMap;
 import com.zetavision.panda.ums.model.User;
 import com.zetavision.panda.ums.ui.MainActivity;
 import com.zetavision.panda.ums.utils.Constant;
@@ -24,6 +28,7 @@ import com.zetavision.panda.ums.utils.network.UmsApi;
 import com.zetavision.panda.ums.widget.ViewHeaderBar;
 
 import org.jetbrains.annotations.NotNull;
+import org.litepal.crud.DataSupport;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -128,10 +133,12 @@ public abstract class BaseFragment extends Fragment {
 
     public void onRightTextClick() {
         //TODO 暂时调试使用
-//        DataSupport.deleteAll(FormInfoDetail.class);
-//        DataSupport.deleteAll(FormInfo.class);
-//        DataSupport.deleteAll(FormItem.class);
-//        DataSupport.deleteAll(SopMap.class);
+        if (Constant.DEBUG) {
+            DataSupport.deleteAll(FormInfoDetail.class);
+            DataSupport.deleteAll(FormInfo.class);
+            DataSupport.deleteAll(FormItem.class);
+            DataSupport.deleteAll(SopMap.class);
+        }
 //
 //        if (getActivity() instanceof MainActivity) {
 //            ((MainActivity)getActivity()).onChangeLanguage();

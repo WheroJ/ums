@@ -7,6 +7,7 @@ import android.widget.EditText;
 import com.seuic.scanner.DecodeInfo;
 import com.zetavision.panda.ums.R;
 import com.zetavision.panda.ums.fragments.base.BaseFragment;
+import com.zetavision.panda.ums.service.ScanReceiver;
 import com.zetavision.panda.ums.utils.IntentUtils;
 import com.zetavision.panda.ums.utils.ToastUtils;
 
@@ -27,6 +28,8 @@ public class UpKeepFragment extends BaseFragment {
      * 默认处理二维码扫描结果
      */
     private boolean dealDecode = true;
+    private ScanReceiver scanReceiver = null;
+
 //    @Override
 //    public void handleDecode(Result rawResult, Bitmap barcode, float scaleFactor) {
 //        super.handleDecode(rawResult, barcode, scaleFactor);
@@ -71,16 +74,21 @@ public class UpKeepFragment extends BaseFragment {
         getHeader().setTitle(getString(R.string.maint_scan));
     }
 
+
     @Override
     public void onPause() {
         super.onPause();
         EventBus.getDefault().unregister(this);
+        IntentUtils.INSTANCE.unRegisterScanReceiver(scanReceiver, getActivity());
     }
 
     @Override
     public void onResume() {
         super.onResume();
         EventBus.getDefault().register(this);
+
+        scanReceiver = new ScanReceiver();
+        IntentUtils.INSTANCE.registerScanReceiver(scanReceiver, getActivity());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

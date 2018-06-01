@@ -560,11 +560,9 @@ public class VideoActivity extends BaseActivity implements View.OnTouchListener,
      */
     private boolean checkCameraHardware(Context context){
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-//            ToastUtils.show("successfully detact camera");
             return true;
         }
         else {
-//            ToastUtils.show("not detact camera!!!");
             return false;
         }
     }

@@ -168,7 +168,10 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
                     val valueList = item.optionValuesDescription.split("|")
                     val indexOf = if (TextUtils.isEmpty(item.result)) {
                         list.indexOf(item.presetValue)
-                    } else list.indexOf(item.result)
+                    } else {
+//                        list.indexOf(item.result)
+                        valueList.indexOf(item.result)
+                    }
 
                     if (indexOf in valueList.indices) {
                         tvValue?.text = valueList[indexOf]
@@ -293,7 +296,10 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
                     if (!TextUtils.isEmpty(item.presetValue)) {
                         valueList.indexOf(item.presetValue)
                     } else -1
-                } else valueList.indexOf(item.result)
+                } else {
+//                    valueList.indexOf(item.result)
+                    list.indexOf(item.result)
+                }
 
                 if (indexOf in list.indices) {
                     spinner?.setSelection(indexOf)
@@ -323,7 +329,8 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
                                 }
                         }
                         if (change) {
-                            item.result = valueList[position]
+//                            item.result = valueList[position]
+                            item.result = list[position]
                             val chooseItemIndex = valueList.indexOf(item.result)
                             if (chooseItemIndex != -1) {
                                 checkBoolType(valueList, chooseItemIndex, rlChoose)

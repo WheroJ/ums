@@ -138,7 +138,8 @@ class UpKeepDetailAdapter(val formInfoDetail: FormInfoDetail): BaseQuickAdapter<
                     var indexOf = if (TextUtils.isEmpty(item.result)) {
                         list.indexOf(item.presetValue)
                     } else {
-                        list.indexOf(item.result)
+//                        list.indexOf(item.result)
+                        valueList.indexOf(item.result)
                     }
                     if (indexOf in valueList.indices) {
                         tvValue?.text = valueList[indexOf]
@@ -241,7 +242,10 @@ class UpKeepDetailAdapter(val formInfoDetail: FormInfoDetail): BaseQuickAdapter<
                     if (!TextUtils.isEmpty(item.presetValue)) {
                         valueList.indexOf(item.presetValue)
                     } else -1
-                } else valueList.indexOf(item.result)
+                } else {
+//                    valueList.indexOf(item.result)
+                    list.indexOf(item.result)
+                }
 
                 if (indexOf in list.indices) {
                     spinner?.setSelection(indexOf)
@@ -255,7 +259,8 @@ class UpKeepDetailAdapter(val formInfoDetail: FormInfoDetail): BaseQuickAdapter<
 
                 spinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                        item.result = valueList[position]
+//                        item.result = valueList[position]
+                        item.result = list[position]
                         val chooseItemIndex = valueList.indexOf(item.result)
                         if (chooseItemIndex != -1) {
                             checkBoolType(valueList, chooseItemIndex, rlChoose)

@@ -145,6 +145,7 @@ object RxUtils {
                             outputStream.write(bytes)
                             outputStream.flush()
                             progress = currentSaveSize * 1.0f / contentSize
+
                             httpListener?.onUpdate(progress)
                         }
                         outputStream.close()

@@ -153,4 +153,8 @@
     <string name="time_short">Time is too short.</string>
     <string name="cancel_record">Cancel recording.</string>
     <string name="up_to_cancel">↑ Slide to cancel</string>
+    <string name="current_version">Current Version Code</string>
+    <string name="update">UPDATE</string>
+    <string name="version_update">Version Update</string>
+    <string name="exit">EXIT</string>
 </resources>

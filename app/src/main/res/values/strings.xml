@@ -144,4 +144,8 @@
     <string name="up_to_cancel">↑ 上滑取消</string>
     <string name="connect_net2download">请连接网络后下载</string>
     <string name="connect_net2upload">请连接网络后再上传</string>
+    <string name="current_version">当前版本</string>
+    <string name="update">更新</string>
+    <string name="version_update">版本升级</string>
+    <string name="exit">退出</string>
 </resources>

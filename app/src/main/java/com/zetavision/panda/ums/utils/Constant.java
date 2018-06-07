@@ -8,7 +8,7 @@ public class Constant {
     /**
      * 记录当前是否为debug状态
      */
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     /**
      * 中文
@@ -39,7 +39,7 @@ public class Constant {
     /**
      * 1: 内网   2：外网   3:正式
      */
-    public static int NET_TYPE = 3;
+    public static int NET_TYPE = 1;
 
     public static final String EVENT_REFRESH_LANGUAGE = "LANGUAGE";
     public static final String EVENT_REFRESH_USER = "USER";
@@ -55,10 +55,12 @@ public class Constant {
     public static void setBaseUrlByType() {
         switch (NET_TYPE) {
             case 1:
-                API_BASE_URL = "http://192.168.0.113:8088/";
+//                API_BASE_URL = "http://192.168.0.113:8088/";
+                API_BASE_URL = "http://192.168.0.109:8082/";
                 break;
             case 2:
-                API_BASE_URL = "http://10.80.30.210:8088/";
+//                API_BASE_URL = "http://10.80.30.210:8088/";
+                API_BASE_URL = "http://10.81.210.41:8082/";
 //                API_BASE_URL = "http://36.7.139.186:8088/";
                 break;
             case 3:

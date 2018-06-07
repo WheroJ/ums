@@ -67,4 +67,7 @@ public interface UmsApi {
     @GET("/ums/control/queryPlannedForm.mobile?")
     Observable<ResponseBody> searchForm(@Query("utilitySystemId") int utilitySystemId
             , @Query("actionType") String actionType, @Query("searchCode") String searchCode);
+
+    @GET("/ums/control/checkVersion.mobile")
+    Observable<ResponseBody> checkVersion(@Query("padVersion") String padVersion);
 }

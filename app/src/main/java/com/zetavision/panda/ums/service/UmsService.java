@@ -245,7 +245,7 @@ public class UmsService extends Service {
         try {
             JSONObject formsJson = new JSONObject();
             formsJson.put("forms", forms);
-            requestBody = RequestBody.create(MediaType.parse("application/json"), formsJson.toString());
+            requestBody = RequestBody.create(MediaType.parse("application/json"), forms.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }

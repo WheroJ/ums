@@ -61,7 +61,7 @@ object IntentUtils {
         context.startActivity(intent)
     }
 
-    fun goMain(context: BaseActivity) {
+    fun goMain(context: Activity) {
         val intent = Intent(context, MainActivity::class.java)
         context.startActivity(intent)
         context.finish()
@@ -85,7 +85,7 @@ object IntentUtils {
      * 退出整个应用
      * @param activity
      */
-    fun goExit(activity: BaseActivity) {
+    fun goExit(activity: Activity) {
         IntentUtils.clearBuffer(false)
         activity.finish()
         System.exit(0)

@@ -260,8 +260,10 @@ class SpotCheckDetailActivity: BaseActivity() {
     }
 
     @SuppressLint("WrongViewCast")
-    private fun initView(formInfoDetail: FormInfoDetail?) {
-        setAdapter()
+    private fun initView(formInfoDetail: FormInfoDetail?, updateAdapter: Boolean = true) {
+        if (updateAdapter) {
+            setAdapter()
+        }
 
         if (formInfoDetail != null) {
             findViewById<TextView>(R.id.activitySpotCheckDetail_inspectRouteCode).text = formInfoDetail.form.inspectRouteCode
@@ -728,6 +730,7 @@ class SpotCheckDetailActivity: BaseActivity() {
 //                }
             }
         }
+        initView(formInfoDetail, false)
     }
 
     /**

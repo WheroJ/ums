@@ -65,6 +65,7 @@ public class VideoActivity extends BaseActivity implements View.OnTouchListener,
     //当前进度
     private float mProgress;
     private String outputMediaPath;
+    private boolean isFocus = true;
 
     @Override
     public void onProgressEndListener() {
@@ -235,10 +236,11 @@ public class VideoActivity extends BaseActivity implements View.OnTouchListener,
     @Override
     protected void onPause() {
         super.onPause();
+        isFocus = false;
+        stop();
         releaseMediaRecoder(false);
     }
 
-//
     @OnClick({R.id.activityVideo_ivBack, R.id.activityVideo_ivFinish, R.id.activityVideo_ivAbandon})
     public void onClick(View view) {
         switch (view.getId()) {
@@ -452,43 +454,45 @@ public class VideoActivity extends BaseActivity implements View.OnTouchListener,
     private MediaPlayer player;
     private boolean isPause = false;
     private void play() {
-        if (isPause) {//如果是暂停状态下播放，直接start
-            isPause = false;
-            player.start();
-            return;
-        }
+        if (isFocus) {
+            if (isPause) {//如果是暂停状态下播放，直接start
+                isPause = false;
+                player.start();
+                return;
+            }
 
-        File file = new File(outputMediaPath);
-        if (!file.exists()) {//判断需要播放的文件路径是否存在，不存在退出播放流程
-            ToastUtils.show(R.string.file_not_exist);
-            return;
-        }
+            File file = new File(outputMediaPath);
+            if (!file.exists()) {//判断需要播放的文件路径是否存在，不存在退出播放流程
+                ToastUtils.show(R.string.file_not_exist);
+                return;
+            }
 
-        try {
-            player = new MediaPlayer();
-            player.setDataSource(file.getAbsolutePath());
-            //将影像播放控件与媒体播放控件关联起来
+            try {
+                player = new MediaPlayer();
+                player.setDataSource(file.getAbsolutePath());
+                //将影像播放控件与媒体播放控件关联起来
 //            player.setDisplay(playerView.getHolder());
 
-            player.setOnCompletionListener(new OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {//视频播放完成后，释放资源
-                    if (player != null) player.start();
-                }
-            });
-            player.setOnPreparedListener(new OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    //媒体播放器就绪后，设置进度条总长度，开启计时器不断更新进度条，播放视频
-                    if (player != null) player.start();
-                }
-            });
+                player.setOnCompletionListener(new OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {//视频播放完成后，释放资源
+                        if (player != null) player.start();
+                    }
+                });
+                player.setOnPreparedListener(new OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        //媒体播放器就绪后，设置进度条总长度，开启计时器不断更新进度条，播放视频
+                        if (player != null) player.start();
+                    }
+                });
 
-            player.prepareAsync();
+                player.prepareAsync();
 
-            setContentView(true);
-        } catch (IOException e) {
-            e.printStackTrace();
+                setContentView(true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -566,6 +570,8 @@ public class VideoActivity extends BaseActivity implements View.OnTouchListener,
             return false;
         }
     }
+
+
 
     @Override
     protected void onDestroy() {

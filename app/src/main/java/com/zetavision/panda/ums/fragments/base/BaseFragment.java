@@ -138,6 +138,8 @@ public abstract class BaseFragment extends Fragment {
             DataSupport.deleteAll(FormInfo.class);
             DataSupport.deleteAll(FormItem.class);
             DataSupport.deleteAll(SopMap.class);
+            getActivity().finish();
+            IntentUtils.INSTANCE.goMain(getActivity());
         }
 //
 //        if (getActivity() instanceof MainActivity) {

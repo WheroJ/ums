@@ -208,6 +208,8 @@ public class UmsService extends Service {
                     formItem.put("formItemId", item.formItemId);
                     formItem.put("result", item.result);
                     formItem.put("remarks", item.remarks == null?"":item.remarks);
+//                    formItem.put("isStartingUp", item.isStartingUp); TODO 关机
+
                     if (FormInfo.ACTION_TYPE_P.equals(formInfoDetail.actionType)
                             && item.photoUrls != null
                             && !item.photoUrls.isEmpty()) {
@@ -388,20 +390,23 @@ public class UmsService extends Service {
             RxUtils.INSTANCE.acquireString(observable, new RxUtils.DialogListener() {
                         @Override
                         public void onResult(@NotNull Result result) {
-                            if (downloadStatusMap != null && downloadStatusMap.get(formId) == FormInfo.PROGRESS) {
-                                List<FormInfoDetail> formInfoDetails = result.getList(FormInfoDetail.class);
-                                if (formInfoDetails != null && !formInfoDetails.isEmpty()) {
-                                    final FormInfoDetail formInfoDetail = formInfoDetails.get(0);
-                                    formInfoDetail.formId = formInfoDetail.form.getFormId();
-                                    formInfoDetail.equipmentCode = formInfoDetail.form.getEquipmentCode();
-                                    formInfoDetail.inspectRouteCode = formInfoDetail.form.getInspectRouteCode();
-                                    formInfoDetail.actionType = formInfoDetail.form.getActionType();
-                                    formInfoDetail.utilitySystemId = formInfoDetail.form.getUtilitySystemId();
+                            if (downloadStatusMap != null) {
+                                Integer savedFormId = downloadStatusMap.get(formId);
+                                if (savedFormId != null &&  savedFormId == FormInfo.PROGRESS) {
+                                    List<FormInfoDetail> formInfoDetails = result.getList(FormInfoDetail.class);
+                                    if (formInfoDetails != null && !formInfoDetails.isEmpty()) {
+                                        final FormInfoDetail formInfoDetail = formInfoDetails.get(0);
+                                        formInfoDetail.formId = formInfoDetail.form.getFormId();
+                                        formInfoDetail.equipmentCode = formInfoDetail.form.getEquipmentCode();
+                                        formInfoDetail.inspectRouteCode = formInfoDetail.form.getInspectRouteCode();
+                                        formInfoDetail.actionType = formInfoDetail.form.getActionType();
+                                        formInfoDetail.utilitySystemId = formInfoDetail.form.getUtilitySystemId();
 
 //                                    LogPrinter.i(TAG, "startDownload formId=" + formId + ", equipmentCode = " + formInfoDetail.formItemList.get(0).equipmentCode + "+++++++++++++++++++download done");
 
-                                    saveAndUpdateStatus(formInfoDetail, info, true, FormInfo.DONE, -1);
-                                    startDownloadSop(formInfoDetail);
+                                        saveAndUpdateStatus(formInfoDetail, info, true, FormInfo.DONE, -1);
+                                        startDownloadSop(formInfoDetail);
+                                    }
                                 }
                             }
                         }
@@ -485,7 +490,6 @@ public class UmsService extends Service {
                                     getFormInfo(formInfoDetail.formId).setDownload_status(FormInfo.WAIT);
                                     deleteData(formInfoDetail);
 //                                    changeDownloadStatusMap(DELETE, formInfoDetail.formId, -1);
-
                                     emitter.onNext(downloadList);
                                     System.out.println("saveAndUpdateStatus formId=" + info.getFormId() + " =============update return status = " + getFormInfo(formInfoDetail.formId).getDownload_status());
                                     return;
@@ -609,23 +613,25 @@ public class UmsService extends Service {
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) throws Exception {
-                        Flowable.just(downloadList.get(downIndex))
-                                .filter(new Predicate<FormInfo>() {           //过滤下载完成、正在下载项
-                                    @Override
-                                    public boolean test(FormInfo info) throws Exception {
-                                        if (downIndex != -1) {
-                                            downIndex = downloadList.indexOf(info) + 1;
+                        if (downIndex < downloadList.size()) {
+                            Flowable.just(downloadList.get(downIndex))
+                                    .filter(new Predicate<FormInfo>() {           //过滤下载完成、正在下载项
+                                        @Override
+                                        public boolean test(FormInfo info) throws Exception {
+                                            if (downIndex != -1) {
+                                                downIndex = downloadList.indexOf(info) + 1;
+                                            }
+                                            return info.getDownload_status() == FormInfo.WAIT
+                                                    || info.getDownload_status() == FormInfo.FAIL;
                                         }
-                                        return info.getDownload_status() == FormInfo.WAIT
-                                                || info.getDownload_status() == FormInfo.FAIL;
-                                    }
-                                })
-                                .subscribe(new Consumer<FormInfo>() {
-                                    @Override
-                                    public void accept(FormInfo info) throws Exception {
-                                        startDownload(info.getFormId());
-                                    }
-                                });
+                                    })
+                                    .subscribe(new Consumer<FormInfo>() {
+                                        @Override
+                                        public void accept(FormInfo info) throws Exception {
+                                            startDownload(info.getFormId());
+                                        }
+                                    });
+                        }
                     }
                 }));
         if (compositeDisposable == null) {
@@ -673,24 +679,26 @@ public class UmsService extends Service {
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) throws Exception {
-                        Flowable.just(uploadList.get(uploadIndex))
-                                .filter(new Predicate<FormInfoDetail>() {           //过滤下载完成、正在下载项
-                                    @Override
-                                    public boolean test(FormInfoDetail info) throws Exception {
-                                        if (uploadIndex != -1) {
-                                            uploadIndex = uploadList.indexOf(info) + 1;
+                        if (uploadIndex < uploadList.size()) {
+                            Flowable.just(uploadList.get(uploadIndex))
+                                    .filter(new Predicate<FormInfoDetail>() {           //过滤下载完成、正在下载项
+                                        @Override
+                                        public boolean test(FormInfoDetail info) throws Exception {
+                                            if (uploadIndex != -1) {
+                                                uploadIndex = uploadList.indexOf(info) + 1;
+                                            }
+                                            System.out.println("upload info.isUpload = " + info.isUpload);
+                                            return info.isUpload == FormInfo.WAIT
+                                                    || info.isUpload == FormInfo.FAIL;
                                         }
-                                        System.out.println("upload info.isUpload = " + info.isUpload);
-                                        return info.isUpload == FormInfo.WAIT
-                                                || info.isUpload == FormInfo.FAIL;
-                                    }
-                                })
-                                .subscribe(new Consumer<FormInfoDetail>() {
-                                    @Override
-                                    public void accept(FormInfoDetail info) throws Exception {
-                                        startUpload(info.formId);
-                                    }
-                                });
+                                    })
+                                    .subscribe(new Consumer<FormInfoDetail>() {
+                                        @Override
+                                        public void accept(FormInfoDetail info) throws Exception {
+                                            startUpload(info.formId);
+                                        }
+                                    });
+                        }
                     }
                 }));
         if (compositeDisposable == null) {
@@ -766,9 +774,11 @@ public class UmsService extends Service {
 
     public void stopUploadAll() {
         uploadIndex = -1;
-        for (FormInfoDetail formInfoDetail: uploadList) {
-            if (formInfoDetail.isUpload == FormInfo.PROGRESS) {
-                stopUpload(formInfoDetail.formId);
+        if (uploadList != null) {
+            for (FormInfoDetail formInfoDetail : uploadList) {
+                if (formInfoDetail.isUpload == FormInfo.PROGRESS) {
+                    stopUpload(formInfoDetail.formId);
+                }
             }
         }
     }
@@ -1028,6 +1038,8 @@ public class UmsService extends Service {
     }
 
     public void addLoginTimeObserver() {
+        if (compositeDisposable != null)
+            compositeDisposable.dispose();
         compositeDisposable = new CompositeDisposable();
         compositeDisposable.add(Observable.interval(0, 1, TimeUnit.MINUTES, Schedulers.io())
                 .subscribe(new Consumer<Long>() {

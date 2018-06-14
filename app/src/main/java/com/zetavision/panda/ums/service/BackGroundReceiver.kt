@@ -29,10 +29,8 @@ class BackGroundReceiver : BroadcastReceiver() {
             intent2.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             context.startActivity(intent2)
         } else if (intent.action == Constant.ACTION_UPLOAD_LOG) {
-//            uploadCrashLog()
+            uploadCrashLog()
         } else if (DownloadManager.ACTION_NOTIFICATION_CLICKED == intent.action) {
-            System.out.println("用户点击了通知")
-
             // 点击下载进度通知时, 对应的下载ID以数组的方式传递
             val ids = intent.getLongArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS)
             System.out.println("ids: " + Arrays.toString(ids))

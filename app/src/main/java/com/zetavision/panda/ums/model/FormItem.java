@@ -27,7 +27,13 @@ public class FormItem extends DataSupport{
     public String upperLimit;//10",
     public String optionValues;//"
     public String remarks;//"
-    public String equipmentName;//\u79bb\u5fc3\u7a7a\u538b\u673a",
+    public String equipmentName;
+
+    /**
+     * 是否开机
+     */
+//    TODO 关机
+//    public String isStartingUp;
 
     /**
      * 是否需要需要随机牌照  only点检表单
@@ -82,6 +88,8 @@ public class FormItem extends DataSupport{
         if (photoUrls != null) {
             builder.append(photoUrls.hashCode());
         }
+
+//        builder.append(isStartingUp); TODO 关机
         return builder.toString().hashCode();
     }
 }

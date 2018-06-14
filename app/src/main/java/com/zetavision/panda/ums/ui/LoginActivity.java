@@ -19,7 +19,6 @@ import com.zetavision.panda.ums.utils.ToastUtils;
 import com.zetavision.panda.ums.utils.UIUtils;
 import com.zetavision.panda.ums.utils.UserPreferences;
 import com.zetavision.panda.ums.utils.UserUtils;
-import com.zetavision.panda.ums.utils.VersionUtils;
 import com.zetavision.panda.ums.utils.network.Client;
 import com.zetavision.panda.ums.utils.network.RxUtils;
 import com.zetavision.panda.ums.utils.network.UmsApi;
@@ -55,7 +54,7 @@ public class LoginActivity extends BaseActivity {
     private boolean offLogin = false;
 
     @OnClick(R.id.login) void login() {
-        if (!offLogin) {
+        if (!offLogin && NetUtils.INSTANCE.isNetConnect(this)) {
             UmsApi loginApi = Client.getApi(UmsApi.class);
             final String pass = password.getText().toString();
             String userName = username.getText().toString();
@@ -186,6 +185,9 @@ public class LoginActivity extends BaseActivity {
         if (!Constant.RE_LOGIN.equals(getIntent().getStringExtra(Constant.RE_LOGIN))) {
             if (!NetUtils.INSTANCE.isNetConnect(this)) {
                 offLogin = true;
+                if (disposable != null) {
+                    disposable.dispose();
+                }
                 disposable = new CompositeDisposable();
                 disposable.add(Observable.interval(1, 1, TimeUnit.SECONDS)
                         .subscribeOn(Schedulers.io())
@@ -201,13 +203,14 @@ public class LoginActivity extends BaseActivity {
                     public void accept(Long aLong) throws Exception {
                         offLogin = false;
                         disposable.dispose();
+                        disposable = null;
                     }
                 }));
             } else offLogin = false;
         }
 
-        VersionUtils versionUtils = new VersionUtils(this);
-        versionUtils.checkVersion();
+//        VersionUtils versionUtils = new VersionUtils(this);
+//        versionUtils.checkVersion();
     }
 
     @Override

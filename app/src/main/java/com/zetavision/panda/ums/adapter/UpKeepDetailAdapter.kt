@@ -261,10 +261,7 @@ class UpKeepDetailAdapter(val formInfoDetail: FormInfoDetail): BaseQuickAdapter<
                     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
 //                        item.result = valueList[position]
                         item.result = list[position]
-                        val chooseItemIndex = valueList.indexOf(item.result)
-                        if (chooseItemIndex != -1) {
-                            checkBoolType(valueList, chooseItemIndex, rlChoose)
-                        }
+                        checkBoolType(valueList, position, rlChoose)
                     }
 
                     override fun onNothingSelected(parent: AdapterView<*>) {

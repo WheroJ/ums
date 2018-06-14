@@ -14,9 +14,10 @@ import com.zetavision.panda.ums.utils.Constant
  * Created by wheroj on 2018/3/29 18:00.
  * @describe
  */
-class ProgressFormFragment: BaseFragment() {
+class FormListFragment : BaseFragment() {
 
     private var actionType: String? = null
+    private var status: String? = Constant.FORM_STATUS_ALL
 
     override fun getContentLayoutId(): Int {
         return R.layout.framelayout
@@ -25,6 +26,8 @@ class ProgressFormFragment: BaseFragment() {
     override fun init() {
         if (arguments != null) {
             actionType = arguments.getString("actionType")
+            status = if (arguments.getString("status") == null) status
+            else arguments.getString("status")
         }
 
         val data = ArrayList<String>()
@@ -51,26 +54,20 @@ class ProgressFormFragment: BaseFragment() {
     }
 
     private fun changeFragment(actionType: String?) {
+        var fragment: BaseFragment? = null
         when (actionType) {
             FormInfo.ACTION_TYPE_M -> {
-//                header.setTitle(getString(R.string.maint_form))
-                val fragment = UpKeepListFragment()
-                val bundle = Bundle()
-                bundle.putString("actionType", FormInfo.ACTION_TYPE_M)
-                bundle.putString("status", Constant.FORM_STATUS_INPROGRESS)
-                fragment.arguments = bundle
-                replaceShow(fragment)
+                fragment = UpKeepListFragment()
             }
             FormInfo.ACTION_TYPE_P -> {
-//                header.setTitle(getString(R.string.spotcheck_form))
-                val fragment = SpotCheckListFragment()
-                val bundle = Bundle()
-                bundle.putString("actionType", FormInfo.ACTION_TYPE_P)
-                bundle.putString("status", Constant.FORM_STATUS_INPROGRESS)
-                fragment.arguments = bundle
-                replaceShow(fragment)
+                fragment = SpotCheckListFragment()
             }
         }
+        val bundle = Bundle()
+        bundle.putString("actionType", actionType)
+        bundle.putString("status", status)
+        fragment!!.arguments = bundle
+        replaceShow(fragment)
     }
 
     private fun replaceShow(fragment: BaseFragment) {

@@ -74,51 +74,59 @@ class UpKeepListFragment: BaseFragment() {
         val loadingDialog = LoadingDialog()
 
         val firstView = arguments.getBoolean("firstView", false)
-        loadingDialog.show(fragmentManager, null)
+        if (isAdded) {
+            loadingDialog.show(fragmentManager, null)
+        }
 
         Observable.create<ArrayList<FormInfo>> {
             emitter ->
             val sql = if (!TextUtils.isEmpty(deviceName)) {
-                if (!TextUtils.isEmpty(status)) {
+                if (!TextUtils.isEmpty(status) && !TextUtils.equals(status, Constant.FORM_STATUS_ALL)) {
                     "equipmentCode = '$deviceName' and actionType='$actionType' and status = '$status'"
                 } else {
                     "equipmentCode = '$deviceName' and actionType='$actionType'"
                 }
             } else {
-                if (!TextUtils.isEmpty(status)) {
+                if (!TextUtils.isEmpty(status) && !TextUtils.equals(status, Constant.FORM_STATUS_ALL)) {
                     "actionType='$actionType' and status = '$status'"
                 } else "actionType='$actionType'"
             }
-            var formList = ArrayList<FormInfo>()
+
             val elements = DataSupport.where(sql).find(FormInfo::class.java)
-            elements.indices
-                    .filter {
-                        (Constant.FORM_STATUS_INPROGRESS == elements[it].status
-                                || Constant.FORM_STATUS_PLANNED == elements[it].status)
-                    }
-                    .mapTo(formList) { elements[it] }
-            emitter.onNext(formList)
+
+            if (!TextUtils.equals(status, Constant.FORM_STATUS_ALL)) {
+                val formList = ArrayList<FormInfo>()
+
+                elements.indices
+                        .filter {
+                            (Constant.FORM_STATUS_INPROGRESS == elements[it].status
+                                    || Constant.FORM_STATUS_PLANNED == elements[it].status)
+                        }
+                        .mapTo(formList) { elements[it] }
+                emitter.onNext(formList)
+            } else emitter.onNext(elements as ArrayList<FormInfo>)
         }.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
-                    if (it.isEmpty()) {
-                        if (!TextUtils.isEmpty(actionType)) {
-                            val adapter = UpKeepListAdapter(ArrayList(), actionType!!)
-                            recyclerView?.adapter = adapter
+                    if (isAdded) {
+                        if (it.isEmpty()) {
+                            if (!TextUtils.isEmpty(actionType)) {
+                                val adapter = UpKeepListAdapter(ArrayList(), !TextUtils.equals(status, Constant.FORM_STATUS_ALL))
+                                recyclerView?.adapter = adapter
+                            }
+                            ToastUtils.show(R.string.no_data)
+                        } else if (it.size == 1 && (arguments != null && firstView)) {
+                            IntentUtils.goUpKeepDetail(context, it[0].formId)
+                            arguments.remove("firstView")
+                        } else {
+                            if (!TextUtils.isEmpty(actionType)) {
+                                it.sort()
+                                val adapter = UpKeepListAdapter(it, !TextUtils.equals(status, Constant.FORM_STATUS_ALL))
+                                recyclerView?.adapter = adapter
+                            }
                         }
-                        ToastUtils.show(R.string.no_data)
-                    } else if (it.size == 1 && (arguments != null && firstView)) {
-                        IntentUtils.goUpKeepDetail(context, it[0].formId)
-                        arguments.remove("firstView")
-                    } else {
-                        if (!TextUtils.isEmpty(actionType)) {
-                            it.sort()
-                            val adapter = UpKeepListAdapter(it, actionType!!)
-                            recyclerView?.adapter = adapter
-                        }
+                        loadingDialog.dismissAllowingStateLoss()
                     }
-
-                    loadingDialog.dismiss()
                 }
     }
 }

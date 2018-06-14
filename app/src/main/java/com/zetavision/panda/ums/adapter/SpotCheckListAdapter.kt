@@ -13,7 +13,8 @@ import com.zetavision.panda.ums.utils.UIUtils
  * Created by wheroj on 2018/1/30.
  * @describeb
  */
-class SpotCheckListAdapter(data: List<FormInfo>, val actionType: String): BaseQuickAdapter<FormInfo, BaseViewHolder>(R.layout.list_spotcheck_item, data) {
+class SpotCheckListAdapter(data: List<FormInfo>, private val canClick: Boolean)
+    : BaseQuickAdapter<FormInfo, BaseViewHolder>(R.layout.list_spotcheck_item, data) {
 
     private var statusMap: HashMap<String, String> = HashMap()
     init {
@@ -36,7 +37,7 @@ class SpotCheckListAdapter(data: List<FormInfo>, val actionType: String): BaseQu
 
             helper.getView<LinearLayout>(R.id.itemUpKeep_content)
                     .setOnClickListener{
-                        IntentUtils.goSpotCheckDetail(mContext, item!!.formId)
+                        if (canClick) IntentUtils.goSpotCheckDetail(mContext, item!!.formId)
                     }
         }
     }

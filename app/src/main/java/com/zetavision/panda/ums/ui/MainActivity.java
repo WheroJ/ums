@@ -130,11 +130,20 @@ public class MainActivity extends BaseActivity {
                 MainActivityPermissionsDispatcher.showSpotCheckFragmentWithPermissionCheck(this);
                 break;
             case R.id.activityMain_tvInProgress:
-                ProgressFormFragment fragment = new ProgressFormFragment();
+                FormListFragment progressFragment = new FormListFragment();
                 Bundle bundle = new Bundle();
                 bundle.putString("actionType", FormInfo.ACTION_TYPE_P);
-                fragment.setArguments(bundle);
-                replaceShow(fragment, R.id.content);
+                bundle.putString("status", Constant.FORM_STATUS_INPROGRESS);
+                progressFragment.setArguments(bundle);
+                replaceShow(progressFragment, R.id.content);
+                break;
+            case R.id.activityMain_tvDownloaded:
+                FormListFragment downListFragment = new FormListFragment();
+                Bundle bundle2 = new Bundle();
+                bundle2.putString("actionType", FormInfo.ACTION_TYPE_P);
+                bundle2.putString("status", Constant.FORM_STATUS_ALL);
+                downListFragment.setArguments(bundle2);
+                replaceShow(downListFragment, R.id.content);
                 break;
         }
     }
@@ -157,7 +166,7 @@ public class MainActivity extends BaseActivity {
     @OnPermissionDenied(Manifest.permission.CAMERA)
     void showDeniedForCamera() {
         ToastUtils.show(getString(R.string.refuse_permission));
-        onChange((LinearLayout) findViewById(preCheckId));
+        onChange(findViewById(preCheckId));
     }
 
     // 用户勾选了“不再提醒”时调用
@@ -173,7 +182,9 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    @OnClick({R.id.download, R.id.upload, R.id.baoyang, R.id.dianjian, R.id.activityMain_tvInProgress}) void onChange(View view) {
+    @OnClick({R.id.download, R.id.upload, R.id.baoyang, R.id.dianjian
+            , R.id.activityMain_tvInProgress, R.id.activityMain_tvDownloaded})
+    void onChange(View view) {
         if (view.getId() != this.current) {
             View currentView = findViewById(this.current);
             currentView.setBackground(null);

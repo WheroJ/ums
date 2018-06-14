@@ -37,6 +37,11 @@ public class Constant {
     public static final int MAX_CONCURRENT = 2;
 
     /**
+     * 本地最大下载量（表单）
+     */
+    public static final int MAX_DOWN = 20;
+
+    /**
      * 1: 内网   2：外网   3:正式
      */
     public static int NET_TYPE = 1;
@@ -55,8 +60,8 @@ public class Constant {
     public static void setBaseUrlByType() {
         switch (NET_TYPE) {
             case 1:
-//                API_BASE_URL = "http://192.168.0.113:8088/";
-                API_BASE_URL = "http://192.168.0.109:8082/";
+                API_BASE_URL = "http://192.168.0.113:8088/";
+//                API_BASE_URL = "http://192.168.0.102:8082/";
                 break;
             case 2:
 //                API_BASE_URL = "http://10.80.30.210:8088/";
@@ -95,6 +100,7 @@ public class Constant {
     public static final String FORM_STATUS_INPROGRESS = "INPROGRESS";
     public static final String FORM_STATUS_COMPLETED = "COMPLETED";
     public static final String FORM_STATUS_CLOSED = "CLOSED";
+    public static final String FORM_STATUS_ALL = "ALL";
 
     public static final String RELOGINACTION = "com.zetavision.panda.ums.ui.LoginActivity";
     public static final String REGETTOKEN = "com.zetavision.panda.ums.ui.LoginActivity.reGetToken";

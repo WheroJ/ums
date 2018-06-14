@@ -42,6 +42,33 @@
             style="@style/list_header_text"
             android:layout_weight="0.1"
             tools:text="@string/device_name"/>
+
+        <!--TODO 关机-->
+        <!--<RelativeLayout
+            android:id="@+id/itemSpotCheck_rlIsOpen"
+            android:layout_width="0dp"
+            android:layout_weight="0.1"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_spinner"
+            android:visibility="visible">
+
+            <Spinner
+                android:id="@+id/itemSpotCheck_isOpenSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:background="@null" />
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@mipmap/dropdown" />
+        </RelativeLayout>-->
+
         <TextView
             android:id="@+id/itemUpKeepParam_code"
             style="@style/list_header_text"
@@ -170,6 +197,7 @@
 
         <!--android:paddingBottom="@dimen/dp_10"
             android:paddingTop="@dimen/dp_10"-->
+        <!--TODO 关机-->
         <RelativeLayout
             style="@style/list_header_text"
             android:layout_weight="0.2"

@@ -147,6 +147,10 @@ public class VideoActivity extends BaseActivity implements View.OnTouchListener,
 
                             currentTime = 0; isRunning = true; mProgress = 0;
                             mProgressBar.setProgress(mProgress);
+                            if (disposables != null) {
+                                disposables.dispose();
+                                disposables = null;
+                            }
                             disposables = new CompositeDisposable();
 
                             disposables.add(Observable.interval(interval, interval, TimeUnit.MILLISECONDS)

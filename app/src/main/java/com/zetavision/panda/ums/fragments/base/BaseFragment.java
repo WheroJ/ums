@@ -20,6 +20,7 @@ import com.zetavision.panda.ums.model.User;
 import com.zetavision.panda.ums.ui.MainActivity;
 import com.zetavision.panda.ums.utils.Constant;
 import com.zetavision.panda.ums.utils.IntentUtils;
+import com.zetavision.panda.ums.utils.NetUtils;
 import com.zetavision.panda.ums.utils.ToastUtils;
 import com.zetavision.panda.ums.utils.UserUtils;
 import com.zetavision.panda.ums.utils.network.Client;
@@ -103,7 +104,7 @@ public abstract class BaseFragment extends Fragment {
 
     public void onLogoutClick() {
         User loginUser = UserUtils.INSTANCE.getCurretnLoginUser();
-        if (loginUser != null) {
+        if (loginUser != null && NetUtils.INSTANCE.isNetConnect(getContext())) {
             RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class).logout(loginUser.USERNAME)
                     , new RxUtils.DialogListener((AppCompatActivity) getActivity()) {
                 @Override

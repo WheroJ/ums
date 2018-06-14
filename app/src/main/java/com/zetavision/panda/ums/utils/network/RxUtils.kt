@@ -85,18 +85,14 @@ object RxUtils {
 
     fun acquireString(observable: Observable<ResponseBody>
                       , httpListener: HttpListener? = null) {
-        //访问接口需要有用户登录信息才能访问
-        observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .map { t: ResponseBody ->
-                    val resultObject = JSONObject(t.string())
-                    val result = Result()
-                    result.returnCode = resultObject.optString("returnCode")
-                    result.returnMessage = resultObject.optString("returnMessage")
-                    result.returnData = resultObject.optString("returnData")
-                    return@map result
-                }
-                .subscribe(object : Observer<Result> {
+        observable.subscribeOn(Schedulers.io())?.observeOn(AndroidSchedulers.mainThread())?.map { t: ResponseBody ->
+            val resultObject = JSONObject(t.string())
+            val result = Result()
+            result.returnCode = resultObject.optString("returnCode")
+            result.returnMessage = resultObject.optString("returnMessage")
+            result.returnData = resultObject.optString("returnData")
+            return@map result
+        }?.subscribe(object : Observer<Result> {
                     override fun onNext(result: Result) {
                         when (result.returnCode) {
                             "0" -> httpListener?.onResult(result)
@@ -111,7 +107,9 @@ object RxUtils {
                     }
 
                     override fun onError(e: Throwable) {
-                        httpListener?.onError(e)
+                        if (NetUtils.isNetConnect(UIUtils.getContext())) {
+                            httpListener?.onError(e)
+                        }
                     }
 
                     override fun onComplete() {
@@ -184,8 +182,10 @@ object RxUtils {
     }
 
     fun cancelRequest() {
-        compositeDisposable.dispose()
-        compositeDisposable.clear()
-        compositeDisposable = CompositeDisposable()
+        if (compositeDisposable != null) {
+            compositeDisposable.dispose()
+            compositeDisposable.clear()
+            compositeDisposable = CompositeDisposable()
+        }
     }
 }

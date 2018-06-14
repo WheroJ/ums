@@ -12,12 +12,15 @@ import android.widget.TextView;
 import com.zetavision.panda.ums.R;
 import com.zetavision.panda.ums.fragments.base.BaseFragment;
 import com.zetavision.panda.ums.model.FormInfo;
+import com.zetavision.panda.ums.model.FormInfoDetail;
 import com.zetavision.panda.ums.service.UmsService;
 import com.zetavision.panda.ums.ui.formdownload.DownloadFragment;
 import com.zetavision.panda.ums.ui.formup.UploadFragment;
 import com.zetavision.panda.ums.utils.Constant;
 import com.zetavision.panda.ums.utils.NetUtils;
 import com.zetavision.panda.ums.utils.ToastUtils;
+
+import org.litepal.crud.DataSupport;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -204,9 +207,14 @@ public class DownloadAdapter extends BaseAdapter {
                 return;
             }
             if (fragment instanceof DownloadFragment) {
-                UmsService umsService = ((DownloadFragment) fragment).umsService;
-                if (umsService != null) {
-                    umsService.startDownload(data.getFormId());
+                int downloadedCount = DataSupport.count(FormInfoDetail.class);
+                if (downloadedCount >= Constant.MAX_DOWN) {
+                    ToastUtils.showLong(mContext.getString(R.string.max_down, Constant.MAX_DOWN));
+                } else {
+                    UmsService umsService = ((DownloadFragment) fragment).umsService;
+                    if (umsService != null) {
+                        umsService.startDownload(data.getFormId());
+                    }
                 }
             } else if (fragment instanceof UploadFragment) {
                 UmsService umsService = ((UploadFragment) fragment).umsService;

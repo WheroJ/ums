@@ -5,7 +5,7 @@
     android:background="@color/black_80">
 
     <LinearLayout
-        android:layout_width="340dp"
+        android:layout_width="450dp"
         android:layout_height="180dp"
         android:layout_marginStart="@dimen/dp_50"
         android:layout_marginEnd="@dimen/dp_50"
@@ -14,11 +14,12 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/popTakePicure_tvContent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/gray3"
             android:textSize="@dimen/sp_18"
-            android:text="请先进行点检拍照后再输入！"
+            android:text="@string/take_picture"
             android:layout_marginTop="@dimen/dp_40"
             android:layout_marginBottom="@dimen/dp_20"
             android:layout_gravity="center_horizontal"/>

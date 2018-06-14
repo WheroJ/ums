@@ -7,8 +7,8 @@ android {
         applicationId "com.zetavision.panda.ums"
         minSdkVersion 22
         targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -73,6 +73,7 @@ dependencies {
     annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:3.1.0"
     implementation files('libsref/ScannerAPI.jar')
     compile 'org.greenrobot:eventbus:3.0.0'
+    compile "com.daimajia.swipelayout:library:1.2.0@aar"
 }
 repositories {
     mavenCentral()

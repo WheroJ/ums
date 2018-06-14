@@ -70,4 +70,7 @@ public interface UmsApi {
 
     @GET("/ums/control/checkVersion.mobile")
     Observable<ResponseBody> checkVersion(@Query("padVersion") String padVersion);
+
+    @POST("/ums/control/uploadFile?fileCategory=padlog")
+    Observable<ResponseBody> uploadFile(@Body() RequestBody fileBody);
 }

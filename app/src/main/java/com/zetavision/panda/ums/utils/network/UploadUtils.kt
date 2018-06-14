@@ -84,6 +84,7 @@ class UploadUtils {
         //构建body
         val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
         val iterator = fileMap.keys.iterator()
+//        var count = 0
         while (iterator.hasNext() && !isStopUpload) {
             val oldPath = iterator.next()
             val newFile = fileMap[oldPath]
@@ -91,11 +92,18 @@ class UploadUtils {
             if (newFile != null) {
                 builder.addFormDataPart("file", oldFile.name
                         , RequestBody.create(MediaType.parse(getMimeType(newFile)), newFile))
+//                count += 1
             }
         }
+
         if (!isStopUpload) {
-            RxUtils.acquireString(Client.getApi(UmsApi::class.java)
-                    .uploadFileBatch("inspect", "form", formCode, builder.build()), listener)
+//            if (count == 0) {
+//                RxUtils.acquireString(Client.getApi(UmsApi::class.java)
+//                        .uploadFileBatch("inspect", "form", formCode, null), listener)
+//            } else {
+                RxUtils.acquireString(Client.getApi(UmsApi::class.java)
+                        .uploadFileBatch("inspect", "form", formCode, builder.build()), listener)
+//            }
         }
     }
 
@@ -174,9 +182,8 @@ class UploadUtils {
             fileMap[it] = file
         }
         uploadListener?.setUploadFile(fileMap)
-        //TODO 后期需要完善
-//        RxUtils.acquireString(Client.getApi(UmsApi::class.java)
-//                .uploadFileBatch("inspect", "form", formCode, builder.build()), listener)
+        RxUtils.acquireString(Client.getApi(UmsApi::class.java)
+                .uploadFile(builder.build()), uploadListener)
     }
 
     private fun getSuffix(file: File?): String? {

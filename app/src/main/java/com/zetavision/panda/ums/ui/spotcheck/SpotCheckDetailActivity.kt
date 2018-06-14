@@ -9,7 +9,6 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
@@ -147,41 +146,49 @@ class SpotCheckDetailActivity: BaseActivity() {
 
     @SuppressLint("StringFormatInvalid")
     private fun loadLocalData() {
-        val dialog = LoadingDialog()
-        val bundle = Bundle()
-        bundle.putString(Constant.LOADING_CONTENT_KEY, getString(R.string.loading))
-        dialog.arguments = bundle
-        dialog.show(fragmentManager, null)
+//        val dialog = LoadingDialog()
+//        val bundle = Bundle()
+//        bundle.putString(Constant.LOADING_CONTENT_KEY, getString(R.string.loading))
+//        dialog.arguments = bundle
+//        //TODO showAllowingStateLoss
+//        if (isDestroyed) {
+//        dialog.show(fragmentManager, null)
+//        }
+        ToastUtils.showLong("Loading")
         Observable.create<FormInfoDetail> {
             emitter ->
             formInfoDetail = DataSupport.where("(formId = '$maintFormId')").findFirst(FormInfoDetail::class.java, true)
-            emitter.onNext(formInfoDetail!!)
+            if(formInfoDetail == null) {
+                if (NetUtils.isNetConnect(`this`)) {
+                    RxUtils.acquireString(Client.getApi(UmsApi::class.java).downloadMaintForm(maintFormId)
+                            , object : RxUtils.DialogListener() {
+                        override fun onResult(result: Result) {
+                            val formInfoDetails = result.getList(FormInfoDetail::class.java)
+                            if (formInfoDetails != null && formInfoDetails.size > 0) {
+                                formInfoDetail = formInfoDetails[0]
+                                header.setTitle(resources.getString(R.string.spotcheck_fill, formInfoDetail!!.form.formCode))
+                                initView(formInfoDetail)
+                                initSpinner(formInfoDetail, weatherList, shiftList)
+                            }
+                        }
+                    })
+                } else {
+                    runOnUiThread {
+                        ToastUtils.show(R.string.data_exception)
+                    }
+                }
+            } else {
+                emitter.onNext(formInfoDetail!!)
+            }
         }.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
-                    if(formInfoDetail == null) {
-                        if (NetUtils.isNetConnect(`this`)) {
-                            RxUtils.acquireString(Client.getApi(UmsApi::class.java).downloadMaintForm(maintFormId)
-                                    , object : RxUtils.DialogListener() {
-                                override fun onResult(result: Result) {
-                                    val formInfoDetails = result.getList(FormInfoDetail::class.java)
-                                    if (formInfoDetails != null && formInfoDetails.size > 0) {
-                                        formInfoDetail = formInfoDetails[0]
-                                        header.setTitle(resources.getString(R.string.spotcheck_fill, formInfoDetail!!.form.formCode))
-                                        initView(formInfoDetail)
-                                        initSpinner(formInfoDetail, weatherList, shiftList)
-                                    }
-                                }
-                            })
-                        } else {
-                            ToastUtils.show(R.string.data_exception)
-                        }
-                    } else {
-                        initView(formInfoDetail)
-                        initSpinner(formInfoDetail, weatherList, shiftList)
-                        header.setTitle(resources.getString(R.string.spotcheck_fill, formInfoDetail!!.form.formCode))
-                    }
-                    dialog.dismiss()
+                    initView(formInfoDetail)
+                    initSpinner(formInfoDetail, weatherList, shiftList)
+                    header.setTitle(resources.getString(R.string.spotcheck_fill, formInfoDetail!!.form.formCode))
+//                    if (isDestroyed) {
+//                    dialog.dismiss()
+//                    }
                 }
 
     }
@@ -225,8 +232,12 @@ class SpotCheckDetailActivity: BaseActivity() {
                 val indexOf = weatherList?.indexOf(weather) ?: -1
                 if (indexOf in weathers.indices) temperSpinner.setSelection(indexOf)
                 else {
-                    formInfoDetail.form.weather = weatherList!![0].description
-                    temperSpinner.setSelection(0)
+                    if (weatherList == null) {
+                        ToastUtils.show(R.string.data_exception)
+                    } else {
+                        formInfoDetail.form.weather = weatherList[0].description
+                        temperSpinner.setSelection(0)
+                    }
                 }
             }
 
@@ -373,7 +384,7 @@ class SpotCheckDetailActivity: BaseActivity() {
 
     private var hashCodeMap:HashMap<String, Int> = HashMap()
     private fun setAdapter() {
-        if (formInfoDetail != null) {
+        if (formInfoDetail != null && formInfoDetail!!.form != null) {
 
             if (spotCheckDetailAdapter == null) {
                 hashCodeMap.clear()
@@ -467,11 +478,10 @@ class SpotCheckDetailActivity: BaseActivity() {
     private var takePicturePopWindow: PopupWindow? = null
     fun showTakePictureDialog(position: Int) {
         takePicturePopWindow?.dismiss()
-        takePicturePopWindow = object: PopTakePicture(`this`) {
+        takePicturePopWindow = object: PopTakePicture(position, `this`) {
             override fun onTakePicture() {
                 mPhotoPath = IntentUtils.loadImgFromCamera(`this`, position, CAMERA_RESULT)
                 mPosition = position
-                dismiss()
             }
         }
         takePicturePopWindow?.showAtLocation(recyclerView, Gravity.CENTER, 0, 0)

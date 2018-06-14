@@ -157,4 +157,8 @@
     <string name="update">UPDATE</string>
     <string name="version_update">Version Update</string>
     <string name="exit">EXIT</string>
+    <string name="device_status">on</string>
+    <string name="sure_del">确定删除这一条本地缓存数据吗?</string>
+    <string name="max_down">本地最多只能缓存%1$d条数据，如需继续下载请先到已下载表单界面删除部分表单</string>
+    <string name="take_picture_notice">第%1$d项需点检拍照，请先进行点检拍照后再输入！</string>
 </resources>

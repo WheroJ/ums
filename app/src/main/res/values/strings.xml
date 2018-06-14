@@ -24,6 +24,7 @@
     <string name="switch_to_camera">摄像头扫码</string>
     <string name="device_name">设备名称</string>
     <string name="device_code">设备代码</string>
+    <string name="device_status">开机</string>
     <string name="maintain_cycle">保养周期</string>
     <string name="maintain_cycle_desc">保养周期描述</string>
     <string name="maintain_plan_date">计划保养日</string>
@@ -148,4 +149,13 @@
     <string name="update">更新</string>
     <string name="version_update">版本升级</string>
     <string name="exit">退出</string>
+    <string name="exception">程序运行异常，请退出后重新进入应用</string>
+    <string name="sure_del">确定删除这一条本地缓存数据吗?</string>
+    <string name="max_down">本地最多只能缓存%1$d条数据，如需继续下载请先到已下载表单界面删除部分表单</string>
+    <string name="take_picture_notice">第%1$d项需点检拍照，请先进行点检拍照后再输入！</string>
+
+    <string-array name="deviceStatus">
+        <item>ON</item>
+        <item>OFF</item>
+    </string-array>
 </resources>

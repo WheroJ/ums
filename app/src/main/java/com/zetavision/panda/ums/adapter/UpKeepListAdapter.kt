@@ -13,7 +13,7 @@ import com.zetavision.panda.ums.utils.UIUtils
  * Created by wheroj on 2018/1/30.
  * @describeb
  */
-class UpKeepListAdapter(data: List<FormInfo>, val actionType: String): BaseQuickAdapter<FormInfo, BaseViewHolder>(R.layout.list_upkeep_item, data) {
+class UpKeepListAdapter(data: List<FormInfo>, val canClick: Boolean): BaseQuickAdapter<FormInfo, BaseViewHolder>(R.layout.list_upkeep_item, data) {
 
     private var statusMap: HashMap<String, String> = HashMap()
     init {
@@ -36,7 +36,7 @@ class UpKeepListAdapter(data: List<FormInfo>, val actionType: String): BaseQuick
 
             helper.getView<LinearLayout>(R.id.itemUpKeep_content)
                     .setOnClickListener{
-                        IntentUtils.goUpKeepDetail(mContext, item!!.formId)
+                        if (canClick) IntentUtils.goUpKeepDetail(mContext, item!!.formId)
                     }
         }
 

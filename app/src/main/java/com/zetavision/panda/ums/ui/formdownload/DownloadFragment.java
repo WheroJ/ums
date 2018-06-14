@@ -42,15 +42,18 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 
@@ -73,6 +76,7 @@ public class DownloadFragment extends BaseFragment {
     private SystemSpinnerAdapter systemSpinnerAdapter;
     private ActionSpinnerAdapter actionSpinnerAdapter;
     private DownloadAdapter downLoadAdapter;
+    private CompositeDisposable umsServiceDisposable;
 
     @Override
     public int getContentLayoutId() {
@@ -101,6 +105,8 @@ public class DownloadFragment extends BaseFragment {
     @Override
     protected void init() {
         getHeader().setTitle(getString(R.string.form_download));
+        // 绑定service
+        IntentUtils.INSTANCE.bindService(getActivity(), connection);
 
         systemSpinnerAdapter = new SystemSpinnerAdapter(getContext());
         actionSpinnerAdapter = new ActionSpinnerAdapter(getContext());
@@ -126,8 +132,6 @@ public class DownloadFragment extends BaseFragment {
 
         progressBar.setProgress(0);
         progressText.setText(getString(R.string.have_finish, 0.0 + "%"));
-        // 绑定service
-        IntentUtils.INSTANCE.bindService(getActivity(), connection);
         getData();
     }
 
@@ -140,13 +144,33 @@ public class DownloadFragment extends BaseFragment {
 
         //根据您系统id 和 动作分类搜索
         if (!NetUtils.INSTANCE.isNetConnect(getContext())) {
-            List<FormInfo> downloadList = loadLocalFormInfos(systemInfo, actionInfo);
-            if (!downloadList.isEmpty()) {
-                umsService.setDownloadList(downloadList);
-            } else {
-                umsService.setDownloadList(new ArrayList<FormInfo>());
-                ToastUtils.show(R.string.no_local_data);
+            if (umsServiceDisposable != null) {
+                umsServiceDisposable.dispose();
             }
+            umsServiceDisposable = new CompositeDisposable();
+            umsServiceDisposable.add(Observable.interval(500, 500, TimeUnit.MILLISECONDS)
+                    .filter(new Predicate<Long>() {
+                        @Override
+                        public boolean test(Long aLong) throws Exception {
+                            return umsService != null;
+                        }
+                    }).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Consumer<Long>() {
+                        @Override
+                        public void accept(Long aLong) throws Exception {
+                            List<FormInfo> downloadList = loadLocalFormInfos(systemInfo, actionInfo);
+                            if (downloadList != null && !downloadList.isEmpty()) {
+                                umsService.setDownloadList(downloadList);
+                            } else {
+                                umsService.setDownloadList(new ArrayList<FormInfo>());
+                                ToastUtils.show(R.string.no_local_data);
+                            }
+                            umsServiceDisposable.dispose();
+                            umsServiceDisposable = null;
+                        }
+                    }));
+
         } else {
             if (systemInfo != null && actionInfo != null) {
                 RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class)
@@ -227,28 +251,30 @@ public class DownloadFragment extends BaseFragment {
             final SystemInfo systemInfo = (SystemInfo) systemSpinner.getSelectedItem();
             final ActionInfo actionInfo = (ActionInfo) actionSpinner.getSelectedItem();
 
-            RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class)
-                    .searchForm(systemInfo.getUtilitySystemId(), actionInfo.getActionType(), search), new RxUtils.DialogListener() {
-                @Override
-                public void onResult(@NotNull Result result) {
-                    List<FormInfo> formInfos = result.getList(FormInfo.class);
-                    if (formInfos != null && !formInfos.isEmpty()) {
-                        FormInfo formInfo = formInfos.get(0);
-                        setSpinner(formInfo);
-                        umsService.setDownloadList(formInfos);
-                    } else {
+            if (systemInfo != null && actionInfo != null) {
+                RxUtils.INSTANCE.acquireString(Client.getApi(UmsApi.class)
+                        .searchForm(systemInfo.getUtilitySystemId(), actionInfo.getActionType(), search), new RxUtils.DialogListener() {
+                    @Override
+                    public void onResult(@NotNull Result result) {
+                        List<FormInfo> formInfos = result.getList(FormInfo.class);
+                        if (formInfos != null && !formInfos.isEmpty()) {
+                            FormInfo formInfo = formInfos.get(0);
+                            setSpinner(formInfo);
+                            umsService.setDownloadList(formInfos);
+                        } else {
+                            umsService.setDownloadList(new ArrayList<FormInfo>());
+                            ToastUtils.show(R.string.no_data);
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NotNull Throwable e) {
+                        super.onError(e);
                         umsService.setDownloadList(new ArrayList<FormInfo>());
                         ToastUtils.show(R.string.no_data);
                     }
-                }
-
-                @Override
-                public void onError(@NotNull Throwable e) {
-                    super.onError(e);
-                    umsService.setDownloadList(new ArrayList<FormInfo>());
-                    ToastUtils.show(R.string.no_data);
-                }
-            });
+                });
+            }
         }
     }
 
@@ -354,7 +380,9 @@ public class DownloadFragment extends BaseFragment {
             actionSpinnerAdapter.notifyDataSetChanged(actions);
         } else {
             final LoadingDialog dialog = new LoadingDialog();
-            dialog.show(getFragmentManager(), null);
+            if (isAdded()) {
+                dialog.show(getFragmentManager(), null);
+            }
 
             getWeatherAndShift();
             Observable<Result> queryUtilitySystem = Client.getApi(UmsApi.class).queryUtilitySystem().map(new Function<ResponseBody, Result>() {
@@ -413,13 +441,17 @@ public class DownloadFragment extends BaseFragment {
             }, new Consumer<Throwable>() {
                 @Override
                 public void accept(Throwable throwable) throws Exception {
-                    dialog.dismiss();
+                    if (isAdded()) {
+                        dialog.dismiss();
+                    }
                     ToastUtils.show(throwable.getMessage());
                 }
             }, new Action() {
                 @Override
                 public void run() throws Exception {
-                    dialog.dismiss();
+                    if (isAdded()) {
+                        dialog.dismiss();
+                    }
                 }
             });
         }
@@ -482,21 +514,23 @@ public class DownloadFragment extends BaseFragment {
                 @SuppressLint("StringFormatInvalid")
                 @Override
                 public void onUpdate(List<FormInfo> list) {
-                    if (list != null) {
-                        downLoadAdapter.notifyDataSetChanged(list);
-                        if (downLoadAll) {
-                            int count = 0, size = list.size();
-                            for (int i = 0; i < size; i++) {
-                                if (list.get(i).getDownload_status() == FormInfo.DONE) {
-                                    count++;
+                    if (isAdded()) {
+                        if (list != null) {
+                            downLoadAdapter.notifyDataSetChanged(list);
+                            if (downLoadAll) {
+                                int count = 0, size = list.size();
+                                for (int i = 0; i < size; i++) {
+                                    if (list.get(i).getDownload_status() == FormInfo.DONE) {
+                                        count++;
+                                    }
                                 }
-                            }
 
-                            if (count == size) downLoadAll = false;
-                            DecimalFormat df = new DecimalFormat("#.00");
-                            float ratio = count * 100.0F / list.size();
-                            progressBar.setProgress((int)ratio);
-                            progressText.setText(getString(R.string.have_finish, df.format(ratio) + "%"));
+                                if (count == size) downLoadAll = false;
+                                DecimalFormat df = new DecimalFormat("#.00");
+                                float ratio = count * 100.0F / list.size();
+                                progressBar.setProgress((int) ratio);
+                                progressText.setText(getString(R.string.have_finish, df.format(ratio) + "%"));
+                            }
                         }
                     }
                 }
@@ -512,6 +546,7 @@ public class DownloadFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         getActivity().unbindService(connection);
+        if (umsServiceDisposable != null) umsServiceDisposable.dispose();
         super.onDestroyView();
     }
 }

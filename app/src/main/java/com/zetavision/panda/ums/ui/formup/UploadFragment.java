@@ -288,24 +288,26 @@ public class UploadFragment extends BaseFragment{
             umsService.setUploadListener(new UmsService.OnUploadListener() {
                 @Override
                 public void onUpdate(List<FormInfoDetail> list) {
-                    if (list != null) {
-                        uploadAdapter.notifyDataSetChanged(list);
-                        if (getActivity() instanceof MainActivity) {
-                            ((MainActivity) getActivity()).updateCount();
-                        }
-                        if (uploadAll) {
-                            int count = 0, size = list.size();
-                            for (int i = 0; i < size; i++) {
-                                if (list.get(i).isUpload == FormInfo.DONE) {
-                                    count++;
-                                }
+                    if (isAdded()) {
+                        if (list != null) {
+                            uploadAdapter.notifyDataSetChanged(list);
+                            if (getActivity() instanceof MainActivity) {
+                                ((MainActivity) getActivity()).updateCount();
                             }
+                            if (uploadAll) {
+                                int count = 0, size = list.size();
+                                for (int i = 0; i < size; i++) {
+                                    if (list.get(i).isUpload == FormInfo.DONE) {
+                                        count++;
+                                    }
+                                }
 
-                            DecimalFormat df = new DecimalFormat("#.00");
-                            if (count == list.size()) uploadAll = false;
-                            float ratio = count * 100.0F / list.size();
-                            progressBar.setProgress((int) ratio);
-                            progressText.setText(getString(R.string.have_finish, df.format(ratio) + "%"));
+                                DecimalFormat df = new DecimalFormat("#.00");
+                                if (count == list.size()) uploadAll = false;
+                                float ratio = count * 100.0F / list.size();
+                                progressBar.setProgress((int) ratio);
+                                progressText.setText(getString(R.string.have_finish, df.format(ratio) + "%"));
+                            }
                         }
                     }
                 }

@@ -23,12 +23,21 @@ public class Client {
     private static final String BASE_URL = Constant.API_BASE_URL;
 //    private static final String BASE_URL = "http://www.baidu.com";
 
+    /**
+     * 下一次搭框架之前，这一步先处理没有网络的情况
+     * @param service
+     * @param <T>
+     * @return
+     */
     public static <T> T getApi(final Class<T> service) {
-
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        HttpLoggingInterceptor logging;
         if (Constant.DEBUG) {
+            logging = new HttpLoggingInterceptor();
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-        } else logging.setLevel(HttpLoggingInterceptor.Level.NONE);
+        } else {
+            logging = new HttpLoggingInterceptor(new LocalLogger());
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        }
 
         UserPreferences preferences = new UserPreferences();
         String lang;

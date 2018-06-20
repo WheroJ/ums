@@ -70,12 +70,12 @@ abstract public class BaseActivity extends AppCompatActivity {
     }
 
     private void gainView() {
-        llContainer = findViewById(R.id.fragmentBase_content);
+        llContainer = findViewById(R.id.activityBase_content);
         LinearLayout.LayoutParams LayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         View view = View.inflate(this, getContentLayoutId(), null);
         llContainer.addView(view, LayoutParams);
 
-        viewHeadBar = findViewById(R.id.fragmentBase_header);
+        viewHeadBar = findViewById(R.id.activityBase_header);
         if (hasTitle) {
             viewHeadBar.setOnItemClickListener(new ViewHeaderBar.OnItemClickListener() {
                 @Override
@@ -158,7 +158,7 @@ abstract public class BaseActivity extends AppCompatActivity {
     }
 
     private int getLayoutId() {
-        return R.layout.fragment_base;
+        return R.layout.activity_base;
     }
 
     /**

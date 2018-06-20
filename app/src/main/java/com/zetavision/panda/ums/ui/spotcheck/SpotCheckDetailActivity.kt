@@ -150,7 +150,6 @@ class SpotCheckDetailActivity: BaseActivity() {
 //        val bundle = Bundle()
 //        bundle.putString(Constant.LOADING_CONTENT_KEY, getString(R.string.loading))
 //        dialog.arguments = bundle
-//        //TODO showAllowingStateLoss
 //        if (isDestroyed) {
 //        dialog.show(fragmentManager, null)
 //        }
@@ -263,8 +262,12 @@ class SpotCheckDetailActivity: BaseActivity() {
                 val indexOf = shiftList?.indexOf(shift) ?: -1
                 if (indexOf in shifts.indices) classesSpinner.setSelection(indexOf)
                 else {
-                    formInfoDetail.form.shift = shiftList!![0].shift
-                    classesSpinner.setSelection(0)
+                    if (shiftList != null) {
+                        formInfoDetail.form.shift = shiftList[0].shift
+                        classesSpinner.setSelection(0)
+                    } else {
+                        ToastUtils.show(R.string.data_exception)
+                    }
                 }
             }
         }
@@ -482,6 +485,7 @@ class SpotCheckDetailActivity: BaseActivity() {
             override fun onTakePicture() {
                 mPhotoPath = IntentUtils.loadImgFromCamera(`this`, position, CAMERA_RESULT)
                 mPosition = position
+                dismiss()
             }
         }
         takePicturePopWindow?.showAtLocation(recyclerView, Gravity.CENTER, 0, 0)

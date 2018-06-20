@@ -208,7 +208,7 @@ public class UmsService extends Service {
                     formItem.put("formItemId", item.formItemId);
                     formItem.put("result", item.result);
                     formItem.put("remarks", item.remarks == null?"":item.remarks);
-//                    formItem.put("isStartingUp", item.isStartingUp); TODO 关机
+                    formItem.put("isStartingUp", item.isStartingUp);
 
                     if (FormInfo.ACTION_TYPE_P.equals(formInfoDetail.actionType)
                             && item.photoUrls != null

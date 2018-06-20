@@ -176,7 +176,7 @@ class UploadUtils {
         val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
         val fileMap = HashMap<String, File>()
         files.mapNotNull {
-            val file = File(it)
+            val file = File(UIUtils.getCachePath(), it)
             builder.addFormDataPart("file", file.name
                     , RequestBody.create(MediaType.parse(getMimeType(file)), file))
             fileMap[it] = file

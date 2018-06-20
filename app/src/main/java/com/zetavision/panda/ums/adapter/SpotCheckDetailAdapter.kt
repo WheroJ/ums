@@ -1,5 +1,6 @@
 package com.zetavision.panda.ums.adapter
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -32,7 +33,6 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
     private var mustPhotoIndex: Int = -1
     private var mustPhotoEquipmentCode: String? = null
     private var valueMap: HashMap<Int, String> = HashMap()
-    private var isFirstInitMap: HashMap<String, Boolean> = HashMap()
     init {
         status = formInfoDetail.form.status
 
@@ -47,7 +47,7 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
         valueMap[1] = "N"
     }
 
-    var watcher: TextWatcherImpl? = null
+    private var watcher: TextWatcherImpl? = null
     private val ITEM: Int = 1
     private val REMARK: Int = 2
 
@@ -104,6 +104,7 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun initType1View(helper: BaseViewHolder?, item: FormItem) {
         helper?.setIsRecyclable(false)
         helper?.setText(R.id.itemUpKeepParam_order, (data.indexOf(item) + 1).toString())
@@ -125,11 +126,10 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
 //        val addView = helper?.getView<AddView>(R.id.itemUpKeepParam_addView)
         val addView = helper?.getView<ImageView>(R.id.itemUpKeepParam_addView)
 
-//        TODO 关机
-        /*val rlIsOpen = helper?.getView<RelativeLayout>(R.id.itemSpotCheck_rlIsOpen)
+        val rlIsOpen = helper?.getView<RelativeLayout>(R.id.itemSpotCheck_rlIsOpen)
         val isOpenSpinner = helper?.getView<Spinner>(R.id.itemSpotCheck_isOpenSpinner)
 
-        val indexOf = formInfoDetail.formItemList.indexOf(item)
+        var indexOf = formInfoDetail.formItemList.indexOf(item)
         if (indexOf > 0) {
             val preEquipmentCode = formInfoDetail.formItemList[indexOf - 1].equipmentCode
             if (TextUtils.equals(item.equipmentCode, preEquipmentCode)) {
@@ -144,42 +144,36 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
         isOpenSpinner!!.adapter = isOpenSpinnerAdapter
         isOpenSpinnerAdapter.notifyDataSetChanged(deviceStatus)
         changeDeviceStatus(item, null, isOpenSpinner, rlIsOpen)
-        if (!TextUtils.isEmpty(item.formItemId) && isFirstInitMap[item.formItemId] == null) {
-            isFirstInitMap[item.formItemId] = true
-        }
+
         isOpenSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (isFirstInitMap[item.formItemId] != null && !isFirstInitMap[item.formItemId]!!) {
-                    var change = true
-                    when (status) {
-                        Constant.FORM_STATUS_INPROGRESS ->
-                            if (mustPhotoIndex != -1) {
-                                if (item.equipmentCode == mustPhotoEquipmentCode) {
-                                    val formItemList = formInfoDetail.formItemList
-                                    if (formItemList[mustPhotoIndex].photoPaths == null || formItemList[mustPhotoIndex].photoPaths.isEmpty()) {
-                                        listener?.takePicture(mustPhotoIndex)
-                                        UIUtils.closeKeyboard(context)
-                                        change = false
-                                    }
-                                }
-                            }
-                    }
-
-                    if (change) {
-                        changeDeviceStatus(item, valueMap[position], isOpenSpinner, rlIsOpen)
-                    }
-                }
-                isFirstInitMap[item.formItemId] = false
+                changeDeviceStatus(item, valueMap[position], isOpenSpinner, rlIsOpen)
             }
-        }*/
+        }
 
+        isOpenSpinner.setOnTouchListener(View.OnTouchListener { _, _ ->
+            when (status) {
+                Constant.FORM_STATUS_INPROGRESS ->
+                    if (mustPhotoIndex != -1) {
+                        if (item.equipmentCode == mustPhotoEquipmentCode) {
+                            val formItemList = formInfoDetail.formItemList
+                            if (formItemList[mustPhotoIndex].photoPaths == null || formItemList[mustPhotoIndex].photoPaths.isEmpty()) {
+                                listener?.takePicture(mustPhotoIndex)
+                                UIUtils.closeKeyboard(context)
+                                return@OnTouchListener true
+                            }
+                        }
+                    }
+            }
+            false
+        })
 
         setImageAdapter(item, rvPictures)
 
-        val currentFocus = context.currentFocus
+        var currentFocus = context.currentFocus
         currentFocus?.clearFocus()
 
         watcher = object : TextWatcherImpl() {
@@ -193,7 +187,7 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
                                 if (item.photoPaths == null || item.photoPaths.isEmpty()) {
                                     listener?.takePicture(data.indexOf(item))
                                     UIUtils.closeKeyboard(context)
-                                    val currentFocus = context.currentFocus
+                                    currentFocus = context.currentFocus
                                     currentFocus?.clearFocus()
                                 }
                             }
@@ -207,7 +201,6 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
                 }
             }
         }
-
 
         when (status) {
             Constant.FORM_STATUS_COMPLETED,
@@ -233,7 +226,7 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
                 if ("B" == item.valueType) {
                     val list = item.optionValues.split("|")
                     val valueList = item.optionValuesDescription.split("|")
-                    val indexOf = if (TextUtils.isEmpty(item.result)) {
+                    indexOf = if (TextUtils.isEmpty(item.result)) {
                         list.indexOf(item.presetValue)
                     } else {
 //                        list.indexOf(item.result)
@@ -290,7 +283,7 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
 
         when (item.valueType) {
             "N", "T" -> {
-                helper?.setText(R.id.itemUpKeepParam_lowerLimit, item.lowerLimit)
+                helper.setText(R.id.itemUpKeepParam_lowerLimit, item.lowerLimit)
                         ?.setText(R.id.itemUpKeepParam_upperLimit, item.upperLimit)
 
                 etInput?.removeTextChangedListener(watcher)
@@ -316,7 +309,7 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
                 spinner?.adapter = spinnerAdapter
                 spinnerAdapter.notifyDataSetChanged(list)
 
-                val indexOf = if (TextUtils.isEmpty(item.result)) {
+                indexOf = if (TextUtils.isEmpty(item.result)) {
                     if (!TextUtils.isEmpty(item.presetValue)) {
                         list.indexOf(item.presetValue)
                     } else -1
@@ -329,33 +322,27 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
                         spinner?.setSelection(0)
                 }
 
-                if (!TextUtils.isEmpty(item.formItemId) && isFirstInitMap[item.formItemId] == null) {
-                    isFirstInitMap[item.formItemId] = true
-                }
                 spinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                        if (isFirstInitMap[item.formItemId] != null && !isFirstInitMap[item.formItemId]!!) {
-                            var change = true
-                            when (status) {
-                                Constant.FORM_STATUS_INPROGRESS ->
-                                        //强制拍照检测
-                                    if (item.photoMust == FormItem.TYPE_Y) {
-                                        if (item.photoPaths == null || item.photoPaths.isEmpty()) {
-                                            listener?.takePicture(data.indexOf(item))
-                                            change = false
-                                        }
-                                    }
-                            }
-                            if (change) {
-                                item.result = list[position]
-                            }
-                        }
-                        isFirstInitMap[item.formItemId] = false
+                        item.result = list[position]
                     }
 
                     override fun onNothingSelected(parent: AdapterView<*>) {
 
                     }
+                }
+                spinner?.setOnTouchListener { _, _ ->
+                    when (status) {
+                        Constant.FORM_STATUS_INPROGRESS ->
+                            //强制拍照检测
+                            if (item.photoMust == FormItem.TYPE_Y) {
+                                if (item.photoPaths == null || item.photoPaths.isEmpty()) {
+                                    listener?.takePicture(data.indexOf(item))
+                                    return@setOnTouchListener true
+                                }
+                            }
+                    }
+                    false
                 }
             }
             "B" -> {
@@ -365,7 +352,7 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
                 spinner?.adapter = spinnerAdapter
                 spinnerAdapter.notifyDataSetChanged(list)
 
-                val indexOf = if (TextUtils.isEmpty(item.result)) {
+                indexOf = if (TextUtils.isEmpty(item.result)) {
                     if (!TextUtils.isEmpty(item.presetValue)) {
                         valueList.indexOf(item.presetValue)
                     } else -1
@@ -374,9 +361,6 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
                     list.indexOf(item.result)
                 }
 
-                if (!TextUtils.isEmpty(item.formItemId) && isFirstInitMap[item.formItemId] == null) {
-                    isFirstInitMap[item.formItemId] = true
-                }
                 if (indexOf in list.indices) {
                     spinner?.setSelection(indexOf)
                     checkBoolType(valueList, indexOf, rlChoose)
@@ -389,39 +373,36 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
 
                 spinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                        if (isFirstInitMap[item.formItemId] != null && !isFirstInitMap[item.formItemId]!!) {
-                            var change = true
-                            when (status) {
-                                Constant.FORM_STATUS_INPROGRESS ->
-                                        //强制拍照检测
-                                    if (item.photoMust == FormItem.TYPE_Y) {
-                                        if (item.photoPaths == null || item.photoPaths.isEmpty()) {
-                                            listener?.takePicture(data.indexOf(item))
-                                            change = false
-                                        } else {
-                                            listener?.dismissTakePicture(data.indexOf(item))
-                                        }
-                                    }
-                            }
-                            if (change) {
 //                            item.result = valueList[position]
-                                item.result = list[position]
-                                checkBoolType(valueList, position, rlChoose)
-                            }
-                        }
-                        isFirstInitMap[item.formItemId] = false
+                            item.result = list[position]
+                            checkBoolType(valueList, position, rlChoose)
                     }
 
                     override fun onNothingSelected(parent: AdapterView<*>) {
 
                     }
                 }
+
+                spinner?.setOnTouchListener { _, _ ->
+                    when (status) {
+                        Constant.FORM_STATUS_INPROGRESS ->
+                            //强制拍照检测
+                            if (item.photoMust == FormItem.TYPE_Y) {
+                                if (item.photoPaths == null || item.photoPaths.isEmpty()) {
+                                    listener?.takePicture(data.indexOf(item))
+                                    return@setOnTouchListener true
+                                } else {
+                                    listener?.dismissTakePicture(data.indexOf(item))
+                                }
+                            }
+                    }
+                    false
+                }
             }
         }
     }
 
-//    TODO 关机
-    /*private fun changeDeviceStatus(item: FormItem, status: String?, isOpenSpinner: Spinner, rlIsOpen: RelativeLayout?) {
+    private fun changeDeviceStatus(item: FormItem, status: String?, isOpenSpinner: Spinner, rlIsOpen: RelativeLayout?) {
         if (!TextUtils.isEmpty(status)) {
             var start = false
             item.isStartingUp = status
@@ -437,20 +418,20 @@ class SpotCheckDetailAdapter(val formInfoDetail: FormInfoDetail, val context: Ac
             }
         }
 
-        if (TextUtils.equals(item.isStartingUp, "Y")) {
-            isOpenSpinner.setSelection(0)
-            rlIsOpen?.setBackgroundResource(R.drawable.bg_spinner)
-        } else {
+        if (TextUtils.equals(item.isStartingUp, "N")) {
             isOpenSpinner.setSelection(1)
             rlIsOpen?.setBackgroundResource(R.drawable.radius_solid_red_5)
+        } else if (TextUtils.equals(item.isStartingUp, "Y")){
+            isOpenSpinner.setSelection(0)
+            rlIsOpen?.setBackgroundResource(R.drawable.bg_spinner)
         }
-    }*/
+    }
 
     private fun setImageAdapter(item: FormItem, rvPictures: RecyclerView?) {
         if (item.photoPaths != null && item.photoPaths.isNotEmpty()) {
             rvPictures?.layoutManager = LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false)
             val imageAdapter = ImageAdapter(context, item.photoPaths, status)
-            imageAdapter.setItemClickListener(OnItemClickListener { adapter, view, position ->
+            imageAdapter.setItemClickListener(OnItemClickListener { _, _, position ->
                 val typeAndPath = item.photoPaths[position]
                 if (!TextUtils.isEmpty(typeAndPath)) {
                     val splits = typeAndPath.split(";")

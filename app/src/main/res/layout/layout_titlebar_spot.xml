@@ -23,11 +23,10 @@
             style="@style/list_header_text"
             android:layout_weight="0.1"
             android:text="@string/device_code"/>
-        <!--TODO 关机-->
-        <!--<TextView
+        <TextView
             style="@style/list_header_text"
             android:layout_weight="0.1"
-            android:text="@string/device_status"/>-->
+            android:text="@string/device_status"/>
 
         <TextView
             style="@style/list_header_text"
@@ -49,7 +48,6 @@
             style="@style/list_header_text"
             android:layout_weight="0.18"
             android:text="@string/formdetail_input"/>
-        <!--TODO 关机-->
         <TextView
             style="@style/list_header_text"
             android:layout_weight="0.2"

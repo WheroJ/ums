@@ -1,84 +1,40 @@
 package com.zetavision.panda.ums.ui;
 
-import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.view.SurfaceView;
 import android.view.View;
 import android.widget.EditText;
 
-import com.google.zxing.Result;
-import com.seuic.scanner.DecodeInfo;
 import com.zetavision.panda.ums.R;
-import com.zetavision.panda.ums.fragments.base.CaptureFragment;
-import com.zetavision.panda.ums.service.ScanReceiver;
+import com.zetavision.panda.ums.fragments.base.BaseFragment;
 import com.zetavision.panda.ums.utils.IntentUtils;
 import com.zetavision.panda.ums.utils.ToastUtils;
-import com.zetavision.panda.ums.zxing.ViewfinderView;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 
-public class SearchFragment extends CaptureFragment {
+public class SearchFragment extends BaseFragment {
 
-    @BindView(R.id.switchInput) public View switchInput;
-    @BindView(R.id.inputLayout) public View inputLayout;
     @BindView(R.id.device_name) public EditText device_name;
-    @BindView(R.id.preview_view) SurfaceView surfaceView;
-    @BindView(R.id.finderView) ViewfinderView finderView;
-
-    private final int TYPE_SCAN = 1;
-    private final int TYPE_CAMERA = 2;
-
-    /**
-     * 使用哪种类型扫描
-     */
-    private int scanType = -1;
-    private ScanReceiver scanReceiver = null;
 
     /**
      * 默认为点检搜索界面
      */
     private boolean isSpot = true;
 
-    @Override
-    public void handleDecode(Result rawResult, Bitmap barcode, float scaleFactor) {
-        super.handleDecode(rawResult, barcode, scaleFactor);
-        if (scanType == TYPE_CAMERA) {
-            // 处理扫描结果
-            if (!rawResult.getText().equals("")) {
-                if (isSpot)
-                    IntentUtils.INSTANCE.goSpotCheck(getContext(), rawResult.getText());
-                else
-                    IntentUtils.INSTANCE.goUpKeep(getContext(), rawResult.getText().trim());
-            }
-        }
-    }
-
-    @OnClick({R.id.switchInput, R.id.switchScan, R.id.switchCamera})
+    @OnClick({R.id.switchScan, R.id.switchCamera})
     public void onSwitch(View view) {
+        BaseFragment fragment = null;
         switch (view.getId()) {
-            case R.id.switchInput:
-                this.inputLayout.setVisibility(View.VISIBLE);
-                this.switchInput.setVisibility(View.GONE);
-                scanType = -1;
-                break;
             case R.id.switchScan:
-                this.inputLayout.setVisibility(View.GONE);
-                this.switchInput.setVisibility(View.VISIBLE);
-                scanType = TYPE_SCAN;
+                fragment = new ScanFragment();
                 break;
             case R.id.switchCamera:
-                this.inputLayout.setVisibility(View.GONE);
-                this.switchInput.setVisibility(View.VISIBLE);
-                scanType = TYPE_CAMERA;
+                fragment = new CameraFragment();
                 break;
         }
-        updateView();
+        getChildFragmentManager().beginTransaction()
+                .replace(R.id.fragmentContentView, fragment)
+                .commitAllowingStateLoss();
     }
 
     @OnClick(R.id.ok)
@@ -110,52 +66,7 @@ public class SearchFragment extends CaptureFragment {
         else
             getHeader().setTitle(getString(R.string.maint_scan));
 
-        updateView();
-
         // 程序打开的时候调用服务，只用调用一次即可，不需要在每个activity中都调用
 //        IntentUtils.INSTANCE.startScanService(getActivity());
-    }
-
-    private void updateView() {
-        if (scanType == TYPE_CAMERA) {
-            surfaceView.setVisibility(View.VISIBLE);
-            finderView.setVisibility(View.VISIBLE);
-//            initCamera(surfaceView.getHolder());
-        } else {
-            surfaceView.setVisibility(View.INVISIBLE);
-            finderView.setVisibility(View.GONE);
-//            closeCamera();
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        EventBus.getDefault().unregister(this);
-        IntentUtils.INSTANCE.unRegisterScanReceiver(scanReceiver, getActivity());
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        EventBus.getDefault().register(this);
-
-        scanReceiver = new ScanReceiver();
-        IntentUtils.INSTANCE.registerScanReceiver(scanReceiver, getActivity());
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onReceiverCode(DecodeInfo info) {
-        if (scanType == TYPE_SCAN) {
-            // 处理扫描结果
-            if (!TextUtils.isEmpty(info.barcode)) {
-                if (isSpot)
-                    IntentUtils.INSTANCE.goSpotCheck(getContext(), info.barcode);
-                else
-                    IntentUtils.INSTANCE.goUpKeep(getContext(), info.barcode);
-            } else {
-                ToastUtils.show(R.string.error_code);
-            }
-        }
     }
 }

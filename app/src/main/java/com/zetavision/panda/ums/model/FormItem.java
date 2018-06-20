@@ -32,8 +32,7 @@ public class FormItem extends DataSupport{
     /**
      * 是否开机
      */
-//    TODO 关机
-//    public String isStartingUp;
+    public String isStartingUp;
 
     /**
      * 是否需要需要随机牌照  only点检表单
@@ -89,7 +88,7 @@ public class FormItem extends DataSupport{
             builder.append(photoUrls.hashCode());
         }
 
-//        builder.append(isStartingUp); TODO 关机
+        builder.append(isStartingUp);
         return builder.toString().hashCode();
     }
 }

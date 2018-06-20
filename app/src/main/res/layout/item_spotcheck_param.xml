@@ -43,8 +43,7 @@
             android:layout_weight="0.1"
             tools:text="@string/device_name"/>
 
-        <!--TODO 关机-->
-        <!--<RelativeLayout
+        <RelativeLayout
             android:id="@+id/itemSpotCheck_rlIsOpen"
             android:layout_width="0dp"
             android:layout_weight="0.1"
@@ -67,7 +66,7 @@
                 android:padding="8dp"
                 android:scaleType="fitCenter"
                 android:src="@mipmap/dropdown" />
-        </RelativeLayout>-->
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/itemUpKeepParam_code"
@@ -197,7 +196,6 @@
 
         <!--android:paddingBottom="@dimen/dp_10"
             android:paddingTop="@dimen/dp_10"-->
-        <!--TODO 关机-->
         <RelativeLayout
             style="@style/list_header_text"
             android:layout_weight="0.2"

@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import butterknife.BindView;
 import butterknife.OnClick;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -66,6 +67,8 @@ public class VideoActivity extends BaseActivity implements View.OnTouchListener,
     private float mProgress;
     private String outputMediaPath;
     private boolean isFocus = true;
+    @BindView(R.id.activityVideo_flContent)
+    FrameLayout preview;
 
     @Override
     public void onProgressEndListener() {
@@ -84,13 +87,8 @@ public class VideoActivity extends BaseActivity implements View.OnTouchListener,
 
     @Override
     protected void init() {
-        if (!checkCameraHardware(this)) {
-            return;
-        }
-        mCamera = getCameraInstance();
-        cameraPreviewView = new CameraPreviewView(this, mCamera);
-        FrameLayout preview = findViewById(R.id.activityVideo_flContent);
-        preview.addView(cameraPreviewView);
+
+        startCamera();
 
         View mStartButton = findViewById(R.id.activityVideo_rlStartRecord);
         mTvTip = findViewById(R.id.activityVideo_tvTip);
@@ -99,7 +97,6 @@ public class VideoActivity extends BaseActivity implements View.OnTouchListener,
         mProgressBar = findViewById(R.id.activityVideo_progressBar);
         mProgressBar.setOnProgressEndListener(this);
     }
-
 
     private int totalTime = 10*1000, currentTime = 0, interval = 50;
     private CompositeDisposable disposables;
@@ -530,6 +527,27 @@ public class VideoActivity extends BaseActivity implements View.OnTouchListener,
             player.release();
             player = null;
         }
+    }
+
+    public void stopPreview() {
+        synchronized (this) {
+            if (mCamera != null) {
+                mCamera.setPreviewCallback(null);
+                mCamera.stopPreview();
+                mCamera.release();
+                mCamera = null;
+            }
+        }
+    }
+
+    private void startCamera() {
+        if (!checkCameraHardware(this)) {
+            return;
+        }
+        mCamera = getCameraInstance();
+        cameraPreviewView = new CameraPreviewView(this, mCamera);
+        preview.removeAllViews();
+        preview.addView(cameraPreviewView);
     }
 
     /**

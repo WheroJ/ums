@@ -2,7 +2,6 @@ package com.zetavision.panda.ums.ui;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.SpannableString;
@@ -24,7 +23,6 @@ import com.zetavision.panda.ums.ui.formup.UploadFragment;
 import com.zetavision.panda.ums.utils.Common;
 import com.zetavision.panda.ums.utils.Constant;
 import com.zetavision.panda.ums.utils.IntentUtils;
-import com.zetavision.panda.ums.utils.SPUtil;
 import com.zetavision.panda.ums.utils.ToastUtils;
 import com.zetavision.panda.ums.utils.UIUtils;
 import com.zetavision.panda.ums.utils.UserPreferences;
@@ -32,7 +30,6 @@ import com.zetavision.panda.ums.utils.UserPreferences;
 import org.greenrobot.eventbus.EventBus;
 import org.litepal.crud.DataSupport;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -76,17 +73,6 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void init() {
         changeContent();
-
-        uploadCrashLog();
-    }
-
-    private void uploadCrashLog() {
-        ArrayList<String> crashFiles = SPUtil.getObject(Constant.WAIT_UPLOAD_CRASH_LOG, new ArrayList<String>());
-        if (!crashFiles.isEmpty()) {
-            Intent intent = new Intent();
-            intent.setAction(Constant.ACTION_UPLOAD_LOG);
-            sendBroadcast(intent);
-        }
     }
 
     private SpannableString getSpannableString(int type, int count) {

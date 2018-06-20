@@ -87,14 +87,9 @@ public abstract class CaptureFragment extends BaseFragment implements SurfaceHol
         characterSet = intent.getStringExtra(Intents.Scan.CHARACTER_SET);
 
         SurfaceHolder surfaceHolder = preview_view.getHolder();
-        if (hasSurface) {
-            // The activity was paused but not stopped, so the surface still exists. Therefore
-            // surfaceCreated() won't be called, so init the camera here.
-            initCamera(surfaceHolder);
-        } else {
-            // Install the callback and wait for surfaceCreated() to init the camera.
-            surfaceHolder.addCallback(this);
-        }
+        // The activity was paused but not stopped, so the surface still exists. Therefore
+        // surfaceCreated() won't be called, so init the camera here.
+        initCamera(surfaceHolder);
 
         if (getView()!= null) {
             getView().getViewTreeObserver().addOnGlobalLayoutListener(this);
@@ -102,31 +97,40 @@ public abstract class CaptureFragment extends BaseFragment implements SurfaceHol
     }
 
     protected  void closeCamera() {
-        if (cameraManager != null && cameraManager.isOpen())
+        if (cameraManager != null && cameraManager.isOpen()) {
             cameraManager.closeDriver();
+            preview_view.getHolder().removeCallback(this);
+            hasSurface = false;
+        }
     }
 
     protected void initCamera(SurfaceHolder surfaceHolder) {
-        if (surfaceHolder == null) {
-            throw new IllegalStateException("No SurfaceHolder provided");
-        }
-        if (cameraManager.isOpen()) {
-            return;
-        }
-        try {
-            cameraManager.openDriver(surfaceHolder);
-            // Creating the handler starts the preview, which can also throw a RuntimeException.
-            if (handler == null) {
-                 handler = new CaptureHandler(this, decodeFormats, decodeHints, characterSet, cameraManager);
+        if (!hasSurface) {
+            // Install the callback and wait for surfaceCreated() to init the camera.
+            surfaceHolder.addCallback(this);
+        } else {
+            if (surfaceHolder == null) {
+                throw new IllegalStateException("No SurfaceHolder provided");
             }
-            decodeOrStoreSavedBitmap(null, null);
-        } catch (IOException ioe) {
-            displayFrameworkBugMessageAndExit();
-        } catch (RuntimeException e) {
-            // Barcode Scanner has seen crashes in the wild of this variety:
-            // java.?lang.?RuntimeException: Fail to connect to camera service
-            Log.w(TAG, "Unexpected error initializing camera", e);
-            displayFrameworkBugMessageAndExit();
+
+            if (cameraManager.isOpen()) {
+                return;
+            }
+            try {
+                cameraManager.openDriver(surfaceHolder);
+                // Creating the handler starts the preview, which can also throw a RuntimeException.
+//                if (handler == null) {
+                    handler = new CaptureHandler(this, decodeFormats, decodeHints, characterSet, cameraManager);
+//                }
+                decodeOrStoreSavedBitmap(null, null);
+            } catch (IOException ioe) {
+                displayFrameworkBugMessageAndExit();
+            } catch (RuntimeException e) {
+                // Barcode Scanner has seen crashes in the wild of this variety:
+                // java.?lang.?RuntimeException: Fail to connect to camera service
+                Log.w(TAG, "Unexpected error initializing camera", e);
+                displayFrameworkBugMessageAndExit();
+            }
         }
     }
 
@@ -291,27 +295,31 @@ public abstract class CaptureFragment extends BaseFragment implements SurfaceHol
 
     @Override
     public void onGlobalLayout() {
-        WindowManager manager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-        Display display = manager.getDefaultDisplay();
-        if (display != null && getView()!=null) {
-            Point preview_size = new Point(getView().getWidth(), getView().getHeight());
-            Point capture_size = new Point();
-            display.getSize(capture_size);
+        if (getActivity() != null) {
+            WindowManager manager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+            if (manager != null) {
+                Display display = manager.getDefaultDisplay();
+                if (display != null && getView() != null) {
+                    Point preview_size = new Point(getView().getWidth(), getView().getHeight());
+                    Point capture_size = new Point();
+                    display.getSize(capture_size);
 
-            int left_right = - (capture_size.x - preview_size.x) / 2;
-            int top_bottom = - (capture_size.y - preview_size.y) / 2;
+                    int left_right = -(capture_size.x - preview_size.x) / 2;
+                    int top_bottom = -(capture_size.y - preview_size.y) / 2;
 
-            FrameLayout.LayoutParams find_params = new FrameLayout.LayoutParams(finderView.getLayoutParams());
-            find_params.width = capture_size.x;
-            find_params.height = capture_size.y;
-            find_params.setMargins( left_right, top_bottom, left_right, top_bottom);
-            finderView.setLayoutParams(find_params);
+                    FrameLayout.LayoutParams find_params = new FrameLayout.LayoutParams(finderView.getLayoutParams());
+                    find_params.width = capture_size.x;
+                    find_params.height = capture_size.y;
+                    find_params.setMargins(left_right, top_bottom, left_right, top_bottom);
+                    finderView.setLayoutParams(find_params);
 
-            FrameLayout.LayoutParams preview_params = new FrameLayout.LayoutParams(preview_view.getLayoutParams());
-            preview_params.width = capture_size.x;
-            preview_params.height = capture_size.y;
-            preview_params.setMargins( left_right, top_bottom, left_right, top_bottom);
-            preview_view.setLayoutParams(preview_params);
+                    FrameLayout.LayoutParams preview_params = new FrameLayout.LayoutParams(preview_view.getLayoutParams());
+                    preview_params.width = capture_size.x;
+                    preview_params.height = capture_size.y;
+                    preview_params.setMargins(left_right, top_bottom, left_right, top_bottom);
+                    preview_view.setLayoutParams(preview_params);
+                }
+            }
         }
     }
 
@@ -324,8 +332,8 @@ public abstract class CaptureFragment extends BaseFragment implements SurfaceHol
         if (getView()!=null) {
             getView().getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
-        beepManager.close();
-        cameraManager.closeDriver();
+        if (beepManager != null) beepManager.close();
+        if (cameraManager != null) cameraManager.closeDriver();
         if (!hasSurface) {
             SurfaceHolder surfaceHolder = preview_view.getHolder();
             surfaceHolder.removeCallback(this);

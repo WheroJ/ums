@@ -1,5 +1,6 @@
 package com.zetavision.panda.ums.ui;
 
+import android.content.Intent;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
@@ -15,10 +16,12 @@ import com.zetavision.panda.ums.utils.AESTool;
 import com.zetavision.panda.ums.utils.Constant;
 import com.zetavision.panda.ums.utils.IntentUtils;
 import com.zetavision.panda.ums.utils.NetUtils;
+import com.zetavision.panda.ums.utils.SPUtil;
 import com.zetavision.panda.ums.utils.ToastUtils;
 import com.zetavision.panda.ums.utils.UIUtils;
 import com.zetavision.panda.ums.utils.UserPreferences;
 import com.zetavision.panda.ums.utils.UserUtils;
+import com.zetavision.panda.ums.utils.VersionUtils;
 import com.zetavision.panda.ums.utils.network.Client;
 import com.zetavision.panda.ums.utils.network.RxUtils;
 import com.zetavision.panda.ums.utils.network.UmsApi;
@@ -26,6 +29,7 @@ import com.zetavision.panda.ums.utils.network.UmsApi;
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -117,7 +121,7 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void init() {
-
+        uploadCrashLog();
         changeCheckButton();
         rgLang.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -133,6 +137,17 @@ public class LoginActivity extends BaseActivity {
             }
         });
         tvVersionCode.setText(getString(R.string.current_version) + ": " + UIUtils.getVersionName());
+    }
+
+    private void uploadCrashLog() {
+        if (NetUtils.INSTANCE.isNetConnect(this)) {
+            ArrayList<String> crashFiles = SPUtil.getObject(Constant.WAIT_UPLOAD_CRASH_LOG, new ArrayList<String>());
+            if (!crashFiles.isEmpty()) {
+                Intent intent = new Intent();
+                intent.setAction(Constant.ACTION_UPLOAD_LOG);
+                sendBroadcast(intent);
+            }
+        }
     }
 
     private void setLanguage(String lang) {
@@ -209,8 +224,10 @@ public class LoginActivity extends BaseActivity {
             } else offLogin = false;
         }
 
-//        VersionUtils versionUtils = new VersionUtils(this);
-//        versionUtils.checkVersion();
+        if (NetUtils.INSTANCE.isNetConnect(this)) {
+            VersionUtils versionUtils = new VersionUtils(this);
+            versionUtils.checkVersion();
+        }
     }
 
     @Override

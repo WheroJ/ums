@@ -39,7 +39,7 @@ public class Constant {
     /**
      * 本地最大下载量（表单）
      */
-    public static final int MAX_DOWN = 20;
+    public static final int MAX_DOWN = 100;
 
     /**
      * 1: 内网   2：外网   3:正式
@@ -61,12 +61,9 @@ public class Constant {
         switch (NET_TYPE) {
             case 1:
                 API_BASE_URL = "http://192.168.0.113:8088/";
-//                API_BASE_URL = "http://192.168.0.102:8082/";
                 break;
             case 2:
-//                API_BASE_URL = "http://10.80.30.210:8088/";
                 API_BASE_URL = "http://10.81.210.41:8082/";
-//                API_BASE_URL = "http://36.7.139.186:8088/";
                 break;
             case 3:
                 API_BASE_URL = "http://10.80.65.10:8090/";

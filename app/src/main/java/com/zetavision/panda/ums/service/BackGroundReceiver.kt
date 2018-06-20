@@ -66,7 +66,7 @@ class BackGroundReceiver : BroadcastReceiver() {
                 val copyArray = ArrayList<String>()
                 copyArray.addAll(crashPaths)
                 copyArray.mapNotNull {
-                    val file = File(it)
+                    val file = File(UIUtils.getCachePath(), it)
                     if (!file.exists())
                         crashPaths.remove(it)
                 }

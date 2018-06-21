@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/spotcheck_swipe"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:id="@+id/spotcheck_llDel"
+        android:layout_width="@dimen/dp_50"
+        android:layout_height="match_parent"
+        android:background="@color/red"
+        android:gravity="center">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_16"
+            android:text="DEL"
+            android:layout_gravity="center"
+            android:layout_marginTop="-5dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/itemUpKeep_content"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white">
+        <TextView
+            android:id="@+id/itemSpotCheckParam_tvInspectRoute"
+            style="@style/list_item_text"
+            android:layout_weight="0.15"/>
+        <TextView
+            android:id="@+id/itemSpotCheckParam_tvInspectRouteDesc"
+            style="@style/list_item_text"
+            android:layout_weight="0.15"/>
+        <TextView
+            android:id="@+id/itemSpotCheckParam_tvInspectPeroidCode"
+            style="@style/list_item_text"
+            android:layout_weight="0.15"/>
+        <TextView
+            android:id="@+id/itemSpotCheckParam_tvInspectPeroidCodeDesc"
+            style="@style/list_item_text"
+            android:layout_weight="0.15"/>
+        <TextView
+            android:id="@+id/itemSpotCheckParam_tvFormCode"
+            style="@style/list_item_text"
+            android:layout_weight="0.15"/>
+        <TextView
+            android:id="@+id/itemSpotCheckParam_tvPlanDate"
+            style="@style/list_item_text"
+            android:layout_weight="0.15"/>
+
+        <TextView
+            android:id="@+id/itemSpotCheckParam_tvStatus"
+            style="@style/list_item_text"
+            android:layout_weight="0.1"
+            android:textColor="@color/main_color"/>
+    </LinearLayout>
+
+</com.daimajia.swipe.SwipeLayout>

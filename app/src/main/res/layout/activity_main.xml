@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    tools:context="com.zetavision.panda.ums.ui.MainActivity">
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/leftLayout"
+        android:layout_width="180dp"
+        android:layout_height="match_parent"
+        android:background="#1d395e">
+        <ImageView
+            android:padding="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#1b68b6"
+            android:src="@mipmap/logo" />
+        <!--下载-->
+        <LinearLayout
+            android:id="@+id/download"
+            android:background="#62a7ea"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+            <ImageView
+                android:src="@mipmap/download"
+                android:padding="16dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
+            <TextView
+                android:text="@string/form_download"
+                android:lines="1"
+                android:gravity="center_vertical"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_width="match_parent"
+                android:layout_height="60dp" />
+        </LinearLayout>
+        <!--上传-->
+        <LinearLayout
+            android:id="@+id/upload"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+            <ImageView
+                android:src="@mipmap/upload"
+                android:padding="16dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
+            <TextView
+                android:text="@string/form_upload"
+                android:lines="1"
+                android:gravity="center_vertical"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp" />
+            <TextView
+                android:id="@+id/activityMain_tvUploadCount"
+                android:text="10"
+                android:textColor="#FFFFFF"
+                android:gravity="center"
+                android:layout_marginStart="8dp"
+                android:textSize="12sp"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/badge"
+                android:layout_width="wrap_content"
+                android:minWidth="20dp"
+                android:layout_height="20dp" />
+        </LinearLayout>
+        <!--保养-->
+        <LinearLayout
+            android:id="@+id/baoyang"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+            <ImageView
+                android:src="@mipmap/baoyang"
+                android:padding="16dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
+            <TextView
+                android:text="@string/maintain_scan"
+                android:lines="1"
+                android:gravity="center_vertical"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp" />
+        </LinearLayout>
+        <!--点检-->
+        <LinearLayout
+            android:id="@+id/dianjian"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="60dp">
+            <ImageView
+                android:src="@mipmap/repair"
+                android:padding="16dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
+            <TextView
+                android:text="@string/check_scan"
+                android:lines="1"
+                android:gravity="center_vertical"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_1"
+            android:background="@color/gray_f0"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_20"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/activityMain_tvDownloaded"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/dp_20"
+                android:paddingTop="@dimen/dp_10"
+                android:paddingBottom="@dimen/dp_10"
+                tools:text="已下载5张表单"
+                android:textColor="@color/white"/>
+            <TextView
+                android:id="@+id/activityMain_tvWaitUpload"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/dp_20"
+                android:paddingTop="@dimen/dp_10"
+                android:paddingBottom="@dimen/dp_10"
+                tools:text="有5条待上传数据"
+                android:textColor="@color/white"/>
+            <TextView
+                android:id="@+id/activityMain_tvInProgress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/dp_20"
+                android:paddingTop="@dimen/dp_10"
+                android:paddingBottom="@dimen/dp_10"
+                tools:text="有5张进行中的表单"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <FrameLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+</LinearLayout>

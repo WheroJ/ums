@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    tools:context="com.zetavision.panda.ums.ui.LoginActivity">
+
+    <ImageView
+        android:src="@mipmap/login_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:id="@+id/login_box"
+            android:background="@drawable/bg_login_box"
+            android:padding="30dp"
+            android:orientation="vertical"
+            android:layout_centerInParent="true"
+            android:layout_marginBottom="20dp"
+            android:layout_width="320dp"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="Panda UMS"
+                android:gravity="center"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:layout_width="match_parent"
+                android:layout_height="40dp" />
+
+            <EditText
+                android:id="@+id/userName"
+                android:hint="@string/input_username"
+                android:inputType="text"
+                android:lines="1"
+                android:layout_marginTop="30dp"
+                android:layout_width="match_parent"
+                android:background="@drawable/bg_login_edit_text"
+                android:paddingStart="16dp"
+                android:textSize="16sp"
+                android:paddingEnd="16dp"
+                android:layout_height="40dp" />
+            <EditText
+                android:id="@+id/password"
+                android:hint="@string/input_password"
+                android:lines="1"
+                android:inputType="textPassword"
+                android:layout_marginTop="30dp"
+                android:layout_width="match_parent"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textSize="16sp"
+                android:background="@drawable/bg_login_edit_text"
+                android:layout_height="40dp" />
+
+            <Button
+                android:id="@+id/login"
+                android:background="@drawable/bg_btn_primary_light"
+                android:textColor="@color/white"
+                android:text="@string/login"
+                android:layout_marginTop="30dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <RadioGroup
+                android:id="@+id/activityLogin_radioGroup"
+                android:layout_width="match_parent"
+                android:layout_marginTop="@dimen/dp_20"
+                android:layout_height="@dimen/dp_40"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/activityLogin_rbCh"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/dp_15"
+                    android:layout_marginEnd="@dimen/dp_15"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:background="@color/transparent"
+                    android:button="@drawable/radiobutton"
+                    android:checked="true"
+                    android:text="中文"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_18"/>
+
+                <RadioButton
+                    android:id="@+id/activityLogin_rbEn"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/dp_15"
+                    android:layout_marginEnd="@dimen/dp_15"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:background="@color/transparent"
+                    android:button="@drawable/radiobutton"
+                    android:text="English"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_18"/>
+            </RadioGroup>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/activityLogin_versionCode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="version"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:textSize="@dimen/sp_16"
+            android:textColor="@color/gray3"
+            android:layout_marginBottom="@dimen/dp_30"/>
+    </RelativeLayout>
+
+</FrameLayout>

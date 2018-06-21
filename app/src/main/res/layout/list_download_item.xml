@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/form_sort"
+        style="@style/list_item_text"
+        android:layout_weight="0.1"
+        tools:text="序号"/>
+    <TextView
+        android:id="@+id/form_number"
+        style="@style/list_item_text"
+        android:layout_weight="0.2" />
+    <TextView
+        android:id="@+id/category"
+        style="@style/list_item_text"
+        android:layout_weight="0.1" />
+    <TextView
+        android:id="@+id/line_or_eqp"
+        style="@style/list_item_text"
+        android:layout_weight="0.15" />
+    <TextView
+        android:id="@+id/desc"
+        style="@style/list_item_text"
+        android:layout_weight="0.1" />
+    <TextView
+        android:id="@+id/status"
+        style="@style/list_item_text"
+        android:layout_weight="0.1" />
+    <LinearLayout
+        style="@style/list_item_text"
+        android:layout_weight="0.15">
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/downloadBtn"
+                android:src="@mipmap/down_circle"
+                android:layout_width="30dp"
+                android:layout_gravity="center"
+                android:layout_height="30dp" />
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="38dp"
+                android:layout_height="38dp" />
+            <ImageView
+                android:id="@+id/pauseBtn"
+                android:layout_gravity="center"
+                android:src="@mipmap/stop"
+                android:layout_width="15dp"
+                android:layout_height="15dp" />
+            <ImageView
+                android:id="@+id/doneImg"
+                android:layout_gravity="center"
+                android:src="@mipmap/done_circle"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+        </FrameLayout>
+        <TextView
+            android:id="@+id/textInfo"
+            android:layout_marginLeft="16dp"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/list_item_text"
+        android:layout_weight="0.1">
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+            <ImageView
+                android:id="@+id/sop_downloadBtn"
+                android:src="@mipmap/down_circle"
+                android:layout_width="30dp"
+                android:layout_gravity="center"
+                android:layout_height="30dp" />
+            <ProgressBar
+                android:id="@+id/sop_progressBar"
+                android:layout_width="38dp"
+                android:layout_height="38dp" />
+            <ImageView
+                android:id="@+id/sop_pauseBtn"
+                android:layout_gravity="center"
+                android:src="@mipmap/stop"
+                android:layout_width="15dp"
+                android:layout_height="15dp" />
+            <ImageView
+                android:id="@+id/sop_doneImg"
+                android:layout_gravity="center"
+                android:src="@mipmap/done_circle"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+            <TextView
+                android:id="@+id/sop_textInfo"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:lines="1"
+                android:layout_height="wrap_content"
+                tools:text="hahahha"
+                android:visibility="gone"/>
+        </FrameLayout>
+    </LinearLayout>
+
+</LinearLayout>

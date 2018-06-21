@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/itemUpKeep_content"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+    <TextView
+        android:id="@+id/itemSpotCheckParam_tvInspectRoute"
+        style="@style/list_item_text"
+        android:layout_weight="0.15"/>
+    <TextView
+        android:id="@+id/itemSpotCheckParam_tvInspectRouteDesc"
+        style="@style/list_item_text"
+        android:layout_weight="0.15"/>
+    <TextView
+        android:id="@+id/itemSpotCheckParam_tvInspectPeroidCode"
+        style="@style/list_item_text"
+        android:layout_weight="0.15"/>
+    <TextView
+        android:id="@+id/itemSpotCheckParam_tvInspectPeroidCodeDesc"
+        style="@style/list_item_text"
+        android:layout_weight="0.15"/>
+    <TextView
+        android:id="@+id/itemSpotCheckParam_tvFormCode"
+        style="@style/list_item_text"
+        android:layout_weight="0.15"/>
+    <TextView
+        android:id="@+id/itemSpotCheckParam_tvPlanDate"
+        style="@style/list_item_text"
+        android:layout_weight="0.15"/>
+
+    <TextView
+        android:id="@+id/itemSpotCheckParam_tvStatus"
+        style="@style/list_item_text"
+        android:layout_weight="0.1"
+        android:textColor="@color/main_color"/>
+</LinearLayout>

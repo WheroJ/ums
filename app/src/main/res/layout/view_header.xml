@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:background="@color/white">
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true">
+        <com.zetavision.panda.ums.widget.PackUpLeftView
+            android:id="@+id/header_pickup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:visibility="visible"/>
+
+        <ImageView
+            android:id="@+id/header_back"
+            android:layout_width="33dp"
+            android:layout_height="33dp"
+            android:layout_marginStart="16dp"
+            android:src="@mipmap/back"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true">
+        <TextView
+            android:id="@+id/header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="设备SN445455454保养表单"
+            android:textSize="18sp"
+            android:visibility="gone"/>
+
+        <Spinner
+            android:id="@+id/header_spinnerTitle"
+            android:layout_width="@dimen/dp_120"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:paddingStart="@dimen/dp_15"
+            android:paddingEnd="@dimen/dp_15"
+            android:dropDownVerticalOffset="@dimen/dp_50"
+            android:visibility="visible" />
+    </FrameLayout>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:orientation="horizontal"
+        android:layout_alignParentRight="true">
+
+        <ImageView
+            android:id="@+id/header_logo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="10dp"
+            android:layout_marginEnd="@dimen/dp_5"
+            android:scaleType="fitCenter"
+            android:src="@mipmap/panda"
+            android:visibility="visible"/>
+
+        <TextView
+            android:id="@+id/header_username"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginEnd="@dimen/dp_5"
+            android:gravity="center_vertical"
+            android:text="admin"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/header_logout"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="8dp"
+            android:layout_marginEnd="@dimen/dp_5"
+            android:scaleType="fitCenter"
+            android:src="@mipmap/logout"
+            android:visibility="visible" />
+    </LinearLayout>
+
+</RelativeLayout>

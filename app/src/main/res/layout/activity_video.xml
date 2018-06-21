@@ -1,0 +1,86 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.VideoActivity">
+
+    <FrameLayout
+        android:id="@+id/activityVideo_flContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_200"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/transparent">
+
+        <RelativeLayout
+            android:id="@+id/activityVideo_rlStartRecord"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible">
+
+            <ImageView
+                android:id="@+id/activityVideo_ivAbandon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/cancel"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/dp_30"
+                android:padding="@dimen/dp_10"/>
+
+            <com.zetavision.panda.ums.widget.BothWayProgressBar
+                android:id="@+id/activityVideo_progressBar"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/transparent" />
+
+            <TextView
+                android:id="@+id/activityVideo_tvTip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/activityVideo_progressBar"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/dp_15"
+                android:elevation="1dp"
+                tools:text="双击放大"
+                android:textColor="#FFFFFF" />
+
+            <ImageView
+                android:id="@+id/activityVideo_ivStartRecord"
+                android:layout_width="@dimen/dp_100"
+                android:layout_height="@dimen/dp_100"
+                android:layout_centerInParent="true"
+                android:background="@drawable/circle"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="#00ff00" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/activityVideo_rlPlayer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/dp_20"
+            android:layout_marginStart="@dimen/dp_20"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/activityVideo_ivBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/dp_10"
+                android:src="@mipmap/cancel" />
+
+            <ImageView
+                android:id="@+id/activityVideo_ivFinish"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:padding="@dimen/dp_10"
+                android:src="@mipmap/save" />
+        </RelativeLayout>
+    </RelativeLayout>
+</RelativeLayout>
